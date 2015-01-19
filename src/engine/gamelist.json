@@ -1,0 +1,15 @@
+{
+  "version": "0.0.0",
+  "games": [
+    {
+      "name": "poker",
+      "descrip": "description of poker",
+      "package": "src/games/poker.json"
+    },
+    {
+      "name": "uno",
+      "descrip": "description of uno",
+      "package": "src/games/uno.json"
+    }
+  ]
+}

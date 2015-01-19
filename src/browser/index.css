@@ -1,0 +1,26 @@
+body {
+	background-image: url('../../resources/background.jpg');
+}
+#header h1 {
+	float: left;
+}
+#header nav {
+	position: absolute;
+	top: 5%;
+	left: 20%;
+}
+#header menu {
+	position: absolute;
+	top: 5%;
+	left: 80%;
+}
+#header menu div {
+	float: left;
+}
+#content {
+	position: absolute;
+	top: 10%;
+	left: 0%;
+	height: 90%;
+	width: 100%;
+}

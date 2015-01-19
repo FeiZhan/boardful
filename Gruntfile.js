@@ -3,21 +3,30 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    concat: {
+      engine: {
+	        src: ['src/<%= pkg.name %>.js', 'src/engine/*.js'],
+	        dest: 'build/<%= pkg.name %>.engine.js'
+      },
+      browser: {
+	        src: ['build/<%= pkg.name %>.engine.js', 'src/browser/*.js'],
+	        dest: 'build/<%= pkg.name %>.browser.js'
+      }
+    },
     uglify: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        banner: '/*! <%= pkg.name %> browser <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: 'src/<%= pkg.name %>.js',
-        dest: 'build/<%= pkg.name %>.min.js'
+        src: 'build/<%= pkg.name %>.browser.js',
+        dest: 'build/<%= pkg.name %>.browser.min.js'
       }
     }
   });
 
-  // Load the plugin that provides the "uglify" task.
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  // Default task(s).
-  grunt.registerTask('default', ['uglify']);
+  grunt.registerTask('default', ['concat', 'uglify']);
 
 };

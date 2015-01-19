@@ -1,0 +1,27 @@
+#gamelist {
+	border: 1px solid black;
+	position: absolute;
+	top: 5%;
+	left: 5%;
+	height: 90%;
+	width: 40%;
+}
+
+#gamelist li.active {
+	background-color: #E9E581;
+}
+
+#descrip {
+	border: 1px solid black;
+	position: absolute;
+	top: 5%;
+	left: 55%;
+	height: 75%;
+	width: 40%;
+}
+
+button#ok {
+	position: absolute;
+	top: 85%;
+	left: 75%;
+}
