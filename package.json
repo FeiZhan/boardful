@@ -1,0 +1,30 @@
+{
+  "name": "boardful",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FeiZhan/boardful.git"
+  },
+  "author": "Fei Zhan",
+  "license": "GNU GENERAL PUBLIC LICENSE",
+  "bugs": {
+    "url": "https://github.com/FeiZhan/boardful/issues"
+  },
+  "homepage": "https://github.com/FeiZhan/boardful",
+  "dependencies": {
+    "winston": "*"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5"
+  }
+}

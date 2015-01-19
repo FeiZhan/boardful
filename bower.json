@@ -1,0 +1,14 @@
+{
+  "name": "boardful",
+  "version": "0.0.0",
+  "homepage": "https://github.com/FeiZhan/boardful",
+  "authors": [
+    "Fei Zhan <-@-.com>"
+  ],
+  "license": "GNU GENERAL PUBLIC LICENSE",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
