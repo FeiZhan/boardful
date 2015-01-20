@@ -1,8 +1,8 @@
 /**
  * Player.
  *
- * @author  Fei Zhan
- * @version 0.0
+ * @author		Fei Zhan
+ * @version		0.0
 */
 
 var BOARDFUL = BOARDFUL || new Object();
@@ -31,10 +31,10 @@ BOARDFUL.ENGINE.Player = function (config, game_id) {
 	}
 	var that = this;
 	// add event listeners
-	this.game.event_mngr.on("PlayerStart", {
+	this.game.event_mngr.on("Player" + this.id + "Start", {
 		level: "game",
-		callback: function () {
-			that.start();
+		callback: function (arg) {
+			that.start(arg);
 		},
 		instance: that
 	});
@@ -42,21 +42,36 @@ BOARDFUL.ENGINE.Player = function (config, game_id) {
 BOARDFUL.ENGINE.Player.next_id = 0;
 
 // player start
-BOARDFUL.ENGINE.Player.prototype.start = function () {
-	if (this.game.player_list[this.game.current_player].id != this.id) {
-		return;
-	}
-	console.log("player start", this.game.current_player);
-	var event = new BOARDFUL.ENGINE.Event("PlayerEnd");
+BOARDFUL.ENGINE.Player.prototype.start = function (arg) {
+	console.log("player start", this.game.player_list[this.game.current_player]);
+	var event = new BOARDFUL.ENGINE.Event({
+		source_type: "game",
+		source_id: this.id,
+		name: "PlayerEnd"
+	});
 	this.game.event_mngr.front(event.id);
 };
-
+// play card
+BOARDFUL.ENGINE.Player.prototype.playCard = function (arg) {
+	if (0 == this.hand.length) {
+		return;
+	}
+	var card = this.hand[Math.floor((Math.random() * this.hand.length))];
+	var event = new BOARDFUL.ENGINE.Event({
+		source_type: "game",
+		source_id: this.id,
+		name: "PlayCard",
+		player: this.id,
+		card: card
+	});
+	this.game.event_mngr.front(event.id);
+};
 
 // player list
 BOARDFUL.ENGINE.PlayerList = new Object();
 // create a player list
 BOARDFUL.ENGINE.getPlayerList = function (list) {
-	var player_list = new Object();
+	var player_list = new Array();
 	var player;
 	for (var i in list) {
 		switch (list[i]) {
@@ -69,7 +84,7 @@ BOARDFUL.ENGINE.getPlayerList = function (list) {
 		default:
 			break;
 		}
-		player_list[player.id] = player;
+		player_list.push(player.id);
 	}
 	return player_list;
 };

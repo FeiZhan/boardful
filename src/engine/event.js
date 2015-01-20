@@ -9,11 +9,13 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // event
-BOARDFUL.ENGINE.Event = function (name) {
+BOARDFUL.ENGINE.Event = function (arg) {
 	this.id = BOARDFUL.ENGINE.Event.next_id;
 	BOARDFUL.ENGINE.EventList[this.id] = this;
 	++ BOARDFUL.ENGINE.Event.next_id;
-	this.name = name;
+	this.name = arg.name;
+	this.arg = arg;
+	this.arg.creation_time = new Date();
 };
 BOARDFUL.ENGINE.Event.next_id = 0;
 // event list
@@ -99,7 +101,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 					for (var j in this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]]) {
 						var listener = this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]][j];
 						// trigger listener callback for event
-						listener.callback();
+						listener.callback(event.arg);
 						this.logger.log("info", "trigger", listener);
 					}
 				}

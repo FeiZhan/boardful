@@ -25,18 +25,21 @@ BOARDFUL.ENGINE.CardList = new Object();
 
 // load cards
 BOARDFUL.ENGINE.loadCards = function (config) {
+	var card_list = new Array();
 	switch (config) {
 	case "poker":
-		BOARDFUL.ENGINE.CardList = BOARDFUL.ENGINE.loadPoker();
+		card_list = BOARDFUL.ENGINE.loadPoker();
 		break;
 	default:
 		break;
 	}
+	return card_list;
 };
 // load poker cards
 BOARDFUL.ENGINE.loadPoker = function (num) {
 	num = num || 1;
 	var card;
+	var card_list = new Array();
 	for (var i = 0; i < num; ++ i) {
 		for (var j = 1; j <= 13; ++ j) {
 			var value = j;
@@ -60,7 +63,9 @@ BOARDFUL.ENGINE.loadPoker = function (num) {
 					suit: k,
 					color: (k % 2 ? "red" : "black")
 				});
+				card_list.push(card.id);
 			}
 		}
 	}
+	return card_list;
 };

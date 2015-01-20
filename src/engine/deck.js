@@ -17,19 +17,24 @@ BOARDFUL.ENGINE.Deck = function () {
 	this.card_list = new Array();
 };
 BOARDFUL.ENGINE.Deck.next_id = 0;
-// draw cards
-BOARDFUL.ENGINE.Deck.prototype.getCards = function (num) {
+// deck list
+BOARDFUL.ENGINE.DeckList = new Object();
+
+// get cards
+BOARDFUL.ENGINE.Deck.prototype.getCards = function (card_list) {
+	this.card_list = this.card_list.concat(card_list);
+};
+// shuffle cards
+BOARDFUL.ENGINE.Deck.prototype.shuffle = function () {
+	this.card_list = BOARDFUL.ENGINE.shuffle(this.card_list);
+};
+// deal cards
+BOARDFUL.ENGINE.Deck.prototype.dealCards = function (num) {
 	var cards = new Array();
 	for (var i = 0; i < num; ++ i) {
-		cards.append(this.card_list[0]);
-		this.card_list.remove(0);
+		cards.push(this.card_list[0]);
+		this.card_list.shift();
 	}
 	return cards;
 };
-// shuffle cards
-BOARDFUL.ENGINE.Deck.prototype.shuffle = function (num) {
-	
-};
 
-// deck list
-BOARDFUL.ENGINE.DeckList = new Object();
