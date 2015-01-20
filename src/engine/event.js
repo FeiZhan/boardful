@@ -38,14 +38,27 @@ BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
 		if (0 == this.list.length) {
 			return undefined;
 		}
-	} else {
+	}
+	else if ("array" == typeof id || "object" == typeof id) {
+		this.list = id.concat(this.list);
+		this.logger.log("info", "prepend events", id, this.list);
+	}
+	else {
 		this.list.unshift(id);
+		this.logger.log("info", "prepend event", id, this.list);
 	}
 	return BOARDFUL.ENGINE.EventList[this.list[0]];
 };
 // add to the rear of event list
 BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
-	this.list.push(id);
+	if ("array" == typeof id || "object" == typeof id) {
+		this.list = this.list.concat(id);
+		this.logger.log("info", "append events", id, this.list);
+	}
+	else {
+		this.list.push(id);
+		this.logger.log("info", "append event", id, this.list);
+	}
 };
 // add event listener
 BOARDFUL.ENGINE.EventMngr.prototype.on = function (event, config) {
@@ -78,9 +91,9 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 	if (this.list.length > 0) {
 		// get the current event
 		var event = this.front();
+		this.logger.log("info", "event", event, this.list);
 		this.list.shift();
-		this.logger.log("info", "event", event);
-		if (event.name in this.listenerList) {
+		if (event && (event.name in this.listenerList)) {
 			for (var i in BOARDFUL.ENGINE.EventLevels) {
 				if (BOARDFUL.ENGINE.EventLevels[i] in this.listenerList[event.name]) {
 					for (var j in this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]]) {

@@ -97,6 +97,45 @@ BOARDFUL.MENUS.setRoom = function (package) {
 
 
 /**
+ * Game for desktop.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
+**/
+
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
+
+// game for desktop
+BOARDFUL.DESKTOP.Game = function (config) {
+	this.id = BOARDFUL.DESKTOP.Game.next_id;
+	BOARDFUL.DESKTOP.GameList[this.id] = this;
+	++ BOARDFUL.DESKTOP.Game.next_id;
+	// create a game
+	this.game = new BOARDFUL.ENGINE.Game(config);
+	var that = this;
+	this.game.event_mngr.on("RoundStart", {
+		level: "game",
+		callback: function () {
+			that.roundStart();
+		},
+		instance: that
+	});
+};
+BOARDFUL.DESKTOP.Game.next_id = 0;
+BOARDFUL.DESKTOP.GameList = new Object();
+
+// launch game
+BOARDFUL.DESKTOP.Game.prototype.run = function () {
+	this.game.run();
+};
+// start round
+BOARDFUL.DESKTOP.Game.prototype.roundStart = function () {
+	console.log("round", this.game.round);
+};
+
+/**
  * Logger.
  *
  * @author		Fei Zhan
@@ -138,14 +177,14 @@ BOARDFUL.DESKTOP.menuShow = function (list) {
 };
 
 // current room
-BOARDFUL.DESKTOP.Room = undefined;
+BOARDFUL.DESKTOP.CurrentRoom = undefined;
 // show room config
 BOARDFUL.DESKTOP.roomShow = function (game) {
 	// load board game package
 	var load_files = new BOARDFUL.ENGINE.FileLoader([game.package], function () {
 		var board = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
-		BOARDFUL.DESKTOP.Room = new BOARDFUL.ENGINE.Room(board);
-		BOARDFUL.DESKTOP.configRoom(BOARDFUL.DESKTOP.Room);
+		BOARDFUL.DESKTOP.CurrentRoom = new BOARDFUL.ENGINE.Room(board);
+		BOARDFUL.DESKTOP.configRoom(BOARDFUL.DESKTOP.CurrentRoom);
 	});
 };
 // config a room
@@ -159,12 +198,12 @@ BOARDFUL.DESKTOP.configRoom = function (room) {
 };
 
 // current game
-BOARDFUL.DESKTOP.Game = undefined;
+BOARDFUL.DESKTOP.CurrentGame = undefined;
 // start a game
 BOARDFUL.DESKTOP.gameStart = function (room) {
-	BOARDFUL.DESKTOP.Game = new BOARDFUL.ENGINE.Game(room);
+	BOARDFUL.DESKTOP.CurrentGame = new BOARDFUL.DESKTOP.Game(room);
 	console.log("game start");
-	BOARDFUL.DESKTOP.Game.run();
+	BOARDFUL.DESKTOP.CurrentGame.run();
 };
 
 // launch project in desktop
@@ -195,9 +234,11 @@ BOARDFUL.init = function () {
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Debugger.add(winston.transports.File, {
 		filename: 'logs/debug.log'
-	});
+	})
+	.remove(winston.transports.Console);
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
+	BOARDFUL.Debugger.log('info', "start");
 	BOARDFUL.ENGINE.initFileMngr();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
@@ -368,14 +409,27 @@ BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
 		if (0 == this.list.length) {
 			return undefined;
 		}
-	} else {
+	}
+	else if ("array" == typeof id || "object" == typeof id) {
+		this.list = id.concat(this.list);
+		this.logger.log("info", "prepend events", id, this.list);
+	}
+	else {
 		this.list.unshift(id);
+		this.logger.log("info", "prepend event", id, this.list);
 	}
 	return BOARDFUL.ENGINE.EventList[this.list[0]];
 };
 // add to the rear of event list
 BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
-	this.list.push(id);
+	if ("array" == typeof id || "object" == typeof id) {
+		this.list = this.list.concat(id);
+		this.logger.log("info", "append events", id, this.list);
+	}
+	else {
+		this.list.push(id);
+		this.logger.log("info", "append event", id, this.list);
+	}
 };
 // add event listener
 BOARDFUL.ENGINE.EventMngr.prototype.on = function (event, config) {
@@ -408,9 +462,9 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 	if (this.list.length > 0) {
 		// get the current event
 		var event = this.front();
+		this.logger.log("info", "event", event, this.list);
 		this.list.shift();
-		this.logger.log("info", "event", event);
-		if (event.name in this.listenerList) {
+		if (event && (event.name in this.listenerList)) {
 			for (var i in BOARDFUL.ENGINE.EventLevels) {
 				if (BOARDFUL.ENGINE.EventLevels[i] in this.listenerList[event.name]) {
 					for (var j in this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]]) {
@@ -584,17 +638,20 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 // game
 BOARDFUL.ENGINE.Game = function (config) {
 	this.id = BOARDFUL.ENGINE.Game.next_id;
+	BOARDFUL.ENGINE.GameList[this.id] = this;
 	++ BOARDFUL.ENGINE.Game.next_id;
+	this.event_mngr = new BOARDFUL.ENGINE.EventMngr();
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {
 		this.config = config.config;
 		this.options = config.options;
 		this.player_list = new Array();
+		this.current_player = -1;
 		for (var i in config.player_list) {
-			this.player_list.push(new BOARDFUL.ENGINE.Player(config.player_list[i]));
+			var player = new BOARDFUL.ENGINE.Player(config.player_list[i], this.id);
+			this.player_list.push(player);
 		}
 	}
-	this.event_mngr = new BOARDFUL.ENGINE.EventMngr();
 	var that = this;
 	// add event listeners
 	this.event_mngr.on("GameStart", {
@@ -618,11 +675,20 @@ BOARDFUL.ENGINE.Game = function (config) {
 		},
 		instance: that
 	});
+	this.event_mngr.on("PlayerPrepare", {
+		level: "game",
+		callback: function () {
+			that.playerPrepare();
+		},
+		instance: that
+	});
 	// create event
 	var event = new BOARDFUL.ENGINE.Event("GameStart");
 	this.event_mngr.add(event.id);
 };
 BOARDFUL.ENGINE.Game.next_id = 0;
+// game list
+BOARDFUL.ENGINE.GameList = new Object();
 
 // launch game
 BOARDFUL.ENGINE.Game.prototype.run = function () {
@@ -637,13 +703,26 @@ BOARDFUL.ENGINE.Game.prototype.start = function () {
 // start a round
 BOARDFUL.ENGINE.Game.prototype.roundStart = function () {
 	++ this.round;
-	var event = new BOARDFUL.ENGINE.Event("RoundEnd");
-	this.event_mngr.add(event.id);
+	var event_list = new Array();
+	var event;
+	for (var i in this.player_list) {
+		event = new BOARDFUL.ENGINE.Event("PlayerPrepare");
+		event_list.push(event.id);
+		event = new BOARDFUL.ENGINE.Event("PlayerStart");
+		event_list.push(event.id);
+	}
+	event = new BOARDFUL.ENGINE.Event("RoundEnd");
+	event_list.push(event.id);
+	this.event_mngr.front(event_list);
 };
 // end a round
 BOARDFUL.ENGINE.Game.prototype.roundEnd = function () {
 	var event = new BOARDFUL.ENGINE.Event("RoundStart");
 	this.event_mngr.add(event.id);
+};
+// player start
+BOARDFUL.ENGINE.Game.prototype.playerPrepare = function () {
+	this.current_player = (this.current_player + 1) % this.player_list.length;
 };
 
 /**
@@ -720,10 +799,12 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // player
-BOARDFUL.ENGINE.Player = function (config) {
-	this.id = BOARDFUL.ENGINE.NextPlayerId;
+BOARDFUL.ENGINE.Player = function (config, game_id) {
+	this.id = BOARDFUL.ENGINE.Player.next_id;
 	BOARDFUL.ENGINE.PlayerList[this.id] = this;
-	++ BOARDFUL.ENGINE.NextPlayerId;
+	++ BOARDFUL.ENGINE.Player.next_id;
+	this.game_id = game_id;
+	this.game = BOARDFUL.ENGINE.GameList[this.game_id];
 	this.hand = new Array();
 	this.turn = undefined;
 	this.type = undefined;
@@ -738,8 +819,28 @@ BOARDFUL.ENGINE.Player = function (config) {
 		this.type = "other";
 		break;
 	}
+	var that = this;
+	// add event listeners
+	this.game.event_mngr.on("PlayerStart", {
+		level: "game",
+		callback: function () {
+			that.start();
+		},
+		instance: that
+	});
 };
 BOARDFUL.ENGINE.Player.next_id = 0;
+
+// player start
+BOARDFUL.ENGINE.Player.prototype.start = function () {
+	if (this.game.player_list[this.game.current_player].id != this.id) {
+		return;
+	}
+	console.log("player start", this.game.current_player);
+	var event = new BOARDFUL.ENGINE.Event("PlayerEnd");
+	this.game.event_mngr.front(event.id);
+};
+
 
 // player list
 BOARDFUL.ENGINE.PlayerList = new Object();

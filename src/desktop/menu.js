@@ -40,14 +40,14 @@ BOARDFUL.DESKTOP.menuShow = function (list) {
 };
 
 // current room
-BOARDFUL.DESKTOP.Room = undefined;
+BOARDFUL.DESKTOP.CurrentRoom = undefined;
 // show room config
 BOARDFUL.DESKTOP.roomShow = function (game) {
 	// load board game package
 	var load_files = new BOARDFUL.ENGINE.FileLoader([game.package], function () {
 		var board = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
-		BOARDFUL.DESKTOP.Room = new BOARDFUL.ENGINE.Room(board);
-		BOARDFUL.DESKTOP.configRoom(BOARDFUL.DESKTOP.Room);
+		BOARDFUL.DESKTOP.CurrentRoom = new BOARDFUL.ENGINE.Room(board);
+		BOARDFUL.DESKTOP.configRoom(BOARDFUL.DESKTOP.CurrentRoom);
 	});
 };
 // config a room
@@ -61,12 +61,12 @@ BOARDFUL.DESKTOP.configRoom = function (room) {
 };
 
 // current game
-BOARDFUL.DESKTOP.Game = undefined;
+BOARDFUL.DESKTOP.CurrentGame = undefined;
 // start a game
 BOARDFUL.DESKTOP.gameStart = function (room) {
-	BOARDFUL.DESKTOP.Game = new BOARDFUL.ENGINE.Game(room);
+	BOARDFUL.DESKTOP.CurrentGame = new BOARDFUL.DESKTOP.Game(room);
 	console.log("game start");
-	BOARDFUL.DESKTOP.Game.run();
+	BOARDFUL.DESKTOP.CurrentGame.run();
 };
 
 // launch project in desktop

@@ -22,9 +22,11 @@ BOARDFUL.init = function () {
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Debugger.add(winston.transports.File, {
 		filename: 'logs/debug.log'
-	});
+	})
+	.remove(winston.transports.Console);
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
+	BOARDFUL.Debugger.log('info', "start");
 	BOARDFUL.ENGINE.initFileMngr();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
