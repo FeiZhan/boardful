@@ -27,7 +27,7 @@ BOARDFUL.ENGINE.EventLevels = ["top", "system", "server", "board", "room", "game
 BOARDFUL.ENGINE.EventMngr = function () {
 	this.list = new Array();
 	this.listenerList = new Object();
-	this.timeout = 300;
+	this.timeout = 100;
 	this.logger = new BOARDFUL.ENGINE.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/event.log'
@@ -43,11 +43,11 @@ BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
 	}
 	else if ("array" == typeof id || "object" == typeof id) {
 		this.list = id.concat(this.list);
-		this.logger.log("info", "prepend events", id, this.list);
+		this.logger.log("info", "prepend events", id);
 	}
 	else {
 		this.list.unshift(id);
-		this.logger.log("info", "prepend event", id, this.list);
+		this.logger.log("info", "prepend event", id);
 	}
 	return BOARDFUL.ENGINE.EventList[this.list[0]];
 };
@@ -55,11 +55,11 @@ BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
 BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
 	if ("array" == typeof id || "object" == typeof id) {
 		this.list = this.list.concat(id);
-		this.logger.log("info", "append events", id, this.list);
+		this.logger.log("info", "append events", id);
 	}
 	else {
 		this.list.push(id);
-		this.logger.log("info", "append event", id, this.list);
+		this.logger.log("info", "append event", id);
 	}
 };
 // add event listener
@@ -72,7 +72,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.on = function (event, config) {
 		this.listenerList[event][config.level] = new Array();
 	}
 	this.listenerList[event][config.level].push(config);
-	this.logger.log("info", "add listener", event, config);
+	this.logger.log("info", "add listener", event);
 };
 // remove event listener
 BOARDFUL.ENGINE.EventMngr.prototype.off = function (event, config) {
@@ -93,16 +93,16 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 	if (this.list.length > 0) {
 		// get the current event
 		var event = this.front();
-		this.logger.log("info", "event", event, this.list);
+		this.logger.log("info", "event", event.name);
 		this.list.shift();
 		if (event && (event.name in this.listenerList)) {
 			for (var i in BOARDFUL.ENGINE.EventLevels) {
 				if (BOARDFUL.ENGINE.EventLevels[i] in this.listenerList[event.name]) {
 					for (var j in this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]]) {
 						var listener = this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]][j];
+						this.logger.log("info", "trigger", listener.id);
 						// trigger listener callback for event
 						listener.callback(event.arg);
-						this.logger.log("info", "trigger", listener);
 					}
 				}
 			}

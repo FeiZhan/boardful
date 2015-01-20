@@ -14,7 +14,7 @@ BOARDFUL.ENGINE.Card = function (config) {
 	this.id = BOARDFUL.ENGINE.Card.next_id;
 	BOARDFUL.ENGINE.CardList[this.id] = this;
 	++ BOARDFUL.ENGINE.Card.next_id;
-	this.value = config.value;
+	this.rank = config.rank;
 	this.suit = config.suit;
 	this.color = config.color;
 };
@@ -42,24 +42,24 @@ BOARDFUL.ENGINE.loadPoker = function (num) {
 	var card_list = new Array();
 	for (var i = 0; i < num; ++ i) {
 		for (var j = 1; j <= 13; ++ j) {
-			var value = j;
+			var rank = j;
 			switch (j) {
 			case 11:
-				value = "Jack";
+				rank = "Jack";
 				break;
 			case 12:
-				value = "Queen";
+				rank = "Queen";
 				break;
 			case 13:
-				value = "King";
+				rank = "King";
 				break;
 			default:
-				value = j;
+				rank = j;
 				break;
 			}
 			for (var k in ["spade", "heart", "diamond", "club"]) {
 				card = new BOARDFUL.ENGINE.Card({
-					value: value,
+					rank: rank,
 					suit: k,
 					color: (k % 2 ? "red" : "black")
 				});
@@ -68,4 +68,18 @@ BOARDFUL.ENGINE.loadPoker = function (num) {
 		}
 	}
 	return card_list;
+};
+BOARDFUL.ENGINE.pokerSort = function (id0, id1) {
+	var card0 = BOARDFUL.ENGINE.CardList[id0];
+	var card1 = BOARDFUL.ENGINE.CardList[id1];
+	if (card0.rank != card1.rank) {
+		var rank0 = pokerGetRankValue(card0.rank);
+	}
+};
+var pokerGetRankValue = function (rank) {
+	var rank_values = {
+		Jack: 11,
+		Queen: 11,
+		King: 11
+	};
 };

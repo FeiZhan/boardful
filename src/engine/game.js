@@ -22,6 +22,8 @@ BOARDFUL.ENGINE.Game = function (config) {
 			draw: new BOARDFUL.ENGINE.Deck().id,
 			discard: new BOARDFUL.ENGINE.Deck().id
 		};
+		this.table = new BOARDFUL.ENGINE.Table(this.id).id;
+		
 		this.player_list = new Array();
 		this.current_player = -1;
 		for (var i in config.player_list) {
@@ -139,6 +141,12 @@ BOARDFUL.ENGINE.Game.prototype.roundStart = function (arg) {
 			number: 2
 		});
 		event_list.push(event.id);
+		event = new BOARDFUL.ENGINE.Event({
+			source_type: "game",
+			source_id: this.id,
+			name: "PlayersDuel"
+		});
+		event_list.push(event.id);
 	}
 	event = new BOARDFUL.ENGINE.Event({
 		source_type: "game",
@@ -166,13 +174,4 @@ BOARDFUL.ENGINE.Game.prototype.dealCards = function (arg) {
 	var  card_list = BOARDFUL.ENGINE.DeckList[this.deck_list[arg.deck]].dealCards(arg.number);
 	console.log("deal cards", card_list);
 	BOARDFUL.ENGINE.PlayerList[arg.player].hand = BOARDFUL.ENGINE.PlayerList[arg.player].hand.concat(card_list);
-};
-// deal cards
-BOARDFUL.ENGINE.Game.prototype.playersDuel = function (arg) {
-	var event = new BOARDFUL.ENGINE.Event({
-		source_type: "game",
-		source_id: this.id,
-		name: "PlayersDuel"
-	});
-	this.event_mngr.add(event.id);
 };

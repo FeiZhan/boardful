@@ -29,8 +29,13 @@ BOARDFUL.ENGINE.Player = function (config, game_id) {
 		this.type = "other";
 		break;
 	}
+	this.addListeners();
+};
+BOARDFUL.ENGINE.Player.next_id = 0;
+
+// add event listeners
+BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 	var that = this;
-	// add event listeners
 	this.game.event_mngr.on("Player" + this.id + "Start", {
 		level: "game",
 		callback: function (arg) {
@@ -38,9 +43,14 @@ BOARDFUL.ENGINE.Player = function (config, game_id) {
 		},
 		instance: that
 	});
+	this.game.event_mngr.on("Player" + this.id + "PlayCard", {
+		level: "game",
+		callback: function (arg) {
+			that.playCard(arg);
+		},
+		instance: that
+	});
 };
-BOARDFUL.ENGINE.Player.next_id = 0;
-
 // player start
 BOARDFUL.ENGINE.Player.prototype.start = function (arg) {
 	console.log("player start", this.game.player_list[this.game.current_player]);
@@ -60,7 +70,8 @@ BOARDFUL.ENGINE.Player.prototype.playCard = function (arg) {
 	var event = new BOARDFUL.ENGINE.Event({
 		source_type: "game",
 		source_id: this.id,
-		name: "PlayCard",
+		source_event: arg.source_event,
+		name: "PlaceCardOnTable",
 		player: this.id,
 		card: card
 	});
