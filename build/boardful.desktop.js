@@ -657,100 +657,75 @@ BOARDFUL.ENGINE.parseUrl = function () {
 	return param;
 };
 
-
 /**
-* Game.
-*
-* @author  Fei Zhan
-* @version 0.0
+ * Logger.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
 */
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.GAME = BOARDFUL.GAME || new Object();
+BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 
-BOARDFUL.GAME.init = function (config) {
-	$("#content").empty();
-	$("#content").load("src/browser/game.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/game.css"], function () {
-	});
-	$("#content button#ok").on("click", function () {
-	});
-};
 
 /**
-* Loader of menus.
-*
-* @author  Fei Zhan
-* @version 0.0
+ * Logger.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
 */
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.MENUS = BOARDFUL.MENUS || new Object();
+BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 
-BOARDFUL.MENUS.GameList = new Object();
-BOARDFUL.MENUS.run = function () {
-	$("#content").empty();
-	$("#content").load("src/browser/menu0.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/menu0.css", "src/engine/gamelist.json"], function () {
-		BOARDFUL.MENUS.GameList = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
-		BOARDFUL.MENUS.loadGameList(BOARDFUL.MENUS.GameList);
+var util = require('util');
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+BOARDFUL.DESKTOP.GameList = new Object();
+BOARDFUL.DESKTOP.menuRun = function () {
+	console.info("loading");
+	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/engine/gamelist.json"], function () {
+		BOARDFUL.DESKTOP.GameList = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+		BOARDFUL.DESKTOP.menuShow(BOARDFUL.DESKTOP.GameList);
 	});
 };
-BOARDFUL.MENUS.Selected = undefined;
-BOARDFUL.MENUS.loadGameList = function (list) {
-	$("#content button#ok").click(function () {
-		if (undefined === BOARDFUL.MENUS.Selected || ! (BOARDFUL.MENUS.Selected in BOARDFUL.MENUS.GameList)) {
-			return;
-		}
-		BOARDFUL.MENUS.roomStart(BOARDFUL.MENUS.GameList[BOARDFUL.MENUS.Selected]);
-	});
+BOARDFUL.DESKTOP.menuShow = function (list) {
 	for (var i in list) {
-		$("#content #gamelist ul").append('<li id="' + i + '">' + list[i].name + "</li>");
-		$("#content #gamelist ul li:last").click(function () {
-			BOARDFUL.MENUS.Selected = $(this).attr('id');
-			$("#content #gamelist li").removeClass("active");
-			$(this).addClass("active");
-			$("#content #descrip").empty();
-			$("#content #descrip").append(list[BOARDFUL.MENUS.Selected].descrip);
-		});
+		console.log(i + ". " + list[i].name);
+		console.log("\t" + list[i].descrip);
 	}
-};
-
-/**
-* Loader of menus.
-*
-* @author  Fei Zhan
-* @version 0.0
-*/
-
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.MENUS = BOARDFUL.MENUS || new Object();
-
-BOARDFUL.MENUS.GamePackage = new Object();
-BOARDFUL.MENUS.roomStart = function (game) {
-	$("#content").empty();
-	$("#content").load("src/browser/menu1.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/menu1.css", game.package], function () {
-		BOARDFUL.MENUS.GamePackage = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
-		BOARDFUL.MENUS.setRoom(BOARDFUL.MENUS.GamePackage);
+	console.log("select a board");
+	process.stdin.once('data', function (text) {
+		console.log("loading board", util.inspect(BOARDFUL.DESKTOP.GameList[parseInt(text)].name));
+		BOARDFUL.DESKTOP.roomShow(BOARDFUL.DESKTOP.GameList[parseInt(text)]);
 	});
 };
-BOARDFUL.MENUS.setRoom = function (package) {
-	$("#content button#ok").on("click", function () {
-		BOARDFUL.GAME.init(BOARDFUL.MENUS.GamePackage);
+
+BOARDFUL.DESKTOP.Room = undefined;
+BOARDFUL.DESKTOP.roomShow = function (game) {
+	var load_files = new BOARDFUL.ENGINE.loadFileList([game.package], function () {
+		var board = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
+		BOARDFUL.DESKTOP.Room = new BOARDFUL.ENGINE.Room(board);
+		BOARDFUL.DESKTOP.configRoom(BOARDFUL.DESKTOP.Room);
 	});
-	$("#content #name").html(package.name);
-	$("#content #descrip1").html(package.descrip);
-	$("#content #players").append("<div><span>me</span></div>");
-	for (var i = 1; i < package.max_players; ++ i) {
-		$("#content #players").append("<div><span>empty</span></div>");
-	}
-	for (var i in package.options) {
-		$("#content #options").append('<div id="' + i + '"></div>');
-		$("#content #options #" + i).append('<span>' + i + '</span><select></select>');
-		for (var j in package.options[i].value) {
-			$("#content #options #" + i + " select").append('<option value="' + package.options[i].value[j] + '">' + package.options[i].value[j] + '</option>');
-		}
-	}
+};
+BOARDFUL.DESKTOP.configRoom = function (room) {
+	console.log("config room");
+	process.stdin.once('data', function (text) {
+		console.log("config room done", room);
+		BOARDFUL.DESKTOP.gameStart(room);
+	});
 };
 
+BOARDFUL.DESKTOP.Game = undefined;
+BOARDFUL.DESKTOP.gameStart = function (room) {
+	BOARDFUL.DESKTOP.Game = new BOARDFUL.ENGINE.Game(room);
+	console.log("game start");
+	BOARDFUL.DESKTOP.Game.run();
+};
+
+BOARDFUL.init();
+BOARDFUL.run("desktop");

@@ -1,0 +1,29 @@
+#myhand {
+	border: 1px solid black;
+	position: absolute;
+	top: 65%;
+	left: 5%;
+	height: 30%;
+	width: 90%;
+}
+#yourhand {
+	border: 1px solid black;
+	position: absolute;
+	top: 5%;
+	left: 5%;
+	height: 30%;
+	width: 90%;
+}
+#table {
+	border: 1px solid black;
+	position: absolute;
+	top: 35%;
+	left: 30%;
+	height: 30%;
+	width: 40%;
+}
+button#ok {
+	position: absolute;
+	top: 50%;
+	left: 80%;
+}

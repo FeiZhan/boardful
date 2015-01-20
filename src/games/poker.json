@@ -1,5 +1,14 @@
 {
   "version": "0.0.0",
   "name": "poker",
-  "descrip": "description of poker"
+  "descrip": "description of poker",
+  "max_players": "10",
+  "min_players": "2",
+  "options": {
+	"deck_num": {
+		"name": "number of decks",
+		"type": "selection",
+		"value": [1, 2, 3, 4, 5]
+	}
+  }
 }
