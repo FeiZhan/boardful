@@ -1,14 +1,39 @@
 /**
-* Player.
-*
-* @author  Fei Zhan
-* @version 0.0
+ * Player.
+ *
+ * @author  Fei Zhan
+ * @version 0.0
 */
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
-BOARDFUL.ENGINE.playerList = function (list) {
+// player
+BOARDFUL.ENGINE.Player = function (config) {
+	this.id = BOARDFUL.ENGINE.NextPlayerId;
+	BOARDFUL.ENGINE.PlayerList[this.id] = this;
+	++ BOARDFUL.ENGINE.NextPlayerId;
+	this.hand = new Array();
+	this.turn = undefined;
+	this.type = undefined;
+	switch (config) {
+	case "me":
+		this.type = "me";
+		break;
+	case "ai":
+		this.type = "ai";
+		break;
+	default:
+		this.type = "other";
+		break;
+	}
+};
+BOARDFUL.ENGINE.Player.next_id = 0;
+
+// player list
+BOARDFUL.ENGINE.PlayerList = new Object();
+// create a player list
+BOARDFUL.ENGINE.getPlayerList = function (list) {
 	var player_list = new Object();
 	var player;
 	for (var i in list) {
@@ -25,24 +50,4 @@ BOARDFUL.ENGINE.playerList = function (list) {
 		player_list[player.id] = player;
 	}
 	return player_list;
-};
-
-BOARDFUL.ENGINE.NextPlayerId = 0;
-BOARDFUL.ENGINE.Player = function (config) {
-	this.id = BOARDFUL.ENGINE.NextPlayerId;
-	++ BOARDFUL.ENGINE.NextPlayerId;
-	this.hand = new Array();
-	this.turn = undefined;
-	this.type = undefined;
-	switch (config) {
-	case "me":
-		this.type = "me";
-		break;
-	case "ai":
-		this.type = "ai";
-		break;
-	default:
-		this.type = "other";
-		break;
-	}
 };

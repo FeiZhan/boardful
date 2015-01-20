@@ -1,25 +1,32 @@
 /**
-* File loader.
-*
-* @author		Fei Zhan
-* @version		0.0
-* 
+ * File manager.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
 */
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
-BOARDFUL.ENGINE.FileLoader = function () {
-	BOARDFUL.ENGINE.LoaderLogger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.ENGINE.LoaderLogger.add(winston.transports.File, {
-		filename: 'logs/fileloader.log'
+
+// init file manager
+BOARDFUL.ENGINE.initFileMngr = function () {
+	// file mngr logger
+	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
+	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
+		filename: 'logs/file.log'
 	})
 	.remove(winston.transports.Console);
 };
 
+// file list
 BOARDFUL.ENGINE.FileList = new Object();
+// file list by name
 BOARDFUL.ENGINE.FileNameList = new Object();
 BOARDFUL.ENGINE.NextFileId = 0;
+// add to file list
 BOARDFUL.ENGINE.addToFileList = function (file, content, status) {
+	// new file
 	if (! (file in BOARDFUL.ENGINE.FileNameList)) {
 		BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.NextFileId] = {
 			name: file,
@@ -38,14 +45,15 @@ BOARDFUL.ENGINE.addToFileList = function (file, content, status) {
 		};
 	}
 };
+// get file list in current html
 BOARDFUL.ENGINE.getFilesInHtml = function () {
 	$("script").each(function () {
 		BOARDFUL.ENGINE.addToFileList($(this).attr("src"), $(this), "loaded");
 	});
-	BOARDFUL.Logger.log('info', "BOARDFUL.ENGINE.getFilesInHtml");
-	BOARDFUL.Logger.log('info', BOARDFUL.ENGINE.FileNameList);
+	BOARDFUL.ENGINE.FileLogger.log('info', "files in html", BOARDFUL.ENGINE.FileNameList);
 };
 
+// load a file
 BOARDFUL.ENGINE.loadFile = function (file) {
 	switch (BOARDFUL.ENGINE.Envi.type) {
 	case "browser":
@@ -55,62 +63,65 @@ BOARDFUL.ENGINE.loadFile = function (file) {
 		try {
 			var script = require("../" + file);
 			BOARDFUL.ENGINE.addToFileList(file, script, "loaded");
-			BOARDFUL.ENGINE.LoaderLogger.log("info", "file loaded", file);
+			BOARDFUL.ENGINE.FileLogger.log("info", "file loaded", file);
 		} catch (err) {
 			BOARDFUL.ENGINE.addToFileList(file, "", "failed");
-			BOARDFUL.ENGINE.LoaderLogger.log("info", "file failed", file, err);
+			BOARDFUL.ENGINE.FileLogger.log("info", "file failed", file, err);
 		}
 		break;
 	default:
 		break;
 	}
 }
+// load a file via ajax by browser
 BOARDFUL.ENGINE.loadFileAjax = function (file) {
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
 		$.getScript(file)
 			.done(function( script, textStatus ) {
 				BOARDFUL.ENGINE.addToFileList(file, script, "loaded");
-				BOARDFUL.ENGINE.LoaderLogger.log("info", "js loaded", file);
+				BOARDFUL.ENGINE.FileLogger.log("info", "js loaded", file);
 			})
 			.fail(function( jqxhr, settings, exception ) {
 				BOARDFUL.ENGINE.addToFileList(file, "", "failed");
-				BOARDFUL.ENGINE.LoaderLogger.log("info", "js failed", file);
+				BOARDFUL.ENGINE.FileLogger.log("info", "js failed", file);
 			});
 	}
 	else if (".css" == file.substr(file.length - 4)) {
 		// load a css
 		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', file) );
 		BOARDFUL.ENGINE.addToFileList(file, "", "loaded");
-		BOARDFUL.ENGINE.LoaderLogger.log("info", "css loaded");
-		BOARDFUL.ENGINE.LoaderLogger.log("info", file);
+		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded");
+		BOARDFUL.ENGINE.FileLogger.log("info", file);
 	}
 	else if (".json" == file.substr(file.length - 5)) {
 		$.getJSON(file, function(data, textStatus, jqXHR) {
 			BOARDFUL.ENGINE.addToFileList(file, data, "loaded");
-			BOARDFUL.ENGINE.LoaderLogger.log("info", "json loaded", file);
+			BOARDFUL.ENGINE.FileLogger.log("info", "json loaded", file);
 		})
 		.fail(function (jqXHR, textStatus, errorThrown) {
 			BOARDFUL.ENGINE.addToFileList(file, "", "failed");
-			BOARDFUL.ENGINE.LoaderLogger.log("info", "json failed", file);
+			BOARDFUL.ENGINE.FileLogger.log("info", "json failed", file);
 		})
 		.always(function(data, textStatus, jqXHR) {
 		});
 	}
 	else {
 		BOARDFUL.ENGINE.addToFileList(file, "", "failed");
-		BOARDFUL.ENGINE.LoaderLogger.log("info", "file unknown", file);
+		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
 	}
 };
 
-BOARDFUL.ENGINE.loadFileList = function (list, callback) {
+// file loader
+BOARDFUL.ENGINE.FileLoader = function (list, callback) {
 	this.list = list;
 	this.callback = callback;
 	this.done = false;
 	this.load();
 };
-BOARDFUL.ENGINE.loadFileList.prototype.load = function () {
-	BOARDFUL.ENGINE.LoaderLogger.log("info", "loading", this.list);
+// load files and wait
+BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
+	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
 	this.done = true;
 	for (var i in this.list) {
 		if (! (this.list[i] in BOARDFUL.ENGINE.FileNameList) || "loaded" != BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[this.list[i]]].status) {

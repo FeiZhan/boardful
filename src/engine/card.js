@@ -1,14 +1,29 @@
 /**
-* Game.
-*
-* @author  Fei Zhan
-* @version 0.0
-*/
+ * Card.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
+**/
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
+// card
+BOARDFUL.ENGINE.Card = function (config) {
+	this.id = BOARDFUL.ENGINE.Card.next_id;
+	BOARDFUL.ENGINE.CardList[this.id] = this;
+	++ BOARDFUL.ENGINE.Card.next_id;
+	this.value = config.value;
+	this.suit = config.suit;
+	this.color = config.color;
+};
+BOARDFUL.ENGINE.Card.next_id = 0;
+
+// card list
 BOARDFUL.ENGINE.CardList = new Object();
+
+// load cards
 BOARDFUL.ENGINE.loadCards = function (config) {
 	switch (config) {
 	case "poker":
@@ -18,6 +33,7 @@ BOARDFUL.ENGINE.loadCards = function (config) {
 		break;
 	}
 };
+// load poker cards
 BOARDFUL.ENGINE.loadPoker = function (num) {
 	num = num || 1;
 	var card;
@@ -44,17 +60,7 @@ BOARDFUL.ENGINE.loadPoker = function (num) {
 					suit: k,
 					color: (k % 2 ? "red" : "black")
 				});
-				BOARDFUL.ENGINE.CardList[card.id] = card;
 			}
 		}
 	}
-};
-
-BOARDFUL.ENGINE.NextCardId = 0;
-BOARDFUL.ENGINE.Card = function (config) {
-	this.id = BOARDFUL.ENGINE.NextCardId;
-	++ BOARDFUL.ENGINE.NextCardId;
-	this.value = config.value;
-	this.suit = config.suit;
-	this.color = config.color;
 };

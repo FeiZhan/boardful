@@ -19,12 +19,14 @@ BOARDFUL.ENGINE.getFunctionFromString = function (string) {
 	}
 	return scope[scopeSplit[scopeSplit.length - 1]];
 };
+// convert to string
 BOARDFUL.ENGINE.toString = function (value) {
 	var str = value;
 	try {
 		str = JSON.stringify(value);
 	}
 	catch (err) {
+		// circular json, convert two levels
 		if ("array" == typeof value || "object" == typeof value || "function" == typeof value) {
 			str = "{";
 			for (var i in value) {
@@ -92,6 +94,7 @@ BOARDFUL.ENGINE.parseUrlParam = function (query) {
 	}
 	return query_string;
 };
+// parse url param and hash
 BOARDFUL.ENGINE.parseUrl = function () {
 	var param = BOARDFUL.ENGINE.parseUrlParam(window.location.search.substring(1));
 	param["#"] = window.location.hash.substring(1);

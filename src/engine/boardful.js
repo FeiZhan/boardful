@@ -1,15 +1,18 @@
 /**
-* Define the BOARDFUL namespace.
-*
-* @author		Fei Zhan
-* @version		0.0
-* 
+ * Define the BOARDFUL namespace.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
 */
 
+// namespace
 var BOARDFUL = BOARDFUL || new Object();
 
+// init
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
+	// create logger
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Logger.add(winston.transports.File, {
 		//filename: 'logs/boardful_' + new Date().toString() + '.log'
@@ -22,13 +25,14 @@ BOARDFUL.init = function () {
 	});
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
-	BOARDFUL.ENGINE.FileLoader();
+	BOARDFUL.ENGINE.initFileMngr();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
 		BOARDFUL.ENGINE.getFilesInHtml();
 	}
 };
+// run
 BOARDFUL.run = function (config) {
 	BOARDFUL.Logger.log('info', "start type", config);
 	switch (config) {

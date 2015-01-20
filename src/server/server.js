@@ -6,6 +6,7 @@
  *
  * @author		Fei Zhan
  * @version		0.0
+ * 
 */
 
 var BOARDFUL = BOARDFUL || new Object();
@@ -55,5 +56,6 @@ BOARDFUL.SERVER.createServer = function () {
 	console.log("Static file server running at => http://localhost:" + BOARDFUL.SERVER.port + "/ CTRL + C to shutdown");
 };
 
+// launch project
 BOARDFUL.init();
 BOARDFUL.run("server");
