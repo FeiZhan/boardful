@@ -1,90 +1,3 @@
-/**
- * Poker cards.
- *
- * @author		Fei Zhan
- * @version		0.0
- * 
-**/
-
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BOARDS = BOARDFUL.BOARDS || new Object();
-
-// poker
-BOARDFUL.BOARDS.Poker = function (owner) {
-	this.type = "Poker";
-	this.owner = owner;
-	BOARDFUL.Mngr.add(this);
-	this.card_list = this.createCards();
-};
-// create cards
-BOARDFUL.BOARDS.Poker.prototype.createCards = function () {
-	var card_list = new Array();
-	var card;
-	for (var i in BOARDFUL.BOARDS.Poker.RANKS) {
-		if ("Joker" == i) {
-			card = new BOARDFUL.ENGINE.Card({
-				rank: i,
-				suit: "Spade"
-			});
-			card_list.push(card.id);
-			card = new BOARDFUL.ENGINE.Card({
-				rank: i,
-				suit: "Heart"
-			});
-			card_list.push(card.id);
-		}
-		else {
-			for (var j in BOARDFUL.BOARDS.Poker.SUITS) {
-				card = new BOARDFUL.ENGINE.Card({
-					rank: i,
-					suit: j
-				});
-				card_list.push(card.id);
-			}
-		}
-	}
-	return card_list;
-};
-
-BOARDFUL.BOARDS.Poker.RANKS = {
-	"2": 2,
-	"3": 3,
-	"4": 4,
-	"5": 5,
-	"6": 6,
-	"7": 7,
-	"8": 8,
-	"9": 9,
-	"10": 10,
-	"Jack": 11,
-	"Queen": 12,
-	"King": 13,
-	"Ace": 14,
-	"Joker": 15
-};
-BOARDFUL.BOARDS.Poker.SUITS = {
-	"Spade": 4,
-	"Heart": 3,
-	"Diamond": 2,
-	"Club": 1
-};
-BOARDFUL.BOARDS.Poker.compare = function (id0, id1) {
-	var card0 = BOARDFUL.Mngr.get(id0);
-	var card1 = BOARDFUL.Mngr.get(id1);
-	if (card0.rank != card1.rank) {
-		return BOARDFUL.BOARDS.Poker.RANKS[card0.rank] - BOARDFUL.BOARDS.Poker.RANKS[card1.rank];
-	}
-	else if (card0.suit != card1.suit) {
-		return BOARDFUL.BOARDS.Poker.SUITS[card0.suit] - BOARDFUL.BOARDS.Poker.SUITS[card1.suit];
-	}
-	else {
-		return 0;
-	}
-};
-BOARDFUL.BOARDS.Poker.cardToString = function (id) {
-	return BOARDFUL.Mngr.get(id).rank + ' ' + BOARDFUL.Mngr.get(id).suit;
-};
-
 
 /**
 * Game.
@@ -261,14 +174,12 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
 		for (var i in BOARDFUL.BoardList) {
-			console.log(i + ". " + BOARDFUL.BoardList[i].name);
-			console.log("\t" + BOARDFUL.BoardList[i].descrip);
+			console.log(i + ". " + BOARDFUL.BoardList[i].config.name);
+			console.log("\t" + BOARDFUL.BoardList[i].config.descrip);
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			var room = new BOARDFUL.ENGINE.Room();
-			room.loadBoard(BOARDFUL.BoardList[parseInt(text)]);
-			room.configRoom();
+			BOARDFUL.BoardList[parseInt(text)].load();
 		});
 	}
 	else {
@@ -277,6 +188,39 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 };
 // launch project in desktop
 BOARDFUL.run("desktop");
+
+/**
+ * Board game.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
+
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+
+// board game
+BOARDFUL.ENGINE.Board = function (config, owner) {
+	this.type = "Board";
+	this.owner = owner;
+	this.name = config.name;
+	BOARDFUL.Mngr.add(this);
+	this.config = config;
+};
+// load board game
+BOARDFUL.ENGINE.Board.prototype.load = function () {
+	console.log("loading board", this.config.name);
+	var that = this;
+	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
+		var config = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[that.config.package]].content;
+		that.createRoom(config);
+	});
+};
+// create room
+BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
+	var room = new BOARDFUL.ENGINE.Room(config, this.id);
+	room.configRoom();
+};
 
 /**
  * Define the BOARDFUL namespace.
@@ -342,7 +286,10 @@ BOARDFUL.BoardList = new Array();
 BOARDFUL.loadBoards = function () {
 	console.log("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
-		BOARDFUL.BoardList = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+		for (var i in board_list) {
+			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]));
+		}
 	});
 	
 };
@@ -1118,22 +1065,13 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // room
-BOARDFUL.ENGINE.Room = function (owner) {
+BOARDFUL.ENGINE.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
-	this.player_list = ["me", "ai"];
-};
-// load board
-BOARDFUL.ENGINE.Room.prototype.loadBoard = function (board) {
-	console.log("loading board", board.name);
-	var that = this;
-	var load = new BOARDFUL.ENGINE.FileLoader([board.package], function () {
-		var package = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[board.package]].content;
-		that.config = package;
-		that.options = package.options;
-		that.player_list = package.player_list || that.player_list;
-	});
+	this.config = config;
+	this.options = config.options;
+	this.player_list = config.player_list || ["me", "ai"];
 };
 // config room
 BOARDFUL.ENGINE.Room.prototype.configRoom = function () {

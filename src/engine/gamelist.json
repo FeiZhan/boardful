@@ -4,7 +4,7 @@
     {
       "name": "poker",
       "descrip": "description of poker",
-      "package": "src/boards/poker.json"
+      "package": "src/boards/poker/poker.json"
     },
     {
       "name": "uno",

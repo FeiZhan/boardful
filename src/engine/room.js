@@ -9,22 +9,13 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // room
-BOARDFUL.ENGINE.Room = function (owner) {
+BOARDFUL.ENGINE.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
-	this.player_list = ["me", "ai"];
-};
-// load board
-BOARDFUL.ENGINE.Room.prototype.loadBoard = function (board) {
-	console.log("loading board", board.name);
-	var that = this;
-	var load = new BOARDFUL.ENGINE.FileLoader([board.package], function () {
-		var package = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[board.package]].content;
-		that.config = package;
-		that.options = package.options;
-		that.player_list = package.player_list || that.player_list;
-	});
+	this.config = config;
+	this.options = config.options;
+	this.player_list = config.player_list || ["me", "ai"];
 };
 // config room
 BOARDFUL.ENGINE.Room.prototype.configRoom = function () {

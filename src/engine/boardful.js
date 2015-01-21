@@ -62,7 +62,10 @@ BOARDFUL.BoardList = new Array();
 BOARDFUL.loadBoards = function () {
 	console.log("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
-		BOARDFUL.BoardList = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+		for (var i in board_list) {
+			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]));
+		}
 	});
 	
 };

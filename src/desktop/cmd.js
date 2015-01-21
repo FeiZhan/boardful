@@ -76,14 +76,12 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
 		for (var i in BOARDFUL.BoardList) {
-			console.log(i + ". " + BOARDFUL.BoardList[i].name);
-			console.log("\t" + BOARDFUL.BoardList[i].descrip);
+			console.log(i + ". " + BOARDFUL.BoardList[i].config.name);
+			console.log("\t" + BOARDFUL.BoardList[i].config.descrip);
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			var room = new BOARDFUL.ENGINE.Room();
-			room.loadBoard(BOARDFUL.BoardList[parseInt(text)]);
-			room.configRoom();
+			BOARDFUL.BoardList[parseInt(text)].load();
 		});
 	}
 	else {
