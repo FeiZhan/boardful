@@ -25,6 +25,7 @@ BOARDFUL.ENGINE.EventMngr = function (owner) {
 	this.type = "EventMngr";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.current = undefined;
 	this.list = new Array();
 	this.listener_list = new Object();
 	this.timeout = 100;
@@ -99,17 +100,17 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 	default:
 		if (this.list.length > 0) {
 			// get the current event
-			var event = this.front();
-			this.logger.log("info", "event", event.name);
+			this.current = this.front();
+			this.logger.log("info", "event", this.current.name);
 			this.list.shift();
-			if (event && (event.name in this.listener_list)) {
+			if (this.current && (this.current.name in this.listener_list)) {
 				for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
-					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
-						for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
-							var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
+					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
+						for (var j in this.listener_list[this.current.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[this.current.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
 							this.logger.log("info", "trigger", listener);
 							// trigger listener callback for event
-							listener.callback(event.arg);
+							listener.callback(this.current.arg);
 						}
 					}
 				}

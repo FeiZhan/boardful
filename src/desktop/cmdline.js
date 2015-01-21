@@ -16,6 +16,7 @@ BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	this.owner = owner;
 	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
+		BOARDFUL.ENGINE.Command.owner = this.owner;
 	}
 	this.wait_status = "init";
 	this.wait_result = "";

@@ -152,13 +152,14 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // command
 BOARDFUL.ENGINE.Command = new Object();
+BOARDFUL.ENGINE.Command.owner = undefined;
 BOARDFUL.ENGINE.Command.call = function (cmd) {
-	var arg_list = cmd.split();
+	var arg_list = cmd.replace(/\s/g, " ").split(" ");
 	if (0 == arg_list.length) {
 		return;
 	}
 	cmd = arg_list[0];
-	arg_list = arg_list.shift();
+	arg_list.shift();
 	if (cmd in BOARDFUL.ENGINE.Command.list) {
 		return BOARDFUL.ENGINE.Command.list[cmd](arg_list);
 	} else {
@@ -166,8 +167,49 @@ BOARDFUL.ENGINE.Command.call = function (cmd) {
 	}
 };
 BOARDFUL.ENGINE.Command.list = {
-	"why": function () {
-		console.log("because I am rich and bitch");
+	"test": function (args) {
+		console.log("Hello Boardful !");
+	},
+	"get": function (args) {
+		var obj = BOARDFUL.Mngr.get(args[0]);
+		if (obj) {
+			console.log(obj.name);
+		} else {
+			console.log(obj);
+		}
+	},
+	"object": function (args) {
+		console.log(BOARDFUL.Mngr.get(args[0]));
+	},
+	"currentEvent": function (args) {
+		if (BOARDFUL.ENGINE.Command.owner) {
+			console.log(BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).event_mngr.current.name);
+		} else {
+			console.log(undefined);
+		}
+	},
+	"nextEvent": function (args) {
+		if (BOARDFUL.ENGINE.Command.owner) {
+			console.log(BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).event_mngr.list[0]);
+		} else {
+			console.log(undefined);
+		}
+	},
+	"boards": function (args) {
+		console.log(BOARDFUL.BoardList);
+	},
+	"pause": function (args) {
+		if (BOARDFUL.ENGINE.Command.owner) {
+			BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).pause();
+		}
+	},
+	"resume": function (args) {
+		if (BOARDFUL.ENGINE.Command.owner) {
+			BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).resume();
+		}
+	},
+	"exit": function (args) {
+		process.exit(0);
 	},
 };
 
@@ -304,6 +346,7 @@ BOARDFUL.ENGINE.EventMngr = function (owner) {
 	this.type = "EventMngr";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.current = undefined;
 	this.list = new Array();
 	this.listener_list = new Object();
 	this.timeout = 100;
@@ -378,17 +421,17 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 	default:
 		if (this.list.length > 0) {
 			// get the current event
-			var event = this.front();
-			this.logger.log("info", "event", event.name);
+			this.current = this.front();
+			this.logger.log("info", "event", this.current.name);
 			this.list.shift();
-			if (event && (event.name in this.listener_list)) {
+			if (this.current && (this.current.name in this.listener_list)) {
 				for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
-					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
-						for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
-							var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
+					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
+						for (var j in this.listener_list[this.current.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[this.current.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
 							this.logger.log("info", "trigger", listener);
 							// trigger listener callback for event
-							listener.callback(event.arg);
+							listener.callback(this.current.arg);
 						}
 					}
 				}
@@ -1213,6 +1256,7 @@ BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	this.owner = owner;
 	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
+		BOARDFUL.ENGINE.Command.owner = this.owner;
 	}
 	this.wait_status = "init";
 	this.wait_result = "";
