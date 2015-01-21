@@ -13,6 +13,7 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.run = function (config) {
 	BOARDFUL.init();
 	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
+	BOARDFUL.loadBoards();
 	BOARDFUL.Logger.log('info', "start type", config);
 	switch (config) {
 	case "server":
@@ -26,7 +27,7 @@ BOARDFUL.run = function (config) {
 	default:
 		global.jquery = require('jquery');
 		global.$ = jquery.create();
-		BOARDFUL.DESKTOP.menuRun();
+		BOARDFUL.DESKTOP.Cmdline.showMenu();
 		break;
 	}
 };
@@ -54,4 +55,14 @@ BOARDFUL.init = function () {
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
 		BOARDFUL.ENGINE.getFilesInHtml();
 	}
+};
+// board game list
+BOARDFUL.BoardList = new Array();
+// load board game list
+BOARDFUL.loadBoards = function () {
+	console.log("loading Boardful");
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
+		BOARDFUL.BoardList = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+	});
+	
 };

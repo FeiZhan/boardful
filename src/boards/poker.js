@@ -9,9 +9,14 @@
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BOARDS = BOARDFUL.BOARDS || new Object();
 
-BOARDFUL.BOARDS.Poker = function () {
+// poker
+BOARDFUL.BOARDS.Poker = function (owner) {
+	this.type = "Poker";
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
 	this.card_list = this.createCards();
 };
+// create cards
 BOARDFUL.BOARDS.Poker.prototype.createCards = function () {
 	var card_list = new Array();
 	var card;

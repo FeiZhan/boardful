@@ -50,7 +50,6 @@ BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 };
 // player start
 BOARDFUL.ENGINE.Player.prototype.start = function (arg) {
-	console.log("player start", this.game.player_list[this.game.current_player]);
 	var event = new BOARDFUL.ENGINE.Event({
 		name: "PlayerEnd",
 		source: this.id

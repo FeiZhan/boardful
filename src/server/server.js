@@ -57,5 +57,4 @@ BOARDFUL.SERVER.createServer = function () {
 };
 
 // launch project
-BOARDFUL.init();
 BOARDFUL.run("server");

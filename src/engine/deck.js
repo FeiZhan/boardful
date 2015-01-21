@@ -44,8 +44,20 @@ BOARDFUL.ENGINE.Deck.prototype.addListeners = function () {
 };
 // create deck
 BOARDFUL.ENGINE.Deck.prototype.createDeck = function (arg) {
+	if (arg.deck != this.id) {
+		return;
+	}
 	var card_list = BOARDFUL.ENGINE.Card.load(arg.type);
 	BOARDFUL.Mngr.get(arg.deck).getCards(card_list);
+
+	var event_list = new Array();
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "CreateDeckUi",
+		source: this.id,
+		cards: card_list
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
 // shuffle deck
 BOARDFUL.ENGINE.Deck.prototype.shuffleDeck = function (arg) {
@@ -53,6 +65,15 @@ BOARDFUL.ENGINE.Deck.prototype.shuffleDeck = function (arg) {
 		return;
 	}
 	this.card_list = BOARDFUL.ENGINE.shuffle(this.card_list);
+
+	var event_list = new Array();
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "ShuffleDeckUi",
+		source: this.id,
+		cards: this.card_list
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
 // get cards
 BOARDFUL.ENGINE.Deck.prototype.getCards = function (card_list) {
@@ -71,6 +92,14 @@ BOARDFUL.ENGINE.Deck.prototype.dealCards = function (arg) {
 		card_list.push(this.card_list[0]);
 		this.card_list.shift();
 	}
-	console.log("deal cards", card_list);
 	BOARDFUL.Mngr.get(arg.player).hand = BOARDFUL.Mngr.get(arg.player).hand.concat(card_list);
+
+	var event_list = new Array();
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "DealCardsUi",
+		source: this.id,
+		cards: card_list
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };

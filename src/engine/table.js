@@ -81,12 +81,28 @@ BOARDFUL.ENGINE.Table.prototype.settlePlayersDuel = function (arg) {
 	select_list.sort(function (a, b) {
 		return BOARDFUL.BOARDS.Poker.compare(that.arg_list[a].card, that.arg_list[b].card);
 	});
+	var player_list = new Array();
+	var card_list = new Array();
 	for (var i in select_list) {
-		console.log(this.arg_list[select_list[i]].player, BOARDFUL.BOARDS.Poker.cardToString(this.arg_list[select_list[i]].card));
+		player_list.push(this.arg_list[select_list[i]].player);
+		card_list.push(this.arg_list[select_list[i]].card);
 	}
+	var winner = undefined;
 	if (select_list.length > 0) {
-		console.log("winner", this.arg_list[select_list[select_list.length - 1]].player);
+		winner = this.arg_list[select_list[select_list.length - 1]].player;
 	}
+
+	var event_list = new Array();
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "SettlePlayersDuelUi",
+		source: this.id,
+		cards: card_list,
+		players: player_list,
+		player: winner
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
+
 	for (var i  = select_list.length - 1; i >= 0; -- i) {
 		this.arg_list.splice(select_list[i], 1);
 	}
