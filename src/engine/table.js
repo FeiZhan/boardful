@@ -47,19 +47,18 @@ BOARDFUL.ENGINE.Table.prototype.playersDuel = function (arg) {
 	var event;
 	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
 		event = new BOARDFUL.ENGINE.Event({
-			source_type: "table",
-			source_id: this.id,
-			source_event: "PlayersDuel",
 			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
+			source: this.id,
+			source_event: "PlayersDuel",
+			player: BOARDFUL.Mngr.get(this.owner).player_list[i],
 			number: 1
 		});
 		event_list.push(event.id);
 	}
 	event = new BOARDFUL.ENGINE.Event({
-		source_type: "table",
-		source_id: this.id,
-		source_event: "PlayersDuel",
-		name: "SettlePlayersDuel"
+		name: "SettlePlayersDuel",
+		source: this.id,
+		source_event: "PlayersDuel"
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);

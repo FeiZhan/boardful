@@ -52,9 +52,8 @@ BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 BOARDFUL.ENGINE.Player.prototype.start = function (arg) {
 	console.log("player start", this.game.player_list[this.game.current_player]);
 	var event = new BOARDFUL.ENGINE.Event({
-		source_type: "game",
-		source_id: this.id,
-		name: "PlayerEnd"
+		name: "PlayerEnd",
+		source: this.id
 	});
 	this.game.event_mngr.front(event.id);
 };
@@ -65,10 +64,9 @@ BOARDFUL.ENGINE.Player.prototype.playCard = function (arg) {
 	}
 	var card = this.hand[Math.floor((Math.random() * this.hand.length))];
 	var event = new BOARDFUL.ENGINE.Event({
-		source_type: "game",
-		source_id: this.id,
-		source_event: arg.source_event,
 		name: "PlaceCardOnTable",
+		source: this.id,
+		source_event: arg.source_event,
 		player: this.id,
 		card: card
 	});

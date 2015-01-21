@@ -13,7 +13,6 @@ BOARDFUL.ENGINE.Event = function (arg) {
 	this.type = "Event";
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
-	//@bug
 	this.name = arg.name;
 	this.arg = arg;
 	this.arg.creation_time = new Date();
