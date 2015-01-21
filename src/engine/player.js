@@ -3,36 +3,33 @@
  *
  * @author		Fei Zhan
  * @version		0.0
-*/
+**/
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // player
-BOARDFUL.ENGINE.Player = function (config, game_id) {
-	this.id = BOARDFUL.ENGINE.Player.next_id;
-	BOARDFUL.ENGINE.PlayerList[this.id] = this;
-	++ BOARDFUL.ENGINE.Player.next_id;
-	this.game_id = game_id;
-	this.game = BOARDFUL.ENGINE.GameList[this.game_id];
+BOARDFUL.ENGINE.Player = function (config, owner) {
+	this.type = "Player";
+	this.owner = owner;
+	this.game = BOARDFUL.Mngr.get(this.owner);
 	this.hand = new Array();
 	this.turn = undefined;
-	this.type = undefined;
+	this.name = undefined;
 	switch (config) {
 	case "me":
-		this.type = "me";
+		this.name = "me";
 		break;
 	case "ai":
-		this.type = "ai";
+		this.name = "ai";
 		break;
 	default:
-		this.type = "other";
+		this.name = "unknown_player";
 		break;
 	}
+	BOARDFUL.Mngr.add(this);
 	this.addListeners();
 };
-BOARDFUL.ENGINE.Player.next_id = 0;
-
 // add event listeners
 BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 	var that = this;
@@ -76,26 +73,4 @@ BOARDFUL.ENGINE.Player.prototype.playCard = function (arg) {
 		card: card
 	});
 	this.game.event_mngr.front(event.id);
-};
-
-// player list
-BOARDFUL.ENGINE.PlayerList = new Object();
-// create a player list
-BOARDFUL.ENGINE.getPlayerList = function (list) {
-	var player_list = new Array();
-	var player;
-	for (var i in list) {
-		switch (list[i]) {
-		case "me":
-			player = new BOARDFUL.ENGINE.Player("me");
-			break;
-		case "ai":
-			player = new BOARDFUL.ENGINE.Player("ai");
-			break;
-		default:
-			break;
-		}
-		player_list.push(player.id);
-	}
-	return player_list;
 };

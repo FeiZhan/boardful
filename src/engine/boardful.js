@@ -4,7 +4,7 @@
  * @author		Fei Zhan
  * @version		0.0
  * 
-*/
+**/
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
@@ -36,6 +36,7 @@ BOARDFUL.init = function () {
 };
 // run
 BOARDFUL.run = function (config) {
+	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
 	BOARDFUL.Logger.log('info', "start type", config);
 	switch (config) {
 	case "server":

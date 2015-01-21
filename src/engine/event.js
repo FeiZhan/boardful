@@ -10,23 +10,24 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // event
 BOARDFUL.ENGINE.Event = function (arg) {
-	this.id = BOARDFUL.ENGINE.Event.next_id;
-	BOARDFUL.ENGINE.EventList[this.id] = this;
-	++ BOARDFUL.ENGINE.Event.next_id;
+	this.type = "Event";
+	this.owner = undefined;
+	BOARDFUL.Mngr.add(this);
+	//@bug
 	this.name = arg.name;
 	this.arg = arg;
 	this.arg.creation_time = new Date();
 };
-BOARDFUL.ENGINE.Event.next_id = 0;
-// event list
-BOARDFUL.ENGINE.EventList = new Object();
 
 // event level precedence
-BOARDFUL.ENGINE.EventLevels = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
+BOARDFUL.ENGINE.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
 // event manager
-BOARDFUL.ENGINE.EventMngr = function () {
+BOARDFUL.ENGINE.EventMngr = function (owner) {
+	this.type = "EventMngr";
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
 	this.list = new Array();
-	this.listenerList = new Object();
+	this.listener_list = new Object();
 	this.timeout = 100;
 	this.logger = new BOARDFUL.ENGINE.Logger();
 	this.logger.add(winston.transports.File, {
@@ -49,7 +50,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
 		this.list.unshift(id);
 		this.logger.log("info", "prepend event", id);
 	}
-	return BOARDFUL.ENGINE.EventList[this.list[0]];
+	return BOARDFUL.Mngr.get(this.list[0]);
 };
 // add to the rear of event list
 BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
@@ -64,28 +65,28 @@ BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
 };
 // add event listener
 BOARDFUL.ENGINE.EventMngr.prototype.on = function (event, config) {
-	if (! (event in this.listenerList)) {
-		this.listenerList[event] = new Object();
+	if (! (event in this.listener_list)) {
+		this.listener_list[event] = new Object();
 	}
 	config.level = config.level || "rear";
-	if (! (config.level in this.listenerList[event])) {
-		this.listenerList[event][config.level] = new Array();
+	if (! (config.level in this.listener_list[event])) {
+		this.listener_list[event][config.level] = new Array();
 	}
-	this.listenerList[event][config.level].push(config);
+	this.listener_list[event][config.level].push(config);
 	this.logger.log("info", "add listener", event);
 };
 // remove event listener
 BOARDFUL.ENGINE.EventMngr.prototype.off = function (event, config) {
-	if (! (event in this.listenerList)) {
+	if (! (event in this.listener_list)) {
 		return;
 	}
 	config.level = config.level || "extension";
-	if (! (config.level in this.listenerList[event])) {
+	if (! (config.level in this.listener_list[event])) {
 		return;
 	}
-	var index = this.listenerList[event][config.level].indexOf(config);
+	var index = this.listener_list[event][config.level].indexOf(config);
 	if (index >= 0) {
-		this.listenerList[event][config.level].splice(index, 1);
+		this.listener_list[event][config.level].splice(index, 1);
 	}
 };
 // launch event manager
@@ -95,12 +96,12 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 		var event = this.front();
 		this.logger.log("info", "event", event.name);
 		this.list.shift();
-		if (event && (event.name in this.listenerList)) {
-			for (var i in BOARDFUL.ENGINE.EventLevels) {
-				if (BOARDFUL.ENGINE.EventLevels[i] in this.listenerList[event.name]) {
-					for (var j in this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]]) {
-						var listener = this.listenerList[event.name][BOARDFUL.ENGINE.EventLevels[i]][j];
-						this.logger.log("info", "trigger", listener.id);
+		if (event && (event.name in this.listener_list)) {
+			for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
+				if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
+					for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
+						var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
+						this.logger.log("info", "trigger", listener);
 						// trigger listener callback for event
 						listener.callback(event.arg);
 					}

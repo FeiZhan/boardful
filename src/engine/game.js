@@ -2,7 +2,7 @@
  * Game.
  *
  * @author		Fei Zhan
- * @version	0.0
+ * @version		0.0
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
@@ -10,9 +10,9 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // game
 BOARDFUL.ENGINE.Game = function (config) {
-	this.id = BOARDFUL.ENGINE.Game.next_id;
-	BOARDFUL.ENGINE.GameList[this.id] = this;
-	++ BOARDFUL.ENGINE.Game.next_id;
+	this.type = "Game";
+	this.owner = undefined;
+	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr();
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {
@@ -32,18 +32,7 @@ BOARDFUL.ENGINE.Game = function (config) {
 		}
 	}
 	this.addListeners();
-	// create event
-	var event = new BOARDFUL.ENGINE.Event({
-		source_type: "game",
-		source_id: this.id,
-		name: "GameStart"
-	});
-	this.event_mngr.add(event.id);
 };
-BOARDFUL.ENGINE.Game.next_id = 0;
-// game list
-BOARDFUL.ENGINE.GameList = new Object();
-
 // add event listeners
 BOARDFUL.ENGINE.Game.prototype.addListeners = function () {
 	var that = this;
@@ -85,15 +74,22 @@ BOARDFUL.ENGINE.Game.prototype.addListeners = function () {
 };
 // launch game
 BOARDFUL.ENGINE.Game.prototype.run = function () {
+	// create first event
+	var event = new BOARDFUL.ENGINE.Event({
+		source_type: "game",
+		source_id: this.id,
+		name: "GameStart"
+	});
+	this.event_mngr.add(event.id);
 	this.event_mngr.run();
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
 	this.round = 0;
 	this.player_list = BOARDFUL.ENGINE.shuffle(this.player_list);
-	var card_list = BOARDFUL.ENGINE.loadCards("poker");
-	BOARDFUL.ENGINE.DeckList[this.deck_list.draw].getCards(card_list);
-	BOARDFUL.ENGINE.DeckList[this.deck_list.draw].shuffle();
+	var card_list = BOARDFUL.ENGINE.Card.load("poker");
+	BOARDFUL.Mngr.get(this.deck_list.draw).getCards(card_list);
+	BOARDFUL.Mngr.get(this.deck_list.draw).shuffle();
 	var event_list = new Array();
 	for (var i in this.player_list) {
 		var event = new BOARDFUL.ENGINE.Event({
@@ -171,7 +167,7 @@ BOARDFUL.ENGINE.Game.prototype.playerStart = function (arg) {
 };
 // deal cards
 BOARDFUL.ENGINE.Game.prototype.dealCards = function (arg) {
-	var  card_list = BOARDFUL.ENGINE.DeckList[this.deck_list[arg.deck]].dealCards(arg.number);
+	var  card_list = BOARDFUL.Mngr.get(this.deck_list[arg.deck]).dealCards(arg.number);
 	console.log("deal cards", card_list);
-	BOARDFUL.ENGINE.PlayerList[arg.player].hand = BOARDFUL.ENGINE.PlayerList[arg.player].hand.concat(card_list);
+	BOARDFUL.Mngr.get(arg.player).hand = BOARDFUL.Mngr.get(arg.player).hand.concat(card_list);
 };

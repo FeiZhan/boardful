@@ -10,18 +10,18 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // deck
-BOARDFUL.ENGINE.Deck = function () {
-	this.id = BOARDFUL.ENGINE.Deck.next_id;
-	BOARDFUL.ENGINE.DeckList[this.id] = this;
-	++ BOARDFUL.ENGINE.Deck.next_id;
+BOARDFUL.ENGINE.Deck = function (owner) {
+	this.type = "Deck";
 	this.card_list = new Array();
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
 };
-BOARDFUL.ENGINE.Deck.next_id = 0;
-// deck list
-BOARDFUL.ENGINE.DeckList = new Object();
 
 // get cards
 BOARDFUL.ENGINE.Deck.prototype.getCards = function (card_list) {
+	for (var i in card_list) {
+		BOARDFUL.Mngr.get(card_list[i]).owner = this.id;
+	}
 	this.card_list = this.card_list.concat(card_list);
 };
 // shuffle cards
@@ -37,4 +37,3 @@ BOARDFUL.ENGINE.Deck.prototype.dealCards = function (num) {
 	}
 	return cards;
 };
-

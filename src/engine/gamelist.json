@@ -4,12 +4,12 @@
     {
       "name": "poker",
       "descrip": "description of poker",
-      "package": "src/games/poker.json"
+      "package": "src/boards/poker.json"
     },
     {
       "name": "uno",
       "descrip": "description of uno",
-      "package": "src/games/uno.json"
+      "package": "src/boards/uno.json"
     }
   ]
 }

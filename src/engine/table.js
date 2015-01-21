@@ -9,35 +9,31 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 // table
-BOARDFUL.ENGINE.Table = function (game) {
-	this.id = BOARDFUL.ENGINE.Table.next_id;
-	BOARDFUL.ENGINE.TableList[this.id] = this;
-	++ BOARDFUL.ENGINE.Table.next_id;
-	this.game = game;
+BOARDFUL.ENGINE.Table = function (owner) {
+	this.type = "Table";
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
 	this.arg_list = new Array();
 	this.addListeners();
 };
-BOARDFUL.ENGINE.Table.next_id = 0;
-// table list
-BOARDFUL.ENGINE.TableList = new Object();
-
+// add listeners
 BOARDFUL.ENGINE.Table.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.ENGINE.GameList[this.game].event_mngr.on("PlayersDuel", {
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayersDuel", {
 		level: "game",
 		callback: function (arg) {
 			that.playersDuel(arg);
 		},
 		instance: that
 	});
-	BOARDFUL.ENGINE.GameList[this.game].event_mngr.on("PlaceCardOnTable", {
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlaceCardOnTable", {
 		level: "game",
 		callback: function (arg) {
 			that.placeCardOnTable(arg);
 		},
 		instance: that
 	});
-	BOARDFUL.ENGINE.GameList[this.game].event_mngr.on("SettlePlayersDuel", {
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("SettlePlayersDuel", {
 		level: "game",
 		callback: function (arg) {
 			that.settlePlayersDuel(arg);
@@ -49,12 +45,12 @@ BOARDFUL.ENGINE.Table.prototype.addListeners = function () {
 BOARDFUL.ENGINE.Table.prototype.playersDuel = function (arg) {
 	var event_list = new Array();
 	var event;
-	for (var i in BOARDFUL.ENGINE.GameList[this.game].player_list) {
+	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
 		event = new BOARDFUL.ENGINE.Event({
 			source_type: "table",
 			source_id: this.id,
 			source_event: "PlayersDuel",
-			name: "Player" + BOARDFUL.ENGINE.GameList[this.game].player_list[i] + "PlayCard",
+			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
 			number: 1
 		});
 		event_list.push(event.id);
@@ -66,26 +62,33 @@ BOARDFUL.ENGINE.Table.prototype.playersDuel = function (arg) {
 		name: "SettlePlayersDuel"
 	});
 	event_list.push(event.id);
-	BOARDFUL.ENGINE.GameList[this.game].event_mngr.front(event_list);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
-// place card arguments on table
+// place card on table
 BOARDFUL.ENGINE.Table.prototype.placeCardOnTable = function (arg) {
-	var index = BOARDFUL.ENGINE.PlayerList[arg.player].hand.indexOf(arg.card);
-	BOARDFUL.ENGINE.PlayerList[arg.player].hand.splice(index, 1);
+	var index = BOARDFUL.Mngr.get(arg.player).hand.indexOf(arg.card);
+	BOARDFUL.Mngr.get(arg.player).hand.splice(index, 1);
 	this.arg_list.push(arg);
 };
 // settle players duel
 BOARDFUL.ENGINE.Table.prototype.settlePlayersDuel = function (arg) {
-	var args = new Array();
+	var select_list = new Array();
 	for (var i in this.arg_list) {
 		if ("PlayersDuel" == this.arg_list[i].source_event) {
-			args.push(i);
+			select_list.push(i);
 		}
 	}
-	/*args.sort(function (a, b) {
-		return BOARDFUL.ENGINE.pokerSort(this.arg_list[a].card, this.arg_list[b].card);
-	});*/
-	for (var i  = args.length - 1; i >= 0; -- i) {
-		this.arg_list.splice(args[i], 1);
+	var that = this;
+	select_list.sort(function (a, b) {
+		return BOARDFUL.BOARDS.Poker.compare(that.arg_list[a].card, that.arg_list[b].card);
+	});
+	for (var i in select_list) {
+		console.log(this.arg_list[select_list[i]].player, BOARDFUL.BOARDS.Poker.cardToString(this.arg_list[select_list[i]].card));
+	}
+	if (select_list.length > 0) {
+		console.log("winner", this.arg_list[select_list[select_list.length - 1]].player);
+	}
+	for (var i  = select_list.length - 1; i >= 0; -- i) {
+		this.arg_list.splice(select_list[i], 1);
 	}
 };
