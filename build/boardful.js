@@ -104,9 +104,9 @@ BOARDFUL.MENUS.setRoom = function (package) {
  * 
 **/
 
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 var keypress = require('keypress');
+var BOARDFUL = require("../build/boardful.engine.js");
+BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 
 // command line
 BOARDFUL.DESKTOP.Cmdline = function (owner) {
@@ -266,6 +266,7 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 		setTimeout(BOARDFUL.DESKTOP.Cmdline.showMenu, 300);
 	}
 };
+
 // launch project in desktop
 BOARDFUL.run("desktop");
 
@@ -296,7 +297,7 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 		var load1 = new BOARDFUL.ENGINE.FileLoader(config.files, function () {
 			for (var i in config.files) {
 				if (".js" == config.files[i].substr(config.files[i].length - 3)) {
-					//BOARDFUL.ENGINE.File.setToMods(config.files[i]);
+					BOARDFUL.ENGINE.File.setToMods(config.files[i]);
 				}
 			}
 			that.createRoom(config);
@@ -319,6 +320,9 @@ BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
+if (module) {
+	module.exports = BOARDFUL;
+}
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // run
@@ -1535,9 +1539,9 @@ BOARDFUL.ENGINE.shuffle = function (o) {
  * @author		Fei Zhan
  * @version		0.0
  * 
-*/
+**/
 
-var BOARDFUL = BOARDFUL || new Object();
+var BOARDFUL = require("../build/boardful.engine.js");
 BOARDFUL.SERVER = BOARDFUL.SERVER || new Object();
 
 var http = require("http"),
@@ -1595,18 +1599,18 @@ BOARDFUL.run("server");
  * @version		0.0
  * 
 **/
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.MODS = BOARDFUL.MODS || new Object();
+var BOARDFUL = require("../../build/boardful.engine.js");
 
 // poker
-BOARDFUL.MODS.Poker = function (owner) {
+var Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	this.card_list = this.createCards();
 };
-var Poker = BOARDFUL.MODS.Poker;
-
+if (module) {
+	module.exports.Poker = Poker;
+}
 // create cards
 Poker.prototype.createCards = function () {
 	var card_list = new Array();

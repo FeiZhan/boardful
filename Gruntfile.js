@@ -8,15 +8,15 @@ module.exports = function(grunt) {
 			dest: 'build/<%= pkg.name %>.engine.js'
 		},
 		desktop: {
-			src: ['src/engine/*.js', 'src/desktop/*.js', 'mods/*.js', 'mods/*/*.js'],
+			src: ['src/desktop/*.js'],
 			dest: 'build/<%= pkg.name %>.desktop.js'
 		},
 		browser: {
-			src: ['src/engine/*.js', 'src/browser/*.js'],
+			src: ['src/browser/*.js'],
 			dest: 'build/<%= pkg.name %>.browser.js'
 		},
 		server: {
-			src: ['src/engine/*.js', 'src/server/*.js'],
+			src: ['src/server/*.js'],
 			dest: 'build/<%= pkg.name %>.server.js'
 		},
 		all: {

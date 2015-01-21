@@ -8,6 +8,9 @@
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
+if (module) {
+	module.exports = BOARDFUL;
+}
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // run

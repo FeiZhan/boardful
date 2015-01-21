@@ -7,9 +7,9 @@
  * @author		Fei Zhan
  * @version		0.0
  * 
-*/
+**/
 
-var BOARDFUL = BOARDFUL || new Object();
+var BOARDFUL = require("../build/boardful.engine.js");
 BOARDFUL.SERVER = BOARDFUL.SERVER || new Object();
 
 var http = require("http"),

@@ -6,9 +6,9 @@
  * 
 **/
 
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 var keypress = require('keypress');
+var BOARDFUL = require("../build/boardful.engine.js");
+BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 
 // command line
 BOARDFUL.DESKTOP.Cmdline = function (owner) {
@@ -168,5 +168,6 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 		setTimeout(BOARDFUL.DESKTOP.Cmdline.showMenu, 300);
 	}
 };
+
 // launch project in desktop
 BOARDFUL.run("desktop");

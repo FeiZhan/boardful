@@ -5,18 +5,18 @@
  * @version		0.0
  * 
 **/
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.MODS = BOARDFUL.MODS || new Object();
+var BOARDFUL = require("../../build/boardful.engine.js");
 
 // poker
-BOARDFUL.MODS.Poker = function (owner) {
+var Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	this.card_list = this.createCards();
 };
-var Poker = BOARDFUL.MODS.Poker;
-
+if (module) {
+	module.exports.Poker = Poker;
+}
 // create cards
 Poker.prototype.createCards = function () {
 	var card_list = new Array();

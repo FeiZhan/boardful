@@ -25,7 +25,7 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 		var load1 = new BOARDFUL.ENGINE.FileLoader(config.files, function () {
 			for (var i in config.files) {
 				if (".js" == config.files[i].substr(config.files[i].length - 3)) {
-					//BOARDFUL.ENGINE.File.setToMods(config.files[i]);
+					BOARDFUL.ENGINE.File.setToMods(config.files[i]);
 				}
 			}
 			that.createRoom(config);
@@ -48,6 +48,9 @@ BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
+if (module) {
+	module.exports = BOARDFUL;
+}
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // run
