@@ -8,7 +8,7 @@
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
-if (module) {
+if ('undefined' !== typeof module) {
 	module.exports = BOARDFUL;
 }
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
@@ -42,17 +42,21 @@ BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.Logger.add(winston.transports.File, {
-		//filename: 'logs/boardful_' + new Date().toString() + '.log'
-		filename: 'logs/boardful.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		BOARDFUL.Logger.add(winston.transports.File, {
+			//filename: 'logs/boardful_' + new Date().toString() + '.log'
+			filename: 'logs/boardful.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	BOARDFUL.Logger.log('info', "----------launch----------");
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.Debugger.add(winston.transports.File, {
-		filename: 'logs/debug.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		BOARDFUL.Debugger.add(winston.transports.File, {
+			filename: 'logs/debug.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);

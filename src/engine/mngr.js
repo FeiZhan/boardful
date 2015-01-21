@@ -11,10 +11,12 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 // object manager
 BOARDFUL.ENGINE.Manager = function () {
 	this.logger = new BOARDFUL.ENGINE.Logger();
-	this.logger.add(winston.transports.File, {
-		filename: 'logs/mngr.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		this.logger.add(winston.transports.File, {
+			filename: 'logs/mngr.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	this.logger.log('info', "----------launch----------");
 	this.next_id = 0;
 	this.list = new Object();

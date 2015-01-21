@@ -68,7 +68,7 @@ BOARDFUL.ENGINE.checkEnvi = function () {
 		BOARDFUL.ENGINE.Envi.isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 		BOARDFUL.ENGINE.Envi.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 		// At least Safari 3+: "[object HTMLElementConstructor]"
-		BOARDFUL.ENGINE.Envi.isChrome = !!window.chrome && !isOpera;              // Chrome 1+
+		BOARDFUL.ENGINE.Envi.isChrome = !!window.chrome && !BOARDFUL.ENGINE.Envi.isOpera;              // Chrome 1+
 		BOARDFUL.ENGINE.Envi.isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
 	}
 };

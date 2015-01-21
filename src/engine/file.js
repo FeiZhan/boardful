@@ -14,10 +14,12 @@ BOARDFUL.ENGINE.File = BOARDFUL.ENGINE.File || new Object();
 BOARDFUL.ENGINE.File.init = function () {
 	// file mngr logger
 	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
-		filename: 'logs/file.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
+			filename: 'logs/file.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	BOARDFUL.ENGINE.FileLogger.log('info', "----------launch----------");
 };
 // file list

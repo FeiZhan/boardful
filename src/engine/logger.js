@@ -8,13 +8,19 @@
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+var winston = {
+	transports: {
+		File: undefined,
+		Console: undefined
+	}
+};
 
 // logger
 BOARDFUL.ENGINE.Logger = function () {
 	var logger;
 	switch (BOARDFUL.ENGINE.Envi.type) {
 	case "nodejs":
-		global.winston = require('winston');
+		winston = require('winston');
 		logger = new (BOARDFUL.ENGINE.WinstonLogger) ({
 			transports: [
 				new (winston.transports.Console)()

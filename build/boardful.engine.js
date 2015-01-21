@@ -48,7 +48,7 @@ BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
-if (module) {
+if ('undefined' !== typeof module) {
 	module.exports = BOARDFUL;
 }
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
@@ -82,17 +82,21 @@ BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.Logger.add(winston.transports.File, {
-		//filename: 'logs/boardful_' + new Date().toString() + '.log'
-		filename: 'logs/boardful.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		BOARDFUL.Logger.add(winston.transports.File, {
+			//filename: 'logs/boardful_' + new Date().toString() + '.log'
+			filename: 'logs/boardful.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	BOARDFUL.Logger.log('info', "----------launch----------");
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.Debugger.add(winston.transports.File, {
-		filename: 'logs/debug.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		BOARDFUL.Debugger.add(winston.transports.File, {
+			filename: 'logs/debug.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
@@ -473,10 +477,12 @@ BOARDFUL.ENGINE.File = BOARDFUL.ENGINE.File || new Object();
 BOARDFUL.ENGINE.File.init = function () {
 	// file mngr logger
 	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
-	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
-		filename: 'logs/file.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
+			filename: 'logs/file.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	BOARDFUL.ENGINE.FileLogger.log('info', "----------launch----------");
 };
 // file list
@@ -836,13 +842,19 @@ BOARDFUL.ENGINE.Game.prototype.startPlayer = function (arg) {
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+var winston = {
+	transports: {
+		File: undefined,
+		Console: undefined
+	}
+};
 
 // logger
 BOARDFUL.ENGINE.Logger = function () {
 	var logger;
 	switch (BOARDFUL.ENGINE.Envi.type) {
 	case "nodejs":
-		global.winston = require('winston');
+		winston = require('winston');
 		logger = new (BOARDFUL.ENGINE.WinstonLogger) ({
 			transports: [
 				new (winston.transports.Console)()
@@ -902,10 +914,12 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 // object manager
 BOARDFUL.ENGINE.Manager = function () {
 	this.logger = new BOARDFUL.ENGINE.Logger();
-	this.logger.add(winston.transports.File, {
-		filename: 'logs/mngr.log'
-	})
-	.remove(winston.transports.Console);
+	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
+		this.logger.add(winston.transports.File, {
+			filename: 'logs/mngr.log'
+		})
+		.remove(winston.transports.Console);
+	}
 	this.logger.log('info', "----------launch----------");
 	this.next_id = 0;
 	this.list = new Object();
@@ -1213,7 +1227,7 @@ BOARDFUL.ENGINE.checkEnvi = function () {
 		BOARDFUL.ENGINE.Envi.isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 		BOARDFUL.ENGINE.Envi.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 		// At least Safari 3+: "[object HTMLElementConstructor]"
-		BOARDFUL.ENGINE.Envi.isChrome = !!window.chrome && !isOpera;              // Chrome 1+
+		BOARDFUL.ENGINE.Envi.isChrome = !!window.chrome && !BOARDFUL.ENGINE.Envi.isOpera;              // Chrome 1+
 		BOARDFUL.ENGINE.Envi.isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
 	}
 };
