@@ -7,12 +7,8 @@ module.exports = function(grunt) {
 			src: ['src/engine/*.js'],
 			dest: 'build/<%= pkg.name %>.engine.js'
 		},
-		boards: {
-			src: ['src/boards/*.js', 'src/boards/*/*.js'],
-			dest: 'build/<%= pkg.name %>.boards.js'
-		},
 		desktop: {
-			src: ['src/engine/*.js', 'src/desktop/*.js', 'src/boards/*.js', 'src/boards/*/*.js'],
+			src: ['src/engine/*.js', 'src/desktop/*.js', 'mods/*.js', 'mods/*/*.js'],
 			dest: 'build/<%= pkg.name %>.desktop.js'
 		},
 		browser: {
@@ -24,7 +20,7 @@ module.exports = function(grunt) {
 			dest: 'build/<%= pkg.name %>.server.js'
 		},
 		all: {
-			src: ['src/*/*.js'],
+			src: ['src/*.js', 'src/*/*.js', 'mods/*.js', 'mods/*/*.js'],
 			dest: 'build/<%= pkg.name %>.js'
 		}
 	},

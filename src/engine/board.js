@@ -22,7 +22,14 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
 		var config = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[that.config.package]].content;
-		that.createRoom(config);
+		var load1 = new BOARDFUL.ENGINE.FileLoader(config.files, function () {
+			for (var i in config.files) {
+				if (".js" == config.files[i].substr(config.files[i].length - 3)) {
+					//BOARDFUL.ENGINE.File.setToMods(config.files[i]);
+				}
+			}
+			that.createRoom(config);
+		});
 	});
 };
 // create room

@@ -79,7 +79,7 @@ BOARDFUL.ENGINE.Table.prototype.settlePlayersDuel = function (arg) {
 	}
 	var that = this;
 	select_list.sort(function (a, b) {
-		return BOARDFUL.BOARDS.Poker.compare(that.arg_list[a].card, that.arg_list[b].card);
+		return BOARDFUL.MODS.Poker.compare(that.arg_list[a].card, that.arg_list[b].card);
 	});
 	var player_list = new Array();
 	var card_list = new Array();

@@ -5,22 +5,23 @@
  * @version		0.0
  * 
 **/
-
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BOARDS = BOARDFUL.BOARDS || new Object();
+BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // poker
-BOARDFUL.BOARDS.Poker = function (owner) {
+BOARDFUL.MODS.Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	this.card_list = this.createCards();
 };
+var Poker = BOARDFUL.MODS.Poker;
+
 // create cards
-BOARDFUL.BOARDS.Poker.prototype.createCards = function () {
+Poker.prototype.createCards = function () {
 	var card_list = new Array();
 	var card;
-	for (var i in BOARDFUL.BOARDS.Poker.RANKS) {
+	for (var i in Poker.RANKS) {
 		if ("Joker" == i) {
 			card = new BOARDFUL.ENGINE.Card({
 				rank: i,
@@ -34,7 +35,7 @@ BOARDFUL.BOARDS.Poker.prototype.createCards = function () {
 			card_list.push(card.id);
 		}
 		else {
-			for (var j in BOARDFUL.BOARDS.Poker.SUITS) {
+			for (var j in Poker.SUITS) {
 				card = new BOARDFUL.ENGINE.Card({
 					rank: i,
 					suit: j
@@ -45,8 +46,7 @@ BOARDFUL.BOARDS.Poker.prototype.createCards = function () {
 	}
 	return card_list;
 };
-
-BOARDFUL.BOARDS.Poker.RANKS = {
+Poker.RANKS = {
 	"2": 2,
 	"3": 3,
 	"4": 4,
@@ -62,25 +62,25 @@ BOARDFUL.BOARDS.Poker.RANKS = {
 	"Ace": 14,
 	"Joker": 15
 };
-BOARDFUL.BOARDS.Poker.SUITS = {
+Poker.SUITS = {
 	"Spade": 4,
 	"Heart": 3,
 	"Diamond": 2,
 	"Club": 1
 };
-BOARDFUL.BOARDS.Poker.compare = function (id0, id1) {
+Poker.compare = function (id0, id1) {
 	var card0 = BOARDFUL.Mngr.get(id0);
 	var card1 = BOARDFUL.Mngr.get(id1);
 	if (card0.rank != card1.rank) {
-		return BOARDFUL.BOARDS.Poker.RANKS[card0.rank] - BOARDFUL.BOARDS.Poker.RANKS[card1.rank];
+		return Poker.RANKS[card0.rank] - Poker.RANKS[card1.rank];
 	}
 	else if (card0.suit != card1.suit) {
-		return BOARDFUL.BOARDS.Poker.SUITS[card0.suit] - BOARDFUL.BOARDS.Poker.SUITS[card1.suit];
+		return Poker.SUITS[card0.suit] - Poker.SUITS[card1.suit];
 	}
 	else {
 		return 0;
 	}
 };
-BOARDFUL.BOARDS.Poker.cardToString = function (id) {
+Poker.cardToString = function (id) {
 	return BOARDFUL.Mngr.get(id).rank + ' ' + BOARDFUL.Mngr.get(id).suit;
 };

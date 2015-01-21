@@ -11,7 +11,7 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 BOARDFUL.ENGINE.File = BOARDFUL.ENGINE.File || new Object();
 // init file manager
-BOARDFUL.ENGINE.File.initMngr = function () {
+BOARDFUL.ENGINE.File.init = function () {
 	// file mngr logger
 	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
@@ -53,29 +53,65 @@ BOARDFUL.ENGINE.File.getFromHtml = function () {
 	});
 	BOARDFUL.ENGINE.FileLogger.log('info', "files in html", BOARDFUL.ENGINE.File.name_list);
 };
+// set file script to MODS scope
+BOARDFUL.ENGINE.File.setToMods = function (file) {
+	var script = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[file]].content;
+	for (var i in script) {
+		BOARDFUL.MODS[i] = script[i];
+	}
+};
 
+// file loader
+BOARDFUL.ENGINE.FileLoader = function (list, callback) {
+	this.list = list;
+	this.callback = callback;
+	this.done = false;
+	this.load();
+};
+// load files and wait
+BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
+	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
+	this.done = true;
+	for (var i in this.list) {
+		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
+			this.done = false;
+			this.loadFile(this.list[i]);
+		}
+	}
+	var that = this;
+	if (! this.done) {
+		setTimeout(function () {
+			that.load();
+		}, 500);
+	} else {
+		this.callback();
+	}
+};
 // load a file
-BOARDFUL.ENGINE.File.load = function (file) {
+BOARDFUL.ENGINE.FileLoader.prototype.loadFile = function (file) {
 	switch (BOARDFUL.ENGINE.Envi.type) {
 	case "browser":
-		BOARDFUL.ENGINE.File.loadAjax(file);
+		this.loadByAjax(file);
 		break;
 	case "nodejs":
-		try {
-			var script = require("../" + file);
-			BOARDFUL.ENGINE.File.add(file, script, "loaded");
-			BOARDFUL.ENGINE.FileLogger.log("info", "file loaded", file);
-		} catch (err) {
-			BOARDFUL.ENGINE.File.add(file, "", "failed");
-			BOARDFUL.ENGINE.FileLogger.log("info", "file failed", file, err);
-		}
+		this.loadByRequire(file);
 		break;
 	default:
 		break;
 	}
 }
+BOARDFUL.ENGINE.FileLoader.prototype.loadByRequire = function (file) {
+	try {
+		var script = require("../" + file);
+		BOARDFUL.ENGINE.File.add(file, script, "loaded");
+		BOARDFUL.ENGINE.FileLogger.log("info", "file loaded", file);
+	} catch (err) {
+		BOARDFUL.ENGINE.File.add(file, "", "failed");
+		BOARDFUL.ENGINE.FileLogger.log("info", "file failed", file, err);
+	}
+};
 // load a file via ajax by browser
-BOARDFUL.ENGINE.File.loadAjax = function (file) {
+BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
 		$.getScript(file)
@@ -110,32 +146,5 @@ BOARDFUL.ENGINE.File.loadAjax = function (file) {
 	else {
 		BOARDFUL.ENGINE.File.add(file, "", "failed");
 		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
-	}
-};
-
-// file loader
-BOARDFUL.ENGINE.FileLoader = function (list, callback) {
-	this.list = list;
-	this.callback = callback;
-	this.done = false;
-	this.load();
-};
-// load files and wait
-BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
-	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
-	this.done = true;
-	for (var i in this.list) {
-		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
-			this.done = false;
-			BOARDFUL.ENGINE.File.load(this.list[i]);
-		}
-	}
-	var that = this;
-	if (! this.done) {
-		setTimeout(function () {
-			that.load();
-		}, 500);
-	} else {
-		this.callback();
 	}
 };

@@ -24,7 +24,7 @@ BOARDFUL.ENGINE.Card.load = function (config) {
 	var card_list = new Array();
 	switch (config) {
 	case "poker":
-		card_list = new BOARDFUL.BOARDS.Poker().card_list;
+		card_list = new BOARDFUL.MODS.Poker().card_list;
 		break;
 	default:
 		break;

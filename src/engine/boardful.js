@@ -8,6 +8,7 @@
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // run
 BOARDFUL.run = function (config) {
@@ -52,7 +53,7 @@ BOARDFUL.init = function () {
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
-	BOARDFUL.ENGINE.File.initMngr();
+	BOARDFUL.ENGINE.File.init();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);

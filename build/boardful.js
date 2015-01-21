@@ -293,7 +293,14 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
 		var config = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[that.config.package]].content;
-		that.createRoom(config);
+		var load1 = new BOARDFUL.ENGINE.FileLoader(config.files, function () {
+			for (var i in config.files) {
+				if (".js" == config.files[i].substr(config.files[i].length - 3)) {
+					//BOARDFUL.ENGINE.File.setToMods(config.files[i]);
+				}
+			}
+			that.createRoom(config);
+		});
 	});
 };
 // create room
@@ -312,6 +319,7 @@ BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
 
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // run
 BOARDFUL.run = function (config) {
@@ -356,7 +364,7 @@ BOARDFUL.init = function () {
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
-	BOARDFUL.ENGINE.File.initMngr();
+	BOARDFUL.ENGINE.File.init();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
@@ -403,7 +411,7 @@ BOARDFUL.ENGINE.Card.load = function (config) {
 	var card_list = new Array();
 	switch (config) {
 	case "poker":
-		card_list = new BOARDFUL.BOARDS.Poker().card_list;
+		card_list = new BOARDFUL.MODS.Poker().card_list;
 		break;
 	default:
 		break;
@@ -730,7 +738,7 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
 BOARDFUL.ENGINE.File = BOARDFUL.ENGINE.File || new Object();
 // init file manager
-BOARDFUL.ENGINE.File.initMngr = function () {
+BOARDFUL.ENGINE.File.init = function () {
 	// file mngr logger
 	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
@@ -772,29 +780,65 @@ BOARDFUL.ENGINE.File.getFromHtml = function () {
 	});
 	BOARDFUL.ENGINE.FileLogger.log('info', "files in html", BOARDFUL.ENGINE.File.name_list);
 };
+// set file script to MODS scope
+BOARDFUL.ENGINE.File.setToMods = function (file) {
+	var script = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[file]].content;
+	for (var i in script) {
+		BOARDFUL.MODS[i] = script[i];
+	}
+};
 
+// file loader
+BOARDFUL.ENGINE.FileLoader = function (list, callback) {
+	this.list = list;
+	this.callback = callback;
+	this.done = false;
+	this.load();
+};
+// load files and wait
+BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
+	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
+	this.done = true;
+	for (var i in this.list) {
+		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
+			this.done = false;
+			this.loadFile(this.list[i]);
+		}
+	}
+	var that = this;
+	if (! this.done) {
+		setTimeout(function () {
+			that.load();
+		}, 500);
+	} else {
+		this.callback();
+	}
+};
 // load a file
-BOARDFUL.ENGINE.File.load = function (file) {
+BOARDFUL.ENGINE.FileLoader.prototype.loadFile = function (file) {
 	switch (BOARDFUL.ENGINE.Envi.type) {
 	case "browser":
-		BOARDFUL.ENGINE.File.loadAjax(file);
+		this.loadByAjax(file);
 		break;
 	case "nodejs":
-		try {
-			var script = require("../" + file);
-			BOARDFUL.ENGINE.File.add(file, script, "loaded");
-			BOARDFUL.ENGINE.FileLogger.log("info", "file loaded", file);
-		} catch (err) {
-			BOARDFUL.ENGINE.File.add(file, "", "failed");
-			BOARDFUL.ENGINE.FileLogger.log("info", "file failed", file, err);
-		}
+		this.loadByRequire(file);
 		break;
 	default:
 		break;
 	}
 }
+BOARDFUL.ENGINE.FileLoader.prototype.loadByRequire = function (file) {
+	try {
+		var script = require("../" + file);
+		BOARDFUL.ENGINE.File.add(file, script, "loaded");
+		BOARDFUL.ENGINE.FileLogger.log("info", "file loaded", file);
+	} catch (err) {
+		BOARDFUL.ENGINE.File.add(file, "", "failed");
+		BOARDFUL.ENGINE.FileLogger.log("info", "file failed", file, err);
+	}
+};
 // load a file via ajax by browser
-BOARDFUL.ENGINE.File.loadAjax = function (file) {
+BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
 		$.getScript(file)
@@ -829,33 +873,6 @@ BOARDFUL.ENGINE.File.loadAjax = function (file) {
 	else {
 		BOARDFUL.ENGINE.File.add(file, "", "failed");
 		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
-	}
-};
-
-// file loader
-BOARDFUL.ENGINE.FileLoader = function (list, callback) {
-	this.list = list;
-	this.callback = callback;
-	this.done = false;
-	this.load();
-};
-// load files and wait
-BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
-	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
-	this.done = true;
-	for (var i in this.list) {
-		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
-			this.done = false;
-			BOARDFUL.ENGINE.File.load(this.list[i]);
-		}
-	}
-	var that = this;
-	if (! this.done) {
-		setTimeout(function () {
-			that.load();
-		}, 500);
-	} else {
-		this.callback();
 	}
 };
 
@@ -1365,7 +1382,7 @@ BOARDFUL.ENGINE.Table.prototype.settlePlayersDuel = function (arg) {
 	}
 	var that = this;
 	select_list.sort(function (a, b) {
-		return BOARDFUL.BOARDS.Poker.compare(that.arg_list[a].card, that.arg_list[b].card);
+		return BOARDFUL.MODS.Poker.compare(that.arg_list[a].card, that.arg_list[b].card);
 	});
 	var player_list = new Array();
 	var card_list = new Array();
@@ -1569,3 +1586,91 @@ BOARDFUL.SERVER.createServer = function () {
 
 // launch project
 BOARDFUL.run("server");
+
+
+/**
+ * Poker cards.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
+**/
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.MODS = BOARDFUL.MODS || new Object();
+
+// poker
+BOARDFUL.MODS.Poker = function (owner) {
+	this.type = "Poker";
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
+	this.card_list = this.createCards();
+};
+var Poker = BOARDFUL.MODS.Poker;
+
+// create cards
+Poker.prototype.createCards = function () {
+	var card_list = new Array();
+	var card;
+	for (var i in Poker.RANKS) {
+		if ("Joker" == i) {
+			card = new BOARDFUL.ENGINE.Card({
+				rank: i,
+				suit: "Spade"
+			});
+			card_list.push(card.id);
+			card = new BOARDFUL.ENGINE.Card({
+				rank: i,
+				suit: "Heart"
+			});
+			card_list.push(card.id);
+		}
+		else {
+			for (var j in Poker.SUITS) {
+				card = new BOARDFUL.ENGINE.Card({
+					rank: i,
+					suit: j
+				});
+				card_list.push(card.id);
+			}
+		}
+	}
+	return card_list;
+};
+Poker.RANKS = {
+	"2": 2,
+	"3": 3,
+	"4": 4,
+	"5": 5,
+	"6": 6,
+	"7": 7,
+	"8": 8,
+	"9": 9,
+	"10": 10,
+	"Jack": 11,
+	"Queen": 12,
+	"King": 13,
+	"Ace": 14,
+	"Joker": 15
+};
+Poker.SUITS = {
+	"Spade": 4,
+	"Heart": 3,
+	"Diamond": 2,
+	"Club": 1
+};
+Poker.compare = function (id0, id1) {
+	var card0 = BOARDFUL.Mngr.get(id0);
+	var card1 = BOARDFUL.Mngr.get(id1);
+	if (card0.rank != card1.rank) {
+		return Poker.RANKS[card0.rank] - Poker.RANKS[card1.rank];
+	}
+	else if (card0.suit != card1.suit) {
+		return Poker.SUITS[card0.suit] - Poker.SUITS[card1.suit];
+	}
+	else {
+		return 0;
+	}
+};
+Poker.cardToString = function (id) {
+	return BOARDFUL.Mngr.get(id).rank + ' ' + BOARDFUL.Mngr.get(id).suit;
+};
