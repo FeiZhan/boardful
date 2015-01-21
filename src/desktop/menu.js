@@ -70,5 +70,4 @@ BOARDFUL.DESKTOP.gameStart = function (room) {
 };
 
 // launch project in desktop
-BOARDFUL.init();
 BOARDFUL.run("desktop");

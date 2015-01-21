@@ -9,6 +9,27 @@
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
 
+// run
+BOARDFUL.run = function (config) {
+	BOARDFUL.init();
+	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
+	BOARDFUL.Logger.log('info', "start type", config);
+	switch (config) {
+	case "server":
+		BOARDFUL.SERVER.port = process.argv[3] || 8080;
+		BOARDFUL.SERVER.createServer();
+		break;
+	case "browser":
+		BOARDFUL.MENUS.run();
+		break;
+	case "desktop":
+	default:
+		global.jquery = require('jquery');
+		global.$ = jquery.create();
+		BOARDFUL.DESKTOP.menuRun();
+		break;
+	}
+};
 // init
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
@@ -32,25 +53,5 @@ BOARDFUL.init = function () {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
 		BOARDFUL.ENGINE.getFilesInHtml();
-	}
-};
-// run
-BOARDFUL.run = function (config) {
-	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
-	BOARDFUL.Logger.log('info', "start type", config);
-	switch (config) {
-	case "server":
-		BOARDFUL.SERVER.port = process.argv[3] || 8080;
-		BOARDFUL.SERVER.createServer();
-		break;
-	case "browser":
-		BOARDFUL.MENUS.run();
-		break;
-	case "desktop":
-	default:
-		global.jquery = require('jquery');
-		global.$ = jquery.create();
-		BOARDFUL.DESKTOP.menuRun();
-		break;
 	}
 };

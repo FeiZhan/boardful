@@ -289,7 +289,6 @@ BOARDFUL.DESKTOP.gameStart = function (room) {
 };
 
 // launch project in desktop
-BOARDFUL.init();
 BOARDFUL.run("desktop");
 
 /**
@@ -303,6 +302,27 @@ BOARDFUL.run("desktop");
 // namespace
 var BOARDFUL = BOARDFUL || new Object();
 
+// run
+BOARDFUL.run = function (config) {
+	BOARDFUL.init();
+	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
+	BOARDFUL.Logger.log('info', "start type", config);
+	switch (config) {
+	case "server":
+		BOARDFUL.SERVER.port = process.argv[3] || 8080;
+		BOARDFUL.SERVER.createServer();
+		break;
+	case "browser":
+		BOARDFUL.MENUS.run();
+		break;
+	case "desktop":
+	default:
+		global.jquery = require('jquery');
+		global.$ = jquery.create();
+		BOARDFUL.DESKTOP.menuRun();
+		break;
+	}
+};
 // init
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
@@ -328,26 +348,6 @@ BOARDFUL.init = function () {
 		BOARDFUL.ENGINE.getFilesInHtml();
 	}
 };
-// run
-BOARDFUL.run = function (config) {
-	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
-	BOARDFUL.Logger.log('info', "start type", config);
-	switch (config) {
-	case "server":
-		BOARDFUL.SERVER.port = process.argv[3] || 8080;
-		BOARDFUL.SERVER.createServer();
-		break;
-	case "browser":
-		BOARDFUL.MENUS.run();
-		break;
-	case "desktop":
-	default:
-		global.jquery = require('jquery');
-		global.$ = jquery.create();
-		BOARDFUL.DESKTOP.menuRun();
-		break;
-	}
-};
 
 /**
  * Card.
@@ -370,7 +370,6 @@ BOARDFUL.ENGINE.Card = function (config) {
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
 };
-
 // load cards
 BOARDFUL.ENGINE.Card.load = function (config) {
 	var card_list = new Array();
@@ -401,8 +400,45 @@ BOARDFUL.ENGINE.Deck = function (owner) {
 	this.card_list = new Array();
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.addListeners();
 };
-
+// add listeners
+BOARDFUL.ENGINE.Deck.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("CreateDeck", {
+		level: "game",
+		callback: function (arg) {
+			that.createDeck(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ShuffleDeck", {
+		level: "game",
+		callback: function (arg) {
+			that.shuffleDeck(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCards", {
+		level: "game",
+		callback: function (arg) {
+			that.dealCards(arg);
+		},
+		id: that.id
+	});
+};
+// create deck
+BOARDFUL.ENGINE.Deck.prototype.createDeck = function (arg) {
+	var card_list = BOARDFUL.ENGINE.Card.load(arg.type);
+	BOARDFUL.Mngr.get(arg.deck).getCards(card_list);
+};
+// shuffle deck
+BOARDFUL.ENGINE.Deck.prototype.shuffleDeck = function (arg) {
+	if (arg.deck != this.id) {
+		return;
+	}
+	this.card_list = BOARDFUL.ENGINE.shuffle(this.card_list);
+};
 // get cards
 BOARDFUL.ENGINE.Deck.prototype.getCards = function (card_list) {
 	for (var i in card_list) {
@@ -410,18 +446,18 @@ BOARDFUL.ENGINE.Deck.prototype.getCards = function (card_list) {
 	}
 	this.card_list = this.card_list.concat(card_list);
 };
-// shuffle cards
-BOARDFUL.ENGINE.Deck.prototype.shuffle = function () {
-	this.card_list = BOARDFUL.ENGINE.shuffle(this.card_list);
-};
 // deal cards
-BOARDFUL.ENGINE.Deck.prototype.dealCards = function (num) {
-	var cards = new Array();
-	for (var i = 0; i < num; ++ i) {
-		cards.push(this.card_list[0]);
+BOARDFUL.ENGINE.Deck.prototype.dealCards = function (arg) {
+	if (arg.deck != this.id) {
+		return;
+	}
+	var card_list = new Array();
+	for (var i = 0; i < arg.number; ++ i) {
+		card_list.push(this.card_list[0]);
 		this.card_list.shift();
 	}
-	return cards;
+	console.log("deal cards", card_list);
+	BOARDFUL.Mngr.get(arg.player).hand = BOARDFUL.Mngr.get(arg.player).hand.concat(card_list);
 };
 
 /**
@@ -703,8 +739,8 @@ BOARDFUL.ENGINE.Game = function (config) {
 		this.config = config.config;
 		this.options = config.options;
 		this.deck_list = {
-			draw: new BOARDFUL.ENGINE.Deck().id,
-			discard: new BOARDFUL.ENGINE.Deck().id
+			draw: new BOARDFUL.ENGINE.Deck(this.id).id,
+			discard: new BOARDFUL.ENGINE.Deck(this.id).id
 		};
 		this.table = new BOARDFUL.ENGINE.Table(this.id).id;
 		
@@ -720,47 +756,47 @@ BOARDFUL.ENGINE.Game = function (config) {
 // add event listeners
 BOARDFUL.ENGINE.Game.prototype.addListeners = function () {
 	var that = this;
-	this.event_mngr.on("GameStart", {
+	this.event_mngr.on("StartGame", {
 		level: "game",
 		callback: function (arg) {
 			that.start(arg);
 		},
-		instance: that
+		id: that.id
 	});
-	this.event_mngr.on("RoundStart", {
+	this.event_mngr.on("ShufflePlayers", {
 		level: "game",
 		callback: function (arg) {
-			that.roundStart(arg);
+			that.shufflePlayers(arg);
 		},
-		instance: that
+		id: that.id
 	});
-	this.event_mngr.on("RoundEnd", {
+	this.event_mngr.on("StartRound", {
 		level: "game",
 		callback: function (arg) {
-			that.roundEnd(arg);
+			that.startRound(arg);
 		},
-		instance: that
+		id: that.id
 	});
-	this.event_mngr.on("PlayerStart", {
+	this.event_mngr.on("EndRound", {
 		level: "game",
 		callback: function (arg) {
-			that.playerStart(arg);
+			that.endRound(arg);
 		},
-		instance: that
+		id: that.id
 	});
-	this.event_mngr.on("DealCards", {
+	this.event_mngr.on("StartPlayers", {
 		level: "game",
 		callback: function (arg) {
-			that.dealCards(arg);
+			that.startPlayers(arg);
 		},
-		instance: that
+		id: that.id
 	});
 };
 // launch game
 BOARDFUL.ENGINE.Game.prototype.run = function () {
 	// create first event
 	var event = new BOARDFUL.ENGINE.Event({
-		name: "GameStart",
+		name: "StartGame",
 		source: this.id
 	});
 	this.event_mngr.add(event.id);
@@ -769,11 +805,25 @@ BOARDFUL.ENGINE.Game.prototype.run = function () {
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
 	this.round = 0;
-	this.player_list = BOARDFUL.ENGINE.shuffle(this.player_list);
-	var card_list = BOARDFUL.ENGINE.Card.load("poker");
-	BOARDFUL.Mngr.get(this.deck_list.draw).getCards(card_list);
-	BOARDFUL.Mngr.get(this.deck_list.draw).shuffle();
 	var event_list = new Array();
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "ShufflePlayers",
+		source: this.id
+	});
+	event_list.push(event.id);
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "CreateDeck",
+		source: this.id,
+		deck: this.deck_list.draw,
+		type: "poker"
+	});
+	event_list.push(event.id);
+	var event = new BOARDFUL.ENGINE.Event({
+		name: "ShuffleDeck",
+		source: this.id,
+		deck: this.deck_list.draw
+	});
+	event_list.push(event.id);
 	for (var i in this.player_list) {
 		var event = new BOARDFUL.ENGINE.Event({
 			name: "DealCards",
@@ -785,25 +835,29 @@ BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
 		event_list.push(event.id);
 	}
 	var event = new BOARDFUL.ENGINE.Event({
-		name: "RoundStart",
+		name: "StartRound",
 		source: this.id
 	});
 	event_list.push(event.id);
 	this.event_mngr.front(event_list);
 };
+// shuffle players
+BOARDFUL.ENGINE.Game.prototype.shufflePlayers = function (arg) {
+	this.player_list = BOARDFUL.ENGINE.shuffle(this.player_list);
+};
 // start a round
-BOARDFUL.ENGINE.Game.prototype.roundStart = function (arg) {
+BOARDFUL.ENGINE.Game.prototype.startRound = function (arg) {
 	++ this.round;
 	var event_list = new Array();
 	var event;
 	for (var i in this.player_list) {
 		event = new BOARDFUL.ENGINE.Event({
-			name: "PlayerStart",
+			name: "StartPlayers",
 			source: this.id
 		});
 		event_list.push(event.id);
 		event = new BOARDFUL.ENGINE.Event({
-			name: "Player" + this.player_list[i] + "Start",
+			name: "StartPlayer" + this.player_list[i],
 			source: this.id,
 			player: this.player_list[i]
 		});
@@ -823,29 +877,23 @@ BOARDFUL.ENGINE.Game.prototype.roundStart = function (arg) {
 		event_list.push(event.id);
 	}
 	event = new BOARDFUL.ENGINE.Event({
-		name: "RoundEnd",
+		name: "EndRound",
 		source: this.id
 	});
 	event_list.push(event.id);
 	this.event_mngr.front(event_list);
 };
 // end a round
-BOARDFUL.ENGINE.Game.prototype.roundEnd = function (arg) {
+BOARDFUL.ENGINE.Game.prototype.endRound = function (arg) {
 	var event = new BOARDFUL.ENGINE.Event({
-		name: "RoundStart",
+		name: "StartRound",
 		source: this.id
 	});
 	this.event_mngr.add(event.id);
 };
 // player start
-BOARDFUL.ENGINE.Game.prototype.playerStart = function (arg) {
+BOARDFUL.ENGINE.Game.prototype.startPlayers = function (arg) {
 	this.current_player = (this.current_player + 1) % this.player_list.length;
-};
-// deal cards
-BOARDFUL.ENGINE.Game.prototype.dealCards = function (arg) {
-	var  card_list = BOARDFUL.Mngr.get(arg.deck).dealCards(arg.number);
-	console.log("deal cards", card_list);
-	BOARDFUL.Mngr.get(arg.player).hand = BOARDFUL.Mngr.get(arg.player).hand.concat(card_list);
 };
 
 /**
@@ -982,19 +1030,19 @@ BOARDFUL.ENGINE.Player = function (config, owner) {
 // add event listeners
 BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 	var that = this;
-	this.game.event_mngr.on("Player" + this.id + "Start", {
+	this.game.event_mngr.on("StartPlayer" + this.id, {
 		level: "game",
 		callback: function (arg) {
 			that.start(arg);
 		},
-		instance: that
+		id: that.id
 	});
 	this.game.event_mngr.on("Player" + this.id + "PlayCard", {
 		level: "game",
 		callback: function (arg) {
 			that.playCard(arg);
 		},
-		instance: that
+		id: that.id
 	});
 };
 // player start
@@ -1068,21 +1116,21 @@ BOARDFUL.ENGINE.Table.prototype.addListeners = function () {
 		callback: function (arg) {
 			that.playersDuel(arg);
 		},
-		instance: that
+		id: that.id
 	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlaceCardOnTable", {
 		level: "game",
 		callback: function (arg) {
 			that.placeCardOnTable(arg);
 		},
-		instance: that
+		id: that.id
 	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("SettlePlayersDuel", {
 		level: "game",
 		callback: function (arg) {
 			that.settlePlayersDuel(arg);
 		},
-		instance: that
+		id: that.id
 	});
 };
 // players duel

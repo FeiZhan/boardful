@@ -19,7 +19,6 @@ BOARDFUL.ENGINE.Card = function (config) {
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
 };
-
 // load cards
 BOARDFUL.ENGINE.Card.load = function (config) {
 	var card_list = new Array();

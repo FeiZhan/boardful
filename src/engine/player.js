@@ -33,19 +33,19 @@ BOARDFUL.ENGINE.Player = function (config, owner) {
 // add event listeners
 BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 	var that = this;
-	this.game.event_mngr.on("Player" + this.id + "Start", {
+	this.game.event_mngr.on("StartPlayer" + this.id, {
 		level: "game",
 		callback: function (arg) {
 			that.start(arg);
 		},
-		instance: that
+		id: that.id
 	});
 	this.game.event_mngr.on("Player" + this.id + "PlayCard", {
 		level: "game",
 		callback: function (arg) {
 			that.playCard(arg);
 		},
-		instance: that
+		id: that.id
 	});
 };
 // player start

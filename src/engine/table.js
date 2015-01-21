@@ -24,21 +24,21 @@ BOARDFUL.ENGINE.Table.prototype.addListeners = function () {
 		callback: function (arg) {
 			that.playersDuel(arg);
 		},
-		instance: that
+		id: that.id
 	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlaceCardOnTable", {
 		level: "game",
 		callback: function (arg) {
 			that.placeCardOnTable(arg);
 		},
-		instance: that
+		id: that.id
 	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("SettlePlayersDuel", {
 		level: "game",
 		callback: function (arg) {
 			that.settlePlayersDuel(arg);
 		},
-		instance: that
+		id: that.id
 	});
 };
 // players duel
