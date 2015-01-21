@@ -17,6 +17,7 @@ BOARDFUL.ENGINE.initFileMngr = function () {
 		filename: 'logs/file.log'
 	})
 	.remove(winston.transports.Console);
+	BOARDFUL.ENGINE.FileLogger.log('info', "----------launch----------");
 };
 
 // file list

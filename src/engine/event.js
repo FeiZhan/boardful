@@ -33,6 +33,7 @@ BOARDFUL.ENGINE.EventMngr = function (owner) {
 		filename: 'logs/event.log'
 	})
 	.remove(winston.transports.Console);
+	this.logger.log('info', "----------launch----------");
 };
 // see or push to the front of event list
 BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
@@ -90,23 +91,31 @@ BOARDFUL.ENGINE.EventMngr.prototype.off = function (event, config) {
 };
 // launch event manager
 BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
-	if (this.list.length > 0) {
-		// get the current event
-		var event = this.front();
-		this.logger.log("info", "event", event.name);
-		this.list.shift();
-		if (event && (event.name in this.listener_list)) {
-			for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
-				if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
-					for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
-						var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
-						this.logger.log("info", "trigger", listener);
-						// trigger listener callback for event
-						listener.callback(event.arg);
+	switch (BOARDFUL.Mngr.get(this.owner).status) {
+	case "pause":
+	case "exit":
+		break;
+	case "run":
+	default:
+		if (this.list.length > 0) {
+			// get the current event
+			var event = this.front();
+			this.logger.log("info", "event", event.name);
+			this.list.shift();
+			if (event && (event.name in this.listener_list)) {
+				for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
+					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
+						for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
+							this.logger.log("info", "trigger", listener);
+							// trigger listener callback for event
+							listener.callback(event.arg);
+						}
 					}
 				}
 			}
 		}
+		break;
 	}
 	var that = this;
 	// start next event

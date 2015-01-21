@@ -20,12 +20,12 @@ BOARDFUL.ENGINE.Room = function (config, owner) {
 // config room
 BOARDFUL.ENGINE.Room.prototype.configRoom = function () {
 	// input config for room
-	console.log("config room");
+	BOARDFUL.Cmdline.output("config room");
 	var that = this;
 	process.stdin.once('data', function (text) {
-		console.log("config room done");
+		BOARDFUL.Cmdline.output("config room done");
 		var game = new BOARDFUL.ENGINE.Game(that);
-		console.log("game start");
+		BOARDFUL.Cmdline.output("game start");
 		game.run();
 	});
 };

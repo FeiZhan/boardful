@@ -15,6 +15,7 @@ BOARDFUL.ENGINE.Game = function (config) {
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
 	this.cmdline = new BOARDFUL.DESKTOP.Cmdline(this.id);
+	this.status = "init";
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {
 		this.config = config.config;
@@ -75,6 +76,7 @@ BOARDFUL.ENGINE.Game.prototype.addListeners = function () {
 };
 // launch game
 BOARDFUL.ENGINE.Game.prototype.run = function () {
+	this.status = "run";
 	// create first event
 	var event = new BOARDFUL.ENGINE.Event({
 		name: "StartGame",
@@ -82,6 +84,33 @@ BOARDFUL.ENGINE.Game.prototype.run = function () {
 	});
 	this.event_mngr.add(event.id);
 	this.event_mngr.run();
+};
+// pause game
+BOARDFUL.ENGINE.Game.prototype.pause = function () {
+	switch (this.status) {
+	case "init":
+	case "exit":
+	case "pause":
+		break;
+	default:
+		this.status = "pause";
+		console.log("game pause");
+		break;
+	}
+};
+// resume game
+BOARDFUL.ENGINE.Game.prototype.resume = function () {
+	switch (this.status) {
+	case "init":
+	case "exit":
+		break;
+	case "pause":
+		this.status = "run";
+		console.log("game resume");
+		break;
+	default:
+		break;
+	}
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {

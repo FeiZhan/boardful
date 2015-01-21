@@ -14,7 +14,7 @@ BOARDFUL.run = function (config) {
 	BOARDFUL.init();
 	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
 	BOARDFUL.loadBoards();
-	BOARDFUL.Logger.log('info', "start type", config);
+	BOARDFUL.Logger.log('info', "launch type", config);
 	switch (config) {
 	case "server":
 		BOARDFUL.SERVER.port = process.argv[3] || 8080;
@@ -27,6 +27,7 @@ BOARDFUL.run = function (config) {
 	default:
 		global.jquery = require('jquery');
 		global.$ = jquery.create();
+		BOARDFUL.DESKTOP.Cmdline.setCmdline();
 		BOARDFUL.DESKTOP.Cmdline.showMenu();
 		break;
 	}
@@ -35,20 +36,22 @@ BOARDFUL.run = function (config) {
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
+	BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Logger.add(winston.transports.File, {
 		//filename: 'logs/boardful_' + new Date().toString() + '.log'
 		filename: 'logs/boardful.log'
 	})
 	.remove(winston.transports.Console);
+	BOARDFUL.Logger.log('info', "----------launch----------");
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Debugger.add(winston.transports.File, {
 		filename: 'logs/debug.log'
 	})
 	.remove(winston.transports.Console);
+	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
-	BOARDFUL.Debugger.log('info', "start");
 	BOARDFUL.ENGINE.initFileMngr();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
@@ -60,7 +63,7 @@ BOARDFUL.init = function () {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	console.log("loading Boardful");
+	BOARDFUL.Cmdline.output("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
 		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
 		for (var i in board_list) {

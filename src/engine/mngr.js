@@ -15,6 +15,7 @@ BOARDFUL.ENGINE.Manager = function () {
 		filename: 'logs/mngr.log'
 	})
 	.remove(winston.transports.Console);
+	this.logger.log('info', "----------launch----------");
 	this.next_id = 0;
 	this.list = new Object();
 };
@@ -25,11 +26,12 @@ BOARDFUL.ENGINE.Manager.prototype.get = function (id) {
 // add object
 BOARDFUL.ENGINE.Manager.prototype.add = function (object) {
 	object.id = this.next_id;
+	object.type = object.type || object.constructor.name;
 	if (! ("name" in object)) {
-		object.name = object.constructor.name + "_" + object.id;
+		object.name = object.type + "_" + object.id;
 	}
 	++ this.next_id;
 	this.list[object.id] = object;
-	this.logger.log("info", "add", object.name);
+	this.logger.log("info", "add", object.name, object);
 	return object.id;
 };

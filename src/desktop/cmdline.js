@@ -8,19 +8,33 @@
 
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
+var keypress = require('keypress');
 
 // command line
 BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	this.type = "Cmdline";
 	this.owner = owner;
-	BOARDFUL.Mngr.add(this);
+	if (BOARDFUL.Mngr) {
+		BOARDFUL.Mngr.add(this);
+	}
+	this.wait_status = "init";
+	this.wait_result = "";
 	this.addListeners();
-	// set terminal
-	process.stdin.resume();
-	process.stdin.setEncoding('utf8');
+	var that = this;
+	// set keypress
+	if (this.owner) {
+		keypress(process.stdin);
+		process.stdin.on('keypress', function () {
+			that.keypress.apply(that, arguments);
+		});
+		process.stdin.setRawMode(true);
+	}
 };
 // add listeners
 BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
+	if (undefined === BOARDFUL.Mngr || undefined === BOARDFUL.Mngr.get(this.owner).event_mngr) {
+		return;
+	}
 	var that = this;
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayerStart", {
 		level: "game",
@@ -50,7 +64,67 @@ BOARDFUL.DESKTOP.Cmdline.prototype.output = function () {
 };
 // input
 BOARDFUL.DESKTOP.Cmdline.prototype.input = function (callback) {
-	process.stdin.once('data', callback);
+	// disable keypress
+	if (this.owner) {
+		process.stdin.removeListener('keypress', function () {
+			that.keypress.apply(that, arguments);
+		});
+		process.stdin.setRawMode(false);
+	}
+	process.stdout.write("?> ");
+	var that = this;
+	process.stdin.once('data', function (text) {
+		callback(text);
+		// enable keypress
+		if (that.owner) {
+			process.stdin.on('keypress', function () {
+				that.keypress.apply(that, arguments);
+			});
+			process.stdin.setRawMode(true);
+		}
+	});
+};
+// wait input
+BOARDFUL.DESKTOP.Cmdline.prototype.waitInput = function (check, callback) {
+	var that = this;
+	switch (that.wait_status) {
+	case "init":
+		that.wait_status = "wait";
+		that.input(function (text) {
+			text = text.trim();
+			that.wait_result = text;
+			that.wait_status = "get";
+		});
+		break;
+	case "wait":
+		break;
+	case "get":
+		if (! check(that.wait_result)) {
+			that.wait_status = "init";
+		} else {
+			return callback(that.wait_result);
+		}
+		break;
+	}
+	setTimeout(function () {
+		that.waitInput(check, callback);
+	}, 100);
+};
+// wait keypress
+BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
+	if (key && key.ctrl && key.name == 'c') {
+		process.exit();
+	}
+	if (key && "p" == key.name && "pause" != BOARDFUL.Mngr.get(this.owner).status) {
+		var that = this;
+		BOARDFUL.Mngr.get(that.owner).pause();
+		that.waitInput(function (text) {
+			console.log("cmd:", text);
+			return "" == text;
+		}, function (text) {
+			BOARDFUL.Mngr.get(that.owner).resume();
+		});
+	}
 };
 
 // ui for player start
@@ -71,6 +145,11 @@ BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
 	this.output("duel", text);
 };
 
+// config command line
+BOARDFUL.DESKTOP.Cmdline.setCmdline = function () {
+	process.stdin.setEncoding('utf8');
+	process.stdin.resume();
+};
 // show menu
 BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 	var that = this;

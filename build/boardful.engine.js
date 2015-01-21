@@ -18,7 +18,7 @@ BOARDFUL.ENGINE.Board = function (config, owner) {
 };
 // load board game
 BOARDFUL.ENGINE.Board.prototype.load = function () {
-	console.log("loading board", this.config.name);
+	BOARDFUL.Cmdline.output("loading board", this.config.name);
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
 		var config = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[that.config.package]].content;
@@ -47,7 +47,7 @@ BOARDFUL.run = function (config) {
 	BOARDFUL.init();
 	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
 	BOARDFUL.loadBoards();
-	BOARDFUL.Logger.log('info', "start type", config);
+	BOARDFUL.Logger.log('info', "launch type", config);
 	switch (config) {
 	case "server":
 		BOARDFUL.SERVER.port = process.argv[3] || 8080;
@@ -60,6 +60,7 @@ BOARDFUL.run = function (config) {
 	default:
 		global.jquery = require('jquery');
 		global.$ = jquery.create();
+		BOARDFUL.DESKTOP.Cmdline.setCmdline();
 		BOARDFUL.DESKTOP.Cmdline.showMenu();
 		break;
 	}
@@ -68,20 +69,22 @@ BOARDFUL.run = function (config) {
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
+	BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Logger.add(winston.transports.File, {
 		//filename: 'logs/boardful_' + new Date().toString() + '.log'
 		filename: 'logs/boardful.log'
 	})
 	.remove(winston.transports.Console);
+	BOARDFUL.Logger.log('info', "----------launch----------");
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Debugger.add(winston.transports.File, {
 		filename: 'logs/debug.log'
 	})
 	.remove(winston.transports.Console);
+	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
-	BOARDFUL.Debugger.log('info', "start");
 	BOARDFUL.ENGINE.initFileMngr();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
@@ -93,7 +96,7 @@ BOARDFUL.init = function () {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	console.log("loading Boardful");
+	BOARDFUL.Cmdline.output("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
 		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
 		for (var i in board_list) {
@@ -278,6 +281,7 @@ BOARDFUL.ENGINE.EventMngr = function (owner) {
 		filename: 'logs/event.log'
 	})
 	.remove(winston.transports.Console);
+	this.logger.log('info', "----------launch----------");
 };
 // see or push to the front of event list
 BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
@@ -335,23 +339,31 @@ BOARDFUL.ENGINE.EventMngr.prototype.off = function (event, config) {
 };
 // launch event manager
 BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
-	if (this.list.length > 0) {
-		// get the current event
-		var event = this.front();
-		this.logger.log("info", "event", event.name);
-		this.list.shift();
-		if (event && (event.name in this.listener_list)) {
-			for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
-				if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
-					for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
-						var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
-						this.logger.log("info", "trigger", listener);
-						// trigger listener callback for event
-						listener.callback(event.arg);
+	switch (BOARDFUL.Mngr.get(this.owner).status) {
+	case "pause":
+	case "exit":
+		break;
+	case "run":
+	default:
+		if (this.list.length > 0) {
+			// get the current event
+			var event = this.front();
+			this.logger.log("info", "event", event.name);
+			this.list.shift();
+			if (event && (event.name in this.listener_list)) {
+				for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
+					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[event.name]) {
+						for (var j in this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[event.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
+							this.logger.log("info", "trigger", listener);
+							// trigger listener callback for event
+							listener.callback(event.arg);
+						}
 					}
 				}
 			}
 		}
+		break;
 	}
 	var that = this;
 	// start next event
@@ -379,6 +391,7 @@ BOARDFUL.ENGINE.initFileMngr = function () {
 		filename: 'logs/file.log'
 	})
 	.remove(winston.transports.Console);
+	BOARDFUL.ENGINE.FileLogger.log('info', "----------launch----------");
 };
 
 // file list
@@ -518,6 +531,7 @@ BOARDFUL.ENGINE.Game = function (config) {
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
 	this.cmdline = new BOARDFUL.DESKTOP.Cmdline(this.id);
+	this.status = "init";
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {
 		this.config = config.config;
@@ -578,6 +592,7 @@ BOARDFUL.ENGINE.Game.prototype.addListeners = function () {
 };
 // launch game
 BOARDFUL.ENGINE.Game.prototype.run = function () {
+	this.status = "run";
 	// create first event
 	var event = new BOARDFUL.ENGINE.Event({
 		name: "StartGame",
@@ -585,6 +600,33 @@ BOARDFUL.ENGINE.Game.prototype.run = function () {
 	});
 	this.event_mngr.add(event.id);
 	this.event_mngr.run();
+};
+// pause game
+BOARDFUL.ENGINE.Game.prototype.pause = function () {
+	switch (this.status) {
+	case "init":
+	case "exit":
+	case "pause":
+		break;
+	default:
+		this.status = "pause";
+		console.log("game pause");
+		break;
+	}
+};
+// resume game
+BOARDFUL.ENGINE.Game.prototype.resume = function () {
+	switch (this.status) {
+	case "init":
+	case "exit":
+		break;
+	case "pause":
+		this.status = "run";
+		console.log("game resume");
+		break;
+	default:
+		break;
+	}
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
@@ -770,6 +812,7 @@ BOARDFUL.ENGINE.Manager = function () {
 		filename: 'logs/mngr.log'
 	})
 	.remove(winston.transports.Console);
+	this.logger.log('info', "----------launch----------");
 	this.next_id = 0;
 	this.list = new Object();
 };
@@ -780,12 +823,13 @@ BOARDFUL.ENGINE.Manager.prototype.get = function (id) {
 // add object
 BOARDFUL.ENGINE.Manager.prototype.add = function (object) {
 	object.id = this.next_id;
+	object.type = object.type || object.constructor.name;
 	if (! ("name" in object)) {
-		object.name = object.constructor.name + "_" + object.id;
+		object.name = object.type + "_" + object.id;
 	}
 	++ this.next_id;
 	this.list[object.id] = object;
-	this.logger.log("info", "add", object.name);
+	this.logger.log("info", "add", object.name, object);
 	return object.id;
 };
 
@@ -885,12 +929,12 @@ BOARDFUL.ENGINE.Room = function (config, owner) {
 // config room
 BOARDFUL.ENGINE.Room.prototype.configRoom = function () {
 	// input config for room
-	console.log("config room");
+	BOARDFUL.Cmdline.output("config room");
 	var that = this;
 	process.stdin.once('data', function (text) {
-		console.log("config room done");
+		BOARDFUL.Cmdline.output("config room done");
 		var game = new BOARDFUL.ENGINE.Game(that);
-		console.log("game start");
+		BOARDFUL.Cmdline.output("game start");
 		game.run();
 	});
 };
