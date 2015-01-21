@@ -112,7 +112,7 @@ var keypress = require('keypress');
 BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	this.type = "Cmdline";
 	this.owner = owner;
-	if (BOARDFUL.Mngr) {
+	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
 	}
 	this.wait_status = "init";
@@ -130,7 +130,7 @@ BOARDFUL.DESKTOP.Cmdline = function (owner) {
 };
 // add listeners
 BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
-	if (undefined === BOARDFUL.Mngr || undefined === BOARDFUL.Mngr.get(this.owner).event_mngr) {
+	if (undefined === this.owner) {
 		return;
 	}
 	var that = this;
@@ -217,7 +217,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
 		var that = this;
 		BOARDFUL.Mngr.get(that.owner).pause();
 		that.waitInput(function (text) {
-			console.log("cmd:", text);
+			BOARDFUL.ENGINE.Command.call(text);
 			return "" == text;
 		}, function (text) {
 			BOARDFUL.Mngr.get(that.owner).resume();
@@ -330,6 +330,7 @@ BOARDFUL.run = function (config) {
 	default:
 		global.jquery = require('jquery');
 		global.$ = jquery.create();
+		BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 		BOARDFUL.DESKTOP.Cmdline.setCmdline();
 		BOARDFUL.DESKTOP.Cmdline.showMenu();
 		break;
@@ -339,7 +340,6 @@ BOARDFUL.run = function (config) {
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
-	BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Logger.add(winston.transports.File, {
 		//filename: 'logs/boardful_' + new Date().toString() + '.log'
@@ -366,7 +366,7 @@ BOARDFUL.init = function () {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	BOARDFUL.Cmdline.output("loading Boardful");
+	console.log("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
 		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
 		for (var i in board_list) {
@@ -408,6 +408,37 @@ BOARDFUL.ENGINE.Card.load = function (config) {
 		break;
 	}
 	return card_list;
+};
+
+/**
+ * Command.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
+
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+
+// command
+BOARDFUL.ENGINE.Command = new Object();
+BOARDFUL.ENGINE.Command.call = function (cmd) {
+	var arg_list = cmd.split();
+	if (0 == arg_list.length) {
+		return;
+	}
+	cmd = arg_list[0];
+	arg_list = arg_list.shift();
+	if (cmd in BOARDFUL.ENGINE.Command.list) {
+		return BOARDFUL.ENGINE.Command.list[cmd](arg_list);
+	} else {
+		console.log("unknow cmd", cmd);
+	}
+};
+BOARDFUL.ENGINE.Command.list = {
+	"why": function () {
+		console.log("because I am rich and bitch");
+	},
 };
 
 /**
@@ -800,7 +831,7 @@ BOARDFUL.ENGINE.Game = function (config) {
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
-	this.cmdline = new BOARDFUL.DESKTOP.Cmdline(this.id);
+	this.ui = new BOARDFUL.DESKTOP.Cmdline(this.id);
 	this.status = "init";
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {

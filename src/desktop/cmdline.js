@@ -14,7 +14,7 @@ var keypress = require('keypress');
 BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	this.type = "Cmdline";
 	this.owner = owner;
-	if (BOARDFUL.Mngr) {
+	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
 	}
 	this.wait_status = "init";
@@ -32,7 +32,7 @@ BOARDFUL.DESKTOP.Cmdline = function (owner) {
 };
 // add listeners
 BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
-	if (undefined === BOARDFUL.Mngr || undefined === BOARDFUL.Mngr.get(this.owner).event_mngr) {
+	if (undefined === this.owner) {
 		return;
 	}
 	var that = this;
@@ -119,7 +119,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
 		var that = this;
 		BOARDFUL.Mngr.get(that.owner).pause();
 		that.waitInput(function (text) {
-			console.log("cmd:", text);
+			BOARDFUL.ENGINE.Command.call(text);
 			return "" == text;
 		}, function (text) {
 			BOARDFUL.Mngr.get(that.owner).resume();

@@ -27,6 +27,7 @@ BOARDFUL.run = function (config) {
 	default:
 		global.jquery = require('jquery');
 		global.$ = jquery.create();
+		BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 		BOARDFUL.DESKTOP.Cmdline.setCmdline();
 		BOARDFUL.DESKTOP.Cmdline.showMenu();
 		break;
@@ -36,7 +37,6 @@ BOARDFUL.run = function (config) {
 BOARDFUL.init = function () {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
-	BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.Logger.add(winston.transports.File, {
 		//filename: 'logs/boardful_' + new Date().toString() + '.log'
@@ -63,7 +63,7 @@ BOARDFUL.init = function () {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	BOARDFUL.Cmdline.output("loading Boardful");
+	console.log("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
 		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
 		for (var i in board_list) {
