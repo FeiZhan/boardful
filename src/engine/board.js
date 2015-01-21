@@ -21,7 +21,7 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 	BOARDFUL.Cmdline.output("loading board", this.config.name);
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
-		var config = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[that.config.package]].content;
+		var config = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[that.config.package]].content;
 		that.createRoom(config);
 	});
 };

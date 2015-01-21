@@ -52,11 +52,11 @@ BOARDFUL.init = function () {
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
-	BOARDFUL.ENGINE.initFileMngr();
+	BOARDFUL.ENGINE.File.initMngr();
 	if ("browser" == BOARDFUL.ENGINE.Envi.type) {
 		BOARDFUL.urlparam = BOARDFUL.ENGINE.parseUrl();
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
-		BOARDFUL.ENGINE.getFilesInHtml();
+		BOARDFUL.ENGINE.File.getFromHtml();
 	}
 };
 // board game list
@@ -65,7 +65,7 @@ BOARDFUL.BoardList = new Array();
 BOARDFUL.loadBoards = function () {
 	console.log("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
-		var board_list = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
+		var board_list = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list["src/engine/gamelist.json"]].content.games;
 		for (var i in board_list) {
 			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]));
 		}

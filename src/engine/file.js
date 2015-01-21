@@ -9,8 +9,9 @@
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 
+BOARDFUL.ENGINE.File = BOARDFUL.ENGINE.File || new Object();
 // init file manager
-BOARDFUL.ENGINE.initFileMngr = function () {
+BOARDFUL.ENGINE.File.initMngr = function () {
 	// file mngr logger
 	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
 	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
@@ -19,27 +20,26 @@ BOARDFUL.ENGINE.initFileMngr = function () {
 	.remove(winston.transports.Console);
 	BOARDFUL.ENGINE.FileLogger.log('info', "----------launch----------");
 };
-
 // file list
-BOARDFUL.ENGINE.FileList = new Object();
+BOARDFUL.ENGINE.File.list = new Object();
 // file list by name
-BOARDFUL.ENGINE.FileNameList = new Object();
-BOARDFUL.ENGINE.NextFileId = 0;
+BOARDFUL.ENGINE.File.name_list = new Object();
+BOARDFUL.ENGINE.File.next_id = 0;
 // add to file list
-BOARDFUL.ENGINE.addToFileList = function (file, content, status) {
+BOARDFUL.ENGINE.File.add = function (file, content, status) {
 	// new file
-	if (! (file in BOARDFUL.ENGINE.FileNameList)) {
-		BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.NextFileId] = {
+	if (! (file in BOARDFUL.ENGINE.File.name_list)) {
+		BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.next_id] = {
 			name: file,
 			type: "",
 			content: content,
 			status: status
 		};
-		BOARDFUL.ENGINE.FileNameList[file] = BOARDFUL.ENGINE.NextFileId;
-		++ BOARDFUL.ENGINE.NextFileId;
+		BOARDFUL.ENGINE.File.name_list[file] = BOARDFUL.ENGINE.File.next_id;
+		++ BOARDFUL.ENGINE.File.next_id;
 	}
 	else {
-		BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[file]] = {
+		BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[file]] = {
 			name: file,
 			content: content,
 			status: status
@@ -47,26 +47,26 @@ BOARDFUL.ENGINE.addToFileList = function (file, content, status) {
 	}
 };
 // get file list in current html
-BOARDFUL.ENGINE.getFilesInHtml = function () {
+BOARDFUL.ENGINE.File.getFromHtml = function () {
 	$("script").each(function () {
-		BOARDFUL.ENGINE.addToFileList($(this).attr("src"), $(this), "loaded");
+		BOARDFUL.ENGINE.File.add($(this).attr("src"), $(this), "loaded");
 	});
-	BOARDFUL.ENGINE.FileLogger.log('info', "files in html", BOARDFUL.ENGINE.FileNameList);
+	BOARDFUL.ENGINE.FileLogger.log('info', "files in html", BOARDFUL.ENGINE.File.name_list);
 };
 
 // load a file
-BOARDFUL.ENGINE.loadFile = function (file) {
+BOARDFUL.ENGINE.File.load = function (file) {
 	switch (BOARDFUL.ENGINE.Envi.type) {
 	case "browser":
-		BOARDFUL.ENGINE.loadFileAjax(file);
+		BOARDFUL.ENGINE.File.loadAjax(file);
 		break;
 	case "nodejs":
 		try {
 			var script = require("../" + file);
-			BOARDFUL.ENGINE.addToFileList(file, script, "loaded");
+			BOARDFUL.ENGINE.File.add(file, script, "loaded");
 			BOARDFUL.ENGINE.FileLogger.log("info", "file loaded", file);
 		} catch (err) {
-			BOARDFUL.ENGINE.addToFileList(file, "", "failed");
+			BOARDFUL.ENGINE.File.add(file, "", "failed");
 			BOARDFUL.ENGINE.FileLogger.log("info", "file failed", file, err);
 		}
 		break;
@@ -75,40 +75,40 @@ BOARDFUL.ENGINE.loadFile = function (file) {
 	}
 }
 // load a file via ajax by browser
-BOARDFUL.ENGINE.loadFileAjax = function (file) {
+BOARDFUL.ENGINE.File.loadAjax = function (file) {
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
 		$.getScript(file)
 			.done(function( script, textStatus ) {
-				BOARDFUL.ENGINE.addToFileList(file, script, "loaded");
+				BOARDFUL.ENGINE.File.add(file, script, "loaded");
 				BOARDFUL.ENGINE.FileLogger.log("info", "js loaded", file);
 			})
 			.fail(function( jqxhr, settings, exception ) {
-				BOARDFUL.ENGINE.addToFileList(file, "", "failed");
+				BOARDFUL.ENGINE.File.add(file, "", "failed");
 				BOARDFUL.ENGINE.FileLogger.log("info", "js failed", file);
 			});
 	}
 	else if (".css" == file.substr(file.length - 4)) {
 		// load a css
 		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', file) );
-		BOARDFUL.ENGINE.addToFileList(file, "", "loaded");
+		BOARDFUL.ENGINE.File.add(file, "", "loaded");
 		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded");
 		BOARDFUL.ENGINE.FileLogger.log("info", file);
 	}
 	else if (".json" == file.substr(file.length - 5)) {
 		$.getJSON(file, function(data, textStatus, jqXHR) {
-			BOARDFUL.ENGINE.addToFileList(file, data, "loaded");
+			BOARDFUL.ENGINE.File.add(file, data, "loaded");
 			BOARDFUL.ENGINE.FileLogger.log("info", "json loaded", file);
 		})
 		.fail(function (jqXHR, textStatus, errorThrown) {
-			BOARDFUL.ENGINE.addToFileList(file, "", "failed");
+			BOARDFUL.ENGINE.File.add(file, "", "failed");
 			BOARDFUL.ENGINE.FileLogger.log("info", "json failed", file);
 		})
 		.always(function(data, textStatus, jqXHR) {
 		});
 	}
 	else {
-		BOARDFUL.ENGINE.addToFileList(file, "", "failed");
+		BOARDFUL.ENGINE.File.add(file, "", "failed");
 		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
 	}
 };
@@ -125,9 +125,9 @@ BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
 	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
 	this.done = true;
 	for (var i in this.list) {
-		if (! (this.list[i] in BOARDFUL.ENGINE.FileNameList) || "loaded" != BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[this.list[i]]].status) {
+		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
 			this.done = false;
-			BOARDFUL.ENGINE.loadFile(this.list[i]);
+			BOARDFUL.ENGINE.File.load(this.list[i]);
 		}
 	}
 	var that = this;
