@@ -39,7 +39,10 @@ BOARDFUL.ENGINE.Logger = function () {
 
 // default logger
 BOARDFUL.ENGINE.DefaultLogger = function () {
-	return console;
+	//return console;
+};
+BOARDFUL.ENGINE.DefaultLogger.prototype.log = function () {
+	return this;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.add = function () {
 	return this;

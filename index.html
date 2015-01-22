@@ -12,12 +12,13 @@
 	<header id="header">
 		<h1>Boardful</h1>
 		<nav>
-			<a href="#">copyright</a>
-			<a href="#">about</a>
+			<a id="copyright" href="#">copyright</a>
+			<a id="about" href="#">about</a>
 		</nav>
 		<menu>
-			<div>options</div>
-			<div>sound</div>
+			<div id="languages">languages</div>
+			<div id="options">options</div>
+			<div id="sound">sound</div>
 		</menu>
 	</header>
 	<div id="content">
@@ -26,7 +27,8 @@
 </body>
 <script>
 $(function() {
-	BOARDFUL.run("browser");
+	BOARDFUL.init("browser");
+	BOARDFUL.BRSR.run();
 });
 </script>
 </html>

@@ -16,6 +16,8 @@ body {
 }
 #header menu div {
 	float: left;
+	margin: 5px;
+    cursor: pointer;
 }
 #content {
 	position: absolute;

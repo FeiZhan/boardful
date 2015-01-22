@@ -1,29 +1,32 @@
-#boardlist {
+#detail {
 	border: 1px solid black;
 	position: absolute;
 	top: 5%;
 	left: 5%;
-	height: 90%;
-	width: 40%;
+	height: 10%;
+	width: 90%;
 }
-#boardlist li.active {
-	background-color: #E9E581;
-}
-#descrip {
+
+#players {
 	border: 1px solid black;
 	position: absolute;
-	top: 5%;
-	left: 55%;
+	top: 20%;
+	left: 5%;
 	height: 75%;
 	width: 40%;
 }
+
+#options {
+	border: 1px solid black;
+	position: absolute;
+	top: 20%;
+	left: 55%;
+	height: 60%;
+	width: 40%;
+}
+
 button#ok {
 	position: absolute;
 	top: 85%;
 	left: 75%;
-}
-button#exit {
-	position: absolute;
-	top: 85%;
-	left: 85%;
 }

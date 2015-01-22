@@ -6,6 +6,8 @@
  * 
 **/
 
+var jquery = require('jquery');
+var $ = jquery.create();
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.engine.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
@@ -156,12 +158,13 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
 		for (var i in BOARDFUL.BoardList) {
-			console.log(i + ". " + BOARDFUL.BoardList[i].config.name);
-			console.log("\t" + BOARDFUL.BoardList[i].config.descrip);
+			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
+			console.log(i + ". " + board.config.name);
+			console.log("\t" + board.config.descrip);
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			BOARDFUL.BoardList[parseInt(text)].load();
+			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load();
 		});
 	}
 	else {
@@ -170,4 +173,7 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 };
 
 // launch project in desktop
-BOARDFUL.run("desktop");
+BOARDFUL.init("desktop");
+BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
+BOARDFUL.DESKTOP.Cmdline.setCmdline();
+BOARDFUL.DESKTOP.Cmdline.showMenu();

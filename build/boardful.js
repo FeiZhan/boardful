@@ -1,4 +1,3 @@
-
 /**
 * Game.
 *
@@ -19,66 +18,67 @@ BOARDFUL.GAME.init = function (config) {
 };
 
 /**
-* Loader of menus.
-*
-* @author  Fei Zhan
-* @version 0.0
-*/
+ * Menus.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.MENUS = BOARDFUL.MENUS || new Object();
+BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
-BOARDFUL.MENUS.GameList = new Object();
-BOARDFUL.MENUS.run = function () {
+// launch in browser
+BOARDFUL.BRSR.run = function () {
+	$('#header #options').click(function () {
+		console.log("options");
+	});
 	$("#content").empty();
-	$("#content").load("src/browser/menu0.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/menu0.css", "src/engine/gamelist.json"], function () {
-		BOARDFUL.MENUS.GameList = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList["src/engine/gamelist.json"]].content.games;
-		BOARDFUL.MENUS.loadGameList(BOARDFUL.MENUS.GameList);
-	});
-};
-BOARDFUL.MENUS.Selected = undefined;
-BOARDFUL.MENUS.loadGameList = function (list) {
-	$("#content button#ok").click(function () {
-		if (undefined === BOARDFUL.MENUS.Selected || ! (BOARDFUL.MENUS.Selected in BOARDFUL.MENUS.GameList)) {
-			return;
-		}
-		BOARDFUL.MENUS.roomStart(BOARDFUL.MENUS.GameList[BOARDFUL.MENUS.Selected]);
-	});
-	for (var i in list) {
-		$("#content #gamelist ul").append('<li id="' + i + '">' + list[i].name + "</li>");
-		$("#content #gamelist ul li:last").click(function () {
-			BOARDFUL.MENUS.Selected = $(this).attr('id');
-			$("#content #gamelist li").removeClass("active");
-			$(this).addClass("active");
-			$("#content #descrip").empty();
-			$("#content #descrip").append(list[BOARDFUL.MENUS.Selected].descrip);
+	// load menu0
+	$("#content").load("src/browser/menu0.html", function () {
+		$('#content #main #local').click(function () {
+			BOARDFUL.BRSR.loadMenu1();
 		});
-	}
+		$('#content #secondary #options').click(function () {
+			console.log("options");
+		});
+	});
+	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
 };
-
-/**
-* Loader of menus.
-*
-* @author  Fei Zhan
-* @version 0.0
-*/
-
-var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.MENUS = BOARDFUL.MENUS || new Object();
-
-BOARDFUL.MENUS.GamePackage = new Object();
-BOARDFUL.MENUS.roomStart = function (game) {
+BOARDFUL.BRSR.Selected = undefined;
+// load menu1
+BOARDFUL.BRSR.loadMenu1 = function () {
+	$("#content").load("src/browser/menu1.html", function () {
+		$("#content button#ok").click(function () {
+			if (undefined === BOARDFUL.BRSR.Selected || ! (BOARDFUL.BRSR.Selected in BOARDFUL.BRSR.GameList)) {
+				return;
+			}
+			BOARDFUL.BRSR.roomStart(BOARDFUL.BRSR.GameList[BOARDFUL.BRSR.Selected]);
+		});
+		for (var i in BOARDFUL.BoardList) {
+			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
+			$("#content #boardlist ul").append('<li id="' + i + '">' + board.name + "</li>");
+			$("#content #boardlist ul li:last").click(function () {
+				BOARDFUL.BRSR.Selected = $(this).attr('id');
+				$("#content #boardlist li").removeClass("active");
+				$(this).addClass("active");
+				$("#content #descrip").html(board.descrip);
+			});
+		}
+	});
+	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
+};
+BOARDFUL.BRSR.GamePackage = new Object();
+BOARDFUL.BRSR.roomStart = function (game) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu1.html");
 	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/menu1.css", game.package], function () {
-		BOARDFUL.MENUS.GamePackage = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
-		BOARDFUL.MENUS.setRoom(BOARDFUL.MENUS.GamePackage);
+		BOARDFUL.BRSR.GamePackage = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
+		BOARDFUL.BRSR.setRoom(BOARDFUL.BRSR.GamePackage);
 	});
 };
-BOARDFUL.MENUS.setRoom = function (package) {
+BOARDFUL.BRSR.setRoom = function (package) {
 	$("#content button#ok").on("click", function () {
-		BOARDFUL.GAME.init(BOARDFUL.MENUS.GamePackage);
+		BOARDFUL.GAME.init(BOARDFUL.BRSR.GamePackage);
 	});
 	$("#content #name").html(package.name);
 	$("#content #descrip1").html(package.descrip);
@@ -95,7 +95,6 @@ BOARDFUL.MENUS.setRoom = function (package) {
 	}
 };
 
-
 /**
  * Command line interface.
  *
@@ -104,6 +103,8 @@ BOARDFUL.MENUS.setRoom = function (package) {
  * 
 **/
 
+var jquery = require('jquery');
+var $ = jquery.create();
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.engine.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
@@ -254,12 +255,13 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
 		for (var i in BOARDFUL.BoardList) {
-			console.log(i + ". " + BOARDFUL.BoardList[i].config.name);
-			console.log("\t" + BOARDFUL.BoardList[i].config.descrip);
+			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
+			console.log(i + ". " + board.config.name);
+			console.log("\t" + board.config.descrip);
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			BOARDFUL.BoardList[parseInt(text)].load();
+			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load();
 		});
 	}
 	else {
@@ -268,7 +270,10 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 };
 
 // launch project in desktop
-BOARDFUL.run("desktop");
+BOARDFUL.init("desktop");
+BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
+BOARDFUL.DESKTOP.Cmdline.setCmdline();
+BOARDFUL.DESKTOP.Cmdline.showMenu();
 
 /**
  * Board game.
@@ -325,50 +330,22 @@ if ('undefined' !== typeof module) {
 }
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
-// run
-BOARDFUL.run = function (config) {
-	BOARDFUL.init();
-	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
-	BOARDFUL.loadBoards();
-	BOARDFUL.Logger.log('info', "launch type", config);
-	switch (config) {
-	case "server":
-		BOARDFUL.SERVER.port = process.argv[3] || 8080;
-		BOARDFUL.SERVER.createServer();
-		break;
-	case "browser":
-		BOARDFUL.MENUS.run();
-		break;
-	case "desktop":
-	default:
-		global.jquery = require('jquery');
-		global.$ = jquery.create();
-		BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
-		BOARDFUL.DESKTOP.Cmdline.setCmdline();
-		BOARDFUL.DESKTOP.Cmdline.showMenu();
-		break;
-	}
-};
 // init
-BOARDFUL.init = function () {
+BOARDFUL.init = function (config) {
 	BOARDFUL.ENGINE.checkEnvi();
 	// create logger
 	BOARDFUL.Logger = new BOARDFUL.ENGINE.Logger();
-	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
-		BOARDFUL.Logger.add(winston.transports.File, {
-			//filename: 'logs/boardful_' + new Date().toString() + '.log'
-			filename: 'logs/boardful.log'
-		})
-		.remove(winston.transports.Console);
-	}
+	BOARDFUL.Logger.add(winston.transports.File, {
+		//filename: 'logs/boardful_' + new Date().toString() + '.log'
+		filename: 'logs/boardful.log'
+	})
+	.remove(winston.transports.Console);
 	BOARDFUL.Logger.log('info', "----------launch----------");
 	BOARDFUL.Debugger = new BOARDFUL.ENGINE.Logger();
-	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
-		BOARDFUL.Debugger.add(winston.transports.File, {
-			filename: 'logs/debug.log'
-		})
-		.remove(winston.transports.Console);
-	}
+	BOARDFUL.Debugger.add(winston.transports.File, {
+		filename: 'logs/debug.log'
+	})
+	.remove(winston.transports.Console);
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
 	BOARDFUL.Logger.log('info', "environment", BOARDFUL.ENGINE.Envi);
@@ -378,17 +355,20 @@ BOARDFUL.init = function () {
 		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
 		BOARDFUL.ENGINE.File.getFromHtml();
 	}
+	BOARDFUL.Mngr = new BOARDFUL.ENGINE.Manager();
+	BOARDFUL.loadBoards();
+	BOARDFUL.Logger.log('info', "launch type", config);
 };
 // board game list
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	console.log("loading Boardful");
 	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
 		var board_list = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list["src/engine/gamelist.json"]].content.games;
 		for (var i in board_list) {
-			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]));
+			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]).id);
 		}
+		console.log("loaded Boardful");
 	});
 	
 };
@@ -749,12 +729,10 @@ BOARDFUL.ENGINE.File = BOARDFUL.ENGINE.File || new Object();
 BOARDFUL.ENGINE.File.init = function () {
 	// file mngr logger
 	BOARDFUL.ENGINE.FileLogger = new BOARDFUL.ENGINE.Logger();
-	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
-		BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
-			filename: 'logs/file.log'
-		})
-		.remove(winston.transports.Console);
-	}
+	BOARDFUL.ENGINE.FileLogger.add(winston.transports.File, {
+		filename: 'logs/file.log'
+	})
+	.remove(winston.transports.Console);
 	BOARDFUL.ENGINE.FileLogger.log('info', "----------launch----------");
 };
 // file list
@@ -1145,7 +1123,10 @@ BOARDFUL.ENGINE.Logger = function () {
 
 // default logger
 BOARDFUL.ENGINE.DefaultLogger = function () {
-	return console;
+	//return console;
+};
+BOARDFUL.ENGINE.DefaultLogger.prototype.log = function () {
+	return this;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.add = function () {
 	return this;
@@ -1186,12 +1167,10 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 // object manager
 BOARDFUL.ENGINE.Manager = function () {
 	this.logger = new BOARDFUL.ENGINE.Logger();
-	if ("nodejs" == BOARDFUL.ENGINE.Envi.type) {
-		this.logger.add(winston.transports.File, {
-			filename: 'logs/mngr.log'
-		})
-		.remove(winston.transports.Console);
-	}
+	this.logger.add(winston.transports.File, {
+		filename: 'logs/mngr.log'
+	})
+	.remove(winston.transports.Console);
 	this.logger.log('info', "----------launch----------");
 	this.next_id = 0;
 	this.list = new Object();
@@ -1603,7 +1582,9 @@ BOARDFUL.SERVER.createServer = function () {
 };
 
 // launch project
-BOARDFUL.run("server");
+BOARDFUL.init("server");
+BOARDFUL.SERVER.port = process.argv[3] || 8080;
+BOARDFUL.SERVER.createServer();
 
 
 /**

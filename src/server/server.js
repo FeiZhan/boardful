@@ -57,4 +57,6 @@ BOARDFUL.SERVER.createServer = function () {
 };
 
 // launch project
-BOARDFUL.run("server");
+BOARDFUL.init("server");
+BOARDFUL.SERVER.port = process.argv[3] || 8080;
+BOARDFUL.SERVER.createServer();
