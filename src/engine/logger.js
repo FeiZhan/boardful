@@ -42,6 +42,7 @@ BOARDFUL.ENGINE.DefaultLogger = function () {
 	//return console;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.log = function () {
+	//console.log.apply(console, arguments);
 	return this;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.add = function () {

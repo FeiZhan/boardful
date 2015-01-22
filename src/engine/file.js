@@ -70,12 +70,12 @@ BOARDFUL.ENGINE.FileLoader = function (list, callback) {
 };
 // load files and wait
 BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
-	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
 	this.done = true;
 	for (var i in this.list) {
 		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
 			this.done = false;
 			this.loadFile(this.list[i]);
+			BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list[i]);
 		}
 	}
 	var that = this;
@@ -112,9 +112,10 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByRequire = function (file) {
 };
 // load a file via ajax by browser
 BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
+	var true_file = "../" + file;
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
-		$.getScript(file)
+		$.getScript(true_file)
 			.done(function( script, textStatus ) {
 				BOARDFUL.ENGINE.File.add(file, script, "loaded");
 				BOARDFUL.ENGINE.FileLogger.log("info", "js loaded", file);
@@ -126,13 +127,12 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 	}
 	else if (".css" == file.substr(file.length - 4)) {
 		// load a css
-		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', file) );
+		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', true_file) );
 		BOARDFUL.ENGINE.File.add(file, "", "loaded");
-		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded");
-		BOARDFUL.ENGINE.FileLogger.log("info", file);
+		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded", file);
 	}
 	else if (".json" == file.substr(file.length - 5)) {
-		$.getJSON(file, function(data, textStatus, jqXHR) {
+		$.getJSON(true_file, function(data, textStatus, jqXHR) {
 			BOARDFUL.ENGINE.File.add(file, data, "loaded");
 			BOARDFUL.ENGINE.FileLogger.log("info", "json loaded", file);
 		})
@@ -144,7 +144,7 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 		});
 	}
 	else {
-		BOARDFUL.ENGINE.File.add(file, "", "failed");
+		BOARDFUL.ENGINE.File.add(file, "", "loaded");
 		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
 	}
 };

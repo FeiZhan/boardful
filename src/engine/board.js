@@ -15,10 +15,10 @@ BOARDFUL.ENGINE.Board = function (config, owner) {
 	this.name = config.name;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
+	this.room_list = new Array();
 };
 // load board game
-BOARDFUL.ENGINE.Board.prototype.load = function () {
-	BOARDFUL.Cmdline.output("loading board", this.config.name);
+BOARDFUL.ENGINE.Board.prototype.load = function (callback) {
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
 		var config = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[that.config.package]].content;
@@ -28,12 +28,15 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 					BOARDFUL.ENGINE.File.setToMods(config.files[i]);
 				}
 			}
-			that.createRoom(config);
+			console.log("loaded board game", that.name);
+			that.createRoom(config, callback);
 		});
 	});
 };
 // create room
-BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
+BOARDFUL.ENGINE.Board.prototype.createRoom = function (config, callback) {
 	var room = new BOARDFUL.ENGINE.Room(config, this.id);
-	room.configRoom();
+	this.room_list.push(room);
+	//room.configRoom();
+	return callback(room.id);
 };

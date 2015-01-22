@@ -28,50 +28,49 @@ BOARDFUL.BRSR.run = function () {
 BOARDFUL.BRSR.Selected = undefined;
 // load menu1
 BOARDFUL.BRSR.loadMenu1 = function () {
+	$("#content").empty();
 	$("#content").load("src/browser/menu1.html", function () {
 		$("#content button#ok").click(function () {
-			if (undefined === BOARDFUL.BRSR.Selected || ! (BOARDFUL.BRSR.Selected in BOARDFUL.BRSR.GameList)) {
+			if (undefined === BOARDFUL.BRSR.Selected) {
 				return;
 			}
-			BOARDFUL.BRSR.roomStart(BOARDFUL.BRSR.GameList[BOARDFUL.BRSR.Selected]);
+			var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+			board.load(BOARDFUL.BRSR.loadMenu2);
 		});
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			$("#content #boardlist ul").append('<li id="' + i + '">' + board.name + "</li>");
+			$("#content #boardlist ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
 			$("#content #boardlist ul li:last").click(function () {
 				BOARDFUL.BRSR.Selected = $(this).attr('id');
 				$("#content #boardlist li").removeClass("active");
 				$(this).addClass("active");
-				$("#content #descrip").html(board.descrip);
+				$("#content #descrip").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.descrip);
 			});
 		}
 	});
 	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
 };
-BOARDFUL.BRSR.GamePackage = new Object();
-BOARDFUL.BRSR.roomStart = function (game) {
+// load menu2
+BOARDFUL.BRSR.loadMenu2 = function (id) {
+	var room = BOARDFUL.Mngr.get(id);
 	$("#content").empty();
-	$("#content").load("src/browser/menu1.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/menu1.css", game.package], function () {
-		BOARDFUL.BRSR.GamePackage = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
-		BOARDFUL.BRSR.setRoom(BOARDFUL.BRSR.GamePackage);
-	});
-};
-BOARDFUL.BRSR.setRoom = function (package) {
-	$("#content button#ok").on("click", function () {
-		BOARDFUL.GAME.init(BOARDFUL.BRSR.GamePackage);
-	});
-	$("#content #name").html(package.name);
-	$("#content #descrip1").html(package.descrip);
-	$("#content #players").append("<div><span>me</span></div>");
-	for (var i = 1; i < package.max_players; ++ i) {
-		$("#content #players").append("<div><span>empty</span></div>");
-	}
-	for (var i in package.options) {
-		$("#content #options").append('<div id="' + i + '"></div>');
-		$("#content #options #" + i).append('<span>' + i + '</span><select></select>');
-		for (var j in package.options[i].value) {
-			$("#content #options #" + i + " select").append('<option value="' + package.options[i].value[j] + '">' + package.options[i].value[j] + '</option>');
+	$("#content").load("src/browser/menu2.html", function () {
+		$("#content button#ok").on("click", function () {
+			console.log("game start");
+		});
+		$("#content #name").html(room.config.name);
+		$("#content #descrip1").html(room.config.descrip);
+		$("#content #players").append("<div><span>me</span></div>");
+		for (var i = 1; i < room.config.max_players; ++ i) {
+			$("#content #players").append("<div><span>empty</span></div>");
 		}
-	}
+		for (var i in room.config.options) {
+			$("#content #roomoptions").append('<div id="' + i + '"></div>');
+			$("#content #roomoptions #" + i).append('<span>' + i + '</span><select></select>');
+			for (var j in room.options[i].value) {
+				$("#content #roomoptions #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.options[i].value[j] + '</option>');
+			}
+		}
+	});
+	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };

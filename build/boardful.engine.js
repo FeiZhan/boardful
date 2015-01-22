@@ -15,10 +15,10 @@ BOARDFUL.ENGINE.Board = function (config, owner) {
 	this.name = config.name;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
+	this.room_list = new Array();
 };
 // load board game
-BOARDFUL.ENGINE.Board.prototype.load = function () {
-	BOARDFUL.Cmdline.output("loading board", this.config.name);
+BOARDFUL.ENGINE.Board.prototype.load = function (callback) {
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
 		var config = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[that.config.package]].content;
@@ -28,14 +28,17 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 					BOARDFUL.ENGINE.File.setToMods(config.files[i]);
 				}
 			}
-			that.createRoom(config);
+			console.log("loaded board game", that.name);
+			that.createRoom(config, callback);
 		});
 	});
 };
 // create room
-BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
+BOARDFUL.ENGINE.Board.prototype.createRoom = function (config, callback) {
 	var room = new BOARDFUL.ENGINE.Room(config, this.id);
-	room.configRoom();
+	this.room_list.push(room);
+	//room.configRoom();
+	return callback(room.id);
 };
 
 /**
@@ -508,12 +511,12 @@ BOARDFUL.ENGINE.FileLoader = function (list, callback) {
 };
 // load files and wait
 BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
-	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
 	this.done = true;
 	for (var i in this.list) {
 		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
 			this.done = false;
 			this.loadFile(this.list[i]);
+			BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list[i]);
 		}
 	}
 	var that = this;
@@ -550,9 +553,10 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByRequire = function (file) {
 };
 // load a file via ajax by browser
 BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
+	var true_file = "../" + file;
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
-		$.getScript(file)
+		$.getScript(true_file)
 			.done(function( script, textStatus ) {
 				BOARDFUL.ENGINE.File.add(file, script, "loaded");
 				BOARDFUL.ENGINE.FileLogger.log("info", "js loaded", file);
@@ -564,13 +568,12 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 	}
 	else if (".css" == file.substr(file.length - 4)) {
 		// load a css
-		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', file) );
+		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', true_file) );
 		BOARDFUL.ENGINE.File.add(file, "", "loaded");
-		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded");
-		BOARDFUL.ENGINE.FileLogger.log("info", file);
+		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded", file);
 	}
 	else if (".json" == file.substr(file.length - 5)) {
-		$.getJSON(file, function(data, textStatus, jqXHR) {
+		$.getJSON(true_file, function(data, textStatus, jqXHR) {
 			BOARDFUL.ENGINE.File.add(file, data, "loaded");
 			BOARDFUL.ENGINE.FileLogger.log("info", "json loaded", file);
 		})
@@ -582,7 +585,7 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 		});
 	}
 	else {
-		BOARDFUL.ENGINE.File.add(file, "", "failed");
+		BOARDFUL.ENGINE.File.add(file, "", "loaded");
 		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
 	}
 };
@@ -849,6 +852,7 @@ BOARDFUL.ENGINE.DefaultLogger = function () {
 	//return console;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.log = function () {
+	//console.log.apply(console, arguments);
 	return this;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.add = function () {

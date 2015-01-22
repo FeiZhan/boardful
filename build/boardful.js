@@ -47,52 +47,51 @@ BOARDFUL.BRSR.run = function () {
 BOARDFUL.BRSR.Selected = undefined;
 // load menu1
 BOARDFUL.BRSR.loadMenu1 = function () {
+	$("#content").empty();
 	$("#content").load("src/browser/menu1.html", function () {
 		$("#content button#ok").click(function () {
-			if (undefined === BOARDFUL.BRSR.Selected || ! (BOARDFUL.BRSR.Selected in BOARDFUL.BRSR.GameList)) {
+			if (undefined === BOARDFUL.BRSR.Selected) {
 				return;
 			}
-			BOARDFUL.BRSR.roomStart(BOARDFUL.BRSR.GameList[BOARDFUL.BRSR.Selected]);
+			var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+			board.load(BOARDFUL.BRSR.loadMenu2);
 		});
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			$("#content #boardlist ul").append('<li id="' + i + '">' + board.name + "</li>");
+			$("#content #boardlist ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
 			$("#content #boardlist ul li:last").click(function () {
 				BOARDFUL.BRSR.Selected = $(this).attr('id');
 				$("#content #boardlist li").removeClass("active");
 				$(this).addClass("active");
-				$("#content #descrip").html(board.descrip);
+				$("#content #descrip").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.descrip);
 			});
 		}
 	});
 	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
 };
-BOARDFUL.BRSR.GamePackage = new Object();
-BOARDFUL.BRSR.roomStart = function (game) {
+// load menu2
+BOARDFUL.BRSR.loadMenu2 = function (id) {
+	var room = BOARDFUL.Mngr.get(id);
 	$("#content").empty();
-	$("#content").load("src/browser/menu1.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/menu1.css", game.package], function () {
-		BOARDFUL.BRSR.GamePackage = BOARDFUL.ENGINE.FileList[BOARDFUL.ENGINE.FileNameList[game.package]].content;
-		BOARDFUL.BRSR.setRoom(BOARDFUL.BRSR.GamePackage);
-	});
-};
-BOARDFUL.BRSR.setRoom = function (package) {
-	$("#content button#ok").on("click", function () {
-		BOARDFUL.GAME.init(BOARDFUL.BRSR.GamePackage);
-	});
-	$("#content #name").html(package.name);
-	$("#content #descrip1").html(package.descrip);
-	$("#content #players").append("<div><span>me</span></div>");
-	for (var i = 1; i < package.max_players; ++ i) {
-		$("#content #players").append("<div><span>empty</span></div>");
-	}
-	for (var i in package.options) {
-		$("#content #options").append('<div id="' + i + '"></div>');
-		$("#content #options #" + i).append('<span>' + i + '</span><select></select>');
-		for (var j in package.options[i].value) {
-			$("#content #options #" + i + " select").append('<option value="' + package.options[i].value[j] + '">' + package.options[i].value[j] + '</option>');
+	$("#content").load("src/browser/menu2.html", function () {
+		$("#content button#ok").on("click", function () {
+			console.log("game start");
+		});
+		$("#content #name").html(room.config.name);
+		$("#content #descrip1").html(room.config.descrip);
+		$("#content #players").append("<div><span>me</span></div>");
+		for (var i = 1; i < room.config.max_players; ++ i) {
+			$("#content #players").append("<div><span>empty</span></div>");
 		}
-	}
+		for (var i in room.config.options) {
+			$("#content #roomoptions").append('<div id="' + i + '"></div>');
+			$("#content #roomoptions #" + i).append('<span>' + i + '</span><select></select>');
+			for (var j in room.options[i].value) {
+				$("#content #roomoptions #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.options[i].value[j] + '</option>');
+			}
+		}
+	});
+	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };
 
 /**
@@ -292,10 +291,10 @@ BOARDFUL.ENGINE.Board = function (config, owner) {
 	this.name = config.name;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
+	this.room_list = new Array();
 };
 // load board game
-BOARDFUL.ENGINE.Board.prototype.load = function () {
-	BOARDFUL.Cmdline.output("loading board", this.config.name);
+BOARDFUL.ENGINE.Board.prototype.load = function (callback) {
 	var that = this;
 	var load = new BOARDFUL.ENGINE.FileLoader([this.config.package], function () {
 		var config = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[that.config.package]].content;
@@ -305,14 +304,17 @@ BOARDFUL.ENGINE.Board.prototype.load = function () {
 					BOARDFUL.ENGINE.File.setToMods(config.files[i]);
 				}
 			}
-			that.createRoom(config);
+			console.log("loaded board game", that.name);
+			that.createRoom(config, callback);
 		});
 	});
 };
 // create room
-BOARDFUL.ENGINE.Board.prototype.createRoom = function (config) {
+BOARDFUL.ENGINE.Board.prototype.createRoom = function (config, callback) {
 	var room = new BOARDFUL.ENGINE.Room(config, this.id);
-	room.configRoom();
+	this.room_list.push(room);
+	//room.configRoom();
+	return callback(room.id);
 };
 
 /**
@@ -785,12 +787,12 @@ BOARDFUL.ENGINE.FileLoader = function (list, callback) {
 };
 // load files and wait
 BOARDFUL.ENGINE.FileLoader.prototype.load = function () {
-	BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list);
 	this.done = true;
 	for (var i in this.list) {
 		if (! (this.list[i] in BOARDFUL.ENGINE.File.name_list) || "loaded" != BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list[this.list[i]]].status) {
 			this.done = false;
 			this.loadFile(this.list[i]);
+			BOARDFUL.ENGINE.FileLogger.log("info", "loading", this.list[i]);
 		}
 	}
 	var that = this;
@@ -827,9 +829,10 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByRequire = function (file) {
 };
 // load a file via ajax by browser
 BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
+	var true_file = "../" + file;
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
-		$.getScript(file)
+		$.getScript(true_file)
 			.done(function( script, textStatus ) {
 				BOARDFUL.ENGINE.File.add(file, script, "loaded");
 				BOARDFUL.ENGINE.FileLogger.log("info", "js loaded", file);
@@ -841,13 +844,12 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 	}
 	else if (".css" == file.substr(file.length - 4)) {
 		// load a css
-		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', file) );
+		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', true_file) );
 		BOARDFUL.ENGINE.File.add(file, "", "loaded");
-		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded");
-		BOARDFUL.ENGINE.FileLogger.log("info", file);
+		BOARDFUL.ENGINE.FileLogger.log("info", "css loaded", file);
 	}
 	else if (".json" == file.substr(file.length - 5)) {
-		$.getJSON(file, function(data, textStatus, jqXHR) {
+		$.getJSON(true_file, function(data, textStatus, jqXHR) {
 			BOARDFUL.ENGINE.File.add(file, data, "loaded");
 			BOARDFUL.ENGINE.FileLogger.log("info", "json loaded", file);
 		})
@@ -859,7 +861,7 @@ BOARDFUL.ENGINE.FileLoader.prototype.loadByAjax = function (file) {
 		});
 	}
 	else {
-		BOARDFUL.ENGINE.File.add(file, "", "failed");
+		BOARDFUL.ENGINE.File.add(file, "", "loaded");
 		BOARDFUL.ENGINE.FileLogger.log("info", "file unknown", file);
 	}
 };
@@ -1126,6 +1128,7 @@ BOARDFUL.ENGINE.DefaultLogger = function () {
 	//return console;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.log = function () {
+	//console.log.apply(console, arguments);
 	return this;
 };
 BOARDFUL.ENGINE.DefaultLogger.prototype.add = function () {
