@@ -260,13 +260,14 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function () {
+			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function (id) {
+				var room = BOARDFUL.Mngr.get(id);
 				// input config for room
 				BOARDFUL.Cmdline.output("config room");
 				var that = this;
 				process.stdin.once('data', function (text) {
 					BOARDFUL.Cmdline.output("config room done");
-					var game = new BOARDFUL.ENGINE.Game(BOARDFUL.BoardList[parseInt(text)]);
+					var game = new BOARDFUL.ENGINE.Game(room);
 					BOARDFUL.Cmdline.output("game start");
 					game.run();
 				});
@@ -890,7 +891,7 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 // game
 BOARDFUL.ENGINE.Game = function (config) {
 	this.type = "Game";
-	this.owner = undefined;
+	this.owner = config.id;
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
 	this.ui = new BOARDFUL.DESKTOP.Cmdline(this.id);
@@ -993,7 +994,6 @@ BOARDFUL.ENGINE.Game.prototype.resume = function () {
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
-	console.log(this.deck_list, this);
 	this.round = 0;
 	var event_list = new Array();
 	var event = new BOARDFUL.ENGINE.Event({
@@ -1596,7 +1596,9 @@ BOARDFUL.SERVER.createServer();
  * @version		0.0
  * 
 **/
-var BOARDFUL = require("../../build/boardful.engine.js");
+if (typeof module !== 'undefined' && module.exports) {
+	var BOARDFUL = require("../../build/boardful.engine.js");
+}
 
 // poker
 var Poker = function (owner) {
@@ -1605,7 +1607,7 @@ var Poker = function (owner) {
 	BOARDFUL.Mngr.add(this);
 	this.card_list = this.createCards();
 };
-if (module) {
+if (typeof module !== 'undefined' && module.exports) {
 	module.exports.Poker = Poker;
 }
 // create cards

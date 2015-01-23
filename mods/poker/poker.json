@@ -3,6 +3,7 @@
 	"name": "poker",
 	"descrip": "description of poker",
 	"files": [
+		"mods/poker/poker.js",
 		"mods/poker/ai.js"
 	],
 	"max_players": "10",

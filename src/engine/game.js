@@ -11,7 +11,7 @@ BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
 // game
 BOARDFUL.ENGINE.Game = function (config) {
 	this.type = "Game";
-	this.owner = undefined;
+	this.owner = config.id;
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
 	this.ui = new BOARDFUL.DESKTOP.Cmdline(this.id);
@@ -114,7 +114,6 @@ BOARDFUL.ENGINE.Game.prototype.resume = function () {
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
-	console.log(this.deck_list, this);
 	this.round = 0;
 	var event_list = new Array();
 	var event = new BOARDFUL.ENGINE.Event({

@@ -164,13 +164,14 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function () {
+			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function (id) {
+				var room = BOARDFUL.Mngr.get(id);
 				// input config for room
 				BOARDFUL.Cmdline.output("config room");
 				var that = this;
 				process.stdin.once('data', function (text) {
 					BOARDFUL.Cmdline.output("config room done");
-					var game = new BOARDFUL.ENGINE.Game(BOARDFUL.BoardList[parseInt(text)]);
+					var game = new BOARDFUL.ENGINE.Game(room);
 					BOARDFUL.Cmdline.output("game start");
 					game.run();
 				});

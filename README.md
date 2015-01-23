@@ -1,6 +1,6 @@
 # boardful
 
-- install nodejs and npm;
+- install nodejs and npm
 - install grunt-cli
 
 ```

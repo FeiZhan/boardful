@@ -5,7 +5,9 @@
  * @version		0.0
  * 
 **/
-var BOARDFUL = require("../../build/boardful.engine.js");
+if (typeof module !== 'undefined' && module.exports) {
+	var BOARDFUL = require("../../build/boardful.engine.js");
+}
 
 // poker
 var Poker = function (owner) {
@@ -14,7 +16,7 @@ var Poker = function (owner) {
 	BOARDFUL.Mngr.add(this);
 	this.card_list = this.createCards();
 };
-if (module) {
+if (typeof module !== 'undefined' && module.exports) {
 	module.exports.Poker = Poker;
 }
 // create cards
