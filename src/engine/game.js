@@ -114,6 +114,7 @@ BOARDFUL.ENGINE.Game.prototype.resume = function () {
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
+	console.log(this.deck_list, this);
 	this.round = 0;
 	var event_list = new Array();
 	var event = new BOARDFUL.ENGINE.Event({

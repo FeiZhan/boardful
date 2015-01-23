@@ -260,7 +260,17 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
-			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load();
+			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function () {
+				// input config for room
+				BOARDFUL.Cmdline.output("config room");
+				var that = this;
+				process.stdin.once('data', function (text) {
+					BOARDFUL.Cmdline.output("config room done");
+					var game = new BOARDFUL.ENGINE.Game(BOARDFUL.BoardList[parseInt(text)]);
+					BOARDFUL.Cmdline.output("game start");
+					game.run();
+				});
+			});
 		});
 	}
 	else {
@@ -313,7 +323,6 @@ BOARDFUL.ENGINE.Board.prototype.load = function (callback) {
 BOARDFUL.ENGINE.Board.prototype.createRoom = function (config, callback) {
 	var room = new BOARDFUL.ENGINE.Room(config, this.id);
 	this.room_list.push(room);
-	//room.configRoom();
 	if ("function" == typeof callback) {
 		return callback(room.id);
 	}
@@ -984,6 +993,7 @@ BOARDFUL.ENGINE.Game.prototype.resume = function () {
 };
 // start game
 BOARDFUL.ENGINE.Game.prototype.start = function (arg) {
+	console.log(this.deck_list, this);
 	this.round = 0;
 	var event_list = new Array();
 	var event = new BOARDFUL.ENGINE.Event({
@@ -1290,19 +1300,6 @@ BOARDFUL.ENGINE.Room = function (config, owner) {
 	this.options = config.options;
 	this.player_list = config.player_list || ["me", "ai"];
 };
-// config room
-BOARDFUL.ENGINE.Room.prototype.configRoom = function () {
-	// input config for room
-	BOARDFUL.Cmdline.output("config room");
-	var that = this;
-	process.stdin.once('data', function (text) {
-		BOARDFUL.Cmdline.output("config room done");
-		var game = new BOARDFUL.ENGINE.Game(that);
-		BOARDFUL.Cmdline.output("game start");
-		game.run();
-	});
-};
-
 /**
  * Table.
  *
