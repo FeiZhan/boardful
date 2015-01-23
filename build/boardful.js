@@ -102,8 +102,8 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
  * 
 **/
 
-var jquery = require('jquery');
-var $ = jquery.create();
+var $ = require('jquery');
+//var $ = jquery.create();
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.engine.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
@@ -314,7 +314,9 @@ BOARDFUL.ENGINE.Board.prototype.createRoom = function (config, callback) {
 	var room = new BOARDFUL.ENGINE.Room(config, this.id);
 	this.room_list.push(room);
 	//room.configRoom();
-	return callback(room.id);
+	if ("function" == typeof callback) {
+		return callback(room.id);
+	}
 };
 
 /**

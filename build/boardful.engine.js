@@ -38,7 +38,9 @@ BOARDFUL.ENGINE.Board.prototype.createRoom = function (config, callback) {
 	var room = new BOARDFUL.ENGINE.Room(config, this.id);
 	this.room_list.push(room);
 	//room.configRoom();
-	return callback(room.id);
+	if ("function" == typeof callback) {
+		return callback(room.id);
+	}
 };
 
 /**

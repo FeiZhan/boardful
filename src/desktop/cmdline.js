@@ -6,8 +6,8 @@
  * 
 **/
 
-var jquery = require('jquery');
-var $ = jquery.create();
+var $ = require('jquery');
+//var $ = jquery.create();
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.engine.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
