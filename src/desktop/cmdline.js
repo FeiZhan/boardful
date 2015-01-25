@@ -9,7 +9,7 @@
 var $ = require('jquery');
 //var $ = jquery.create();
 var keypress = require('keypress');
-var BOARDFUL = require("../build/boardful.engine.js");
+var BOARDFUL = require("../build/boardful.core.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
 
 // command line
@@ -172,6 +172,7 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 				process.stdin.once('data', function (text) {
 					BOARDFUL.Cmdline.output("config room done");
 					var game = new BOARDFUL.ENGINE.Game(room);
+					game.ui = new BOARDFUL.DESKTOP.Cmdline(game.id);
 					BOARDFUL.Cmdline.output("game start");
 					game.run();
 				});

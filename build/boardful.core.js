@@ -90,8 +90,8 @@ BOARDFUL.init = function (config) {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
-		var board_list = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list["src/engine/gamelist.json"]].content.games;
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/core/gamelist.json"], function () {
+		var board_list = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list["src/core/gamelist.json"]].content.games;
 		for (var i in board_list) {
 			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]).id);
 		}

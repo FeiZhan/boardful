@@ -9,7 +9,7 @@
  * 
 **/
 
-var BOARDFUL = require("../build/boardful.engine.js");
+var BOARDFUL = require("../build/boardful.core.js");
 BOARDFUL.SERVER = BOARDFUL.SERVER || new Object();
 
 var http = require("http"),

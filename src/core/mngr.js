@@ -1,8 +1,8 @@
 /**
  * Object manager.
  *
- * @author  Fei Zhan
- * @version 0.0
+ * @author		Fei Zhan
+ * @version		0.0
 **/
 
 var BOARDFUL = BOARDFUL || new Object();

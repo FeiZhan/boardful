@@ -1,22 +1,113 @@
 /**
-* Game.
-*
-* @author  Fei Zhan
-* @version 0.0
-*/
+ * Gui for card.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.GAME = BOARDFUL.GAME || new Object();
+BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
-BOARDFUL.GAME.init = function (config) {
-	$("#content").empty();
-	$("#content").load("src/browser/game.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/game.css"], function () {
+BOARDFUL.BRSR.CardUi = function (instance, owner) {
+	this.type = "CardUi";
+	this.instance = instance;
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
-	$("#content button#ok").on("click", function () {
+};
+BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
+	config = config || new Object();
+	config.parent = config.parent || "";
+	var that = this;
+	$.get("src/browser/card.html", function (text, status, xhr) {
+		$("#content " + config.parent).append(text);
+		$("#content " + config.parent + " .card:last").attr("id", that.id);
+		var card_jq = $("#content #" + that.id);
+		if (config.position) {
+			card_jq.css(config.position);
+		}
+		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
+		if ("function" == typeof callback) {
+			callback(card_jq);
+		}
+	});
+};
+BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
+	var jq = $("#content #" + this.id);
+	if (0 == jq.length) {
+		var that = this;
+		this.draw({
+			position: {
+				top: "50%",
+				left: "80%"
+			}
+		}, function () {
+			that.move(config);
+		});
+	} else {
+		jq.animate({
+			top: config.position.top,
+			left: config.position.left
+		}, "slow", function () {
+			jq.css({
+				top: 0,
+				left: 0
+			});
+			var element = jq.detach();
+			$('#content #myhand').append(element);
+		});
+	}
+};
+/**
+ * Gui for game.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
+
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
+
+BOARDFUL.BRSR.GameUi = function (owner) {
+	this.type = "GameUi";
+	this.owner = owner;
+	if (this.owner) {
+		BOARDFUL.Mngr.add(this);
+		BOARDFUL.ENGINE.Command.owner = this.owner;
+	}
+	this.addListeners();
+	$("#content").empty();
+	$("#content").load("src/browser/game.html", function () {
+		$("#content #ok").on("click", function () {
+		});
+	});
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
+	});
+};
+BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardsUi", {
+		level: "game",
+		callback: function (arg) {
+			that.dealCardsUi(arg);
+		},
+		id: that.id
 	});
 };
 
+BOARDFUL.BRSR.GameUi.prototype.dealCardsUi = function (arg) {
+	console.log("deal cards", arg.cards);
+	for (var i in arg.cards) {
+		var card = new BOARDFUL.BRSR.CardUi(arg.cards[i], this);
+		card.move({
+			position: {
+				top: "65%",
+				left: "50%"
+			}
+		});
+	}
+};
 /**
  * Menus.
  *
@@ -75,7 +166,9 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
 		$("#content button#ok").on("click", function () {
-			console.log("game start");
+			var game = new BOARDFUL.ENGINE.Game(room);
+			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
+			game.run();
 		});
 		$("#content #name").html(room.config.name);
 		$("#content #descrip1").html(room.config.descrip);

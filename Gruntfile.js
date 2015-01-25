@@ -3,9 +3,9 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 	pkg: grunt.file.readJSON('package.json'),
 	concat: {
-		engine: {
-			src: ['src/engine/*.js'],
-			dest: 'build/<%= pkg.name %>.engine.js'
+		core: {
+			src: ['src/core/*.js'],
+			dest: 'build/<%= pkg.name %>.core.js'
 		},
 		desktop: {
 			src: ['src/desktop/*.js'],

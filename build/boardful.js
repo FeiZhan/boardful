@@ -1,22 +1,113 @@
 /**
-* Game.
-*
-* @author  Fei Zhan
-* @version 0.0
-*/
+ * Gui for card.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.GAME = BOARDFUL.GAME || new Object();
+BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
-BOARDFUL.GAME.init = function (config) {
-	$("#content").empty();
-	$("#content").load("src/browser/game.html");
-	var load_files = new BOARDFUL.ENGINE.loadFileList(["src/browser/game.css"], function () {
+BOARDFUL.BRSR.CardUi = function (instance, owner) {
+	this.type = "CardUi";
+	this.instance = instance;
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
-	$("#content button#ok").on("click", function () {
+};
+BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
+	config = config || new Object();
+	config.parent = config.parent || "";
+	var that = this;
+	$.get("src/browser/card.html", function (text, status, xhr) {
+		$("#content " + config.parent).append(text);
+		$("#content " + config.parent + " .card:last").attr("id", that.id);
+		var card_jq = $("#content #" + that.id);
+		if (config.position) {
+			card_jq.css(config.position);
+		}
+		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
+		if ("function" == typeof callback) {
+			callback(card_jq);
+		}
+	});
+};
+BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
+	var jq = $("#content #" + this.id);
+	if (0 == jq.length) {
+		var that = this;
+		this.draw({
+			position: {
+				top: "50%",
+				left: "80%"
+			}
+		}, function () {
+			that.move(config);
+		});
+	} else {
+		jq.animate({
+			top: config.position.top,
+			left: config.position.left
+		}, "slow", function () {
+			jq.css({
+				top: 0,
+				left: 0
+			});
+			var element = jq.detach();
+			$('#content #myhand').append(element);
+		});
+	}
+};
+/**
+ * Gui for game.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
+
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
+
+BOARDFUL.BRSR.GameUi = function (owner) {
+	this.type = "GameUi";
+	this.owner = owner;
+	if (this.owner) {
+		BOARDFUL.Mngr.add(this);
+		BOARDFUL.ENGINE.Command.owner = this.owner;
+	}
+	this.addListeners();
+	$("#content").empty();
+	$("#content").load("src/browser/game.html", function () {
+		$("#content #ok").on("click", function () {
+		});
+	});
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
+	});
+};
+BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardsUi", {
+		level: "game",
+		callback: function (arg) {
+			that.dealCardsUi(arg);
+		},
+		id: that.id
 	});
 };
 
+BOARDFUL.BRSR.GameUi.prototype.dealCardsUi = function (arg) {
+	console.log("deal cards", arg.cards);
+	for (var i in arg.cards) {
+		var card = new BOARDFUL.BRSR.CardUi(arg.cards[i], this);
+		card.move({
+			position: {
+				top: "65%",
+				left: "50%"
+			}
+		});
+	}
+};
 /**
  * Menus.
  *
@@ -75,7 +166,9 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
 		$("#content button#ok").on("click", function () {
-			console.log("game start");
+			var game = new BOARDFUL.ENGINE.Game(room);
+			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
+			game.run();
 		});
 		$("#content #name").html(room.config.name);
 		$("#content #descrip1").html(room.config.descrip);
@@ -93,197 +186,6 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	});
 	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };
-
-/**
- * Command line interface.
- *
- * @author		Fei Zhan
- * @version		0.0
- * 
-**/
-
-var $ = require('jquery');
-//var $ = jquery.create();
-var keypress = require('keypress');
-var BOARDFUL = require("../build/boardful.engine.js");
-BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
-
-// command line
-BOARDFUL.DESKTOP.Cmdline = function (owner) {
-	this.type = "Cmdline";
-	this.owner = owner;
-	if (this.owner) {
-		BOARDFUL.Mngr.add(this);
-		BOARDFUL.ENGINE.Command.owner = this.owner;
-	}
-	this.wait_status = "init";
-	this.wait_result = "";
-	this.addListeners();
-	var that = this;
-	// set keypress
-	if (this.owner) {
-		keypress(process.stdin);
-		process.stdin.on('keypress', function () {
-			that.keypress.apply(that, arguments);
-		});
-		process.stdin.setRawMode(true);
-	}
-};
-// add listeners
-BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
-	if (undefined === this.owner) {
-		return;
-	}
-	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayerStart", {
-		level: "game",
-		callback: function (arg) {
-			that.playerStart(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardsUi", {
-		level: "game",
-		callback: function (arg) {
-			that.dealCardsUi(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("SettlePlayersDuelUi", {
-		level: "game",
-		callback: function (arg) {
-			that.settlePlayersDuelUi(arg);
-		},
-		id: that.id
-	});
-};
-// output
-BOARDFUL.DESKTOP.Cmdline.prototype.output = function () {
-	console.log.apply(console, arguments);
-};
-// input
-BOARDFUL.DESKTOP.Cmdline.prototype.input = function (callback) {
-	// disable keypress
-	if (this.owner) {
-		process.stdin.removeListener('keypress', function () {
-			that.keypress.apply(that, arguments);
-		});
-		process.stdin.setRawMode(false);
-	}
-	process.stdout.write("?> ");
-	var that = this;
-	process.stdin.once('data', function (text) {
-		callback(text);
-		// enable keypress
-		if (that.owner) {
-			process.stdin.on('keypress', function () {
-				that.keypress.apply(that, arguments);
-			});
-			process.stdin.setRawMode(true);
-		}
-	});
-};
-// wait input
-BOARDFUL.DESKTOP.Cmdline.prototype.waitInput = function (check, callback) {
-	var that = this;
-	switch (that.wait_status) {
-	case "init":
-		that.wait_status = "wait";
-		that.input(function (text) {
-			text = text.trim();
-			that.wait_result = text;
-			that.wait_status = "get";
-		});
-		break;
-	case "wait":
-		break;
-	case "get":
-		if (! check(that.wait_result)) {
-			that.wait_status = "init";
-		} else {
-			return callback(that.wait_result);
-		}
-		break;
-	}
-	setTimeout(function () {
-		that.waitInput(check, callback);
-	}, 100);
-};
-// wait keypress
-BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
-	if (key && key.ctrl && key.name == 'c') {
-		process.exit();
-	}
-	if (key && "p" == key.name && "pause" != BOARDFUL.Mngr.get(this.owner).status) {
-		var that = this;
-		BOARDFUL.Mngr.get(that.owner).pause();
-		that.waitInput(function (text) {
-			BOARDFUL.ENGINE.Command.call(text);
-			return "" == text;
-		}, function (text) {
-			BOARDFUL.Mngr.get(that.owner).resume();
-		});
-	}
-};
-
-// ui for player start
-BOARDFUL.DESKTOP.Cmdline.prototype.playerStart = function (arg) {
-	this.output("player start", arg.player);
-};
-// ui for deal cards
-BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
-	this.output("deal cards", arg.cards);
-};
-// ui for settle players duel
-BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
-	var text = "";
-	for (var i in arg.players) {
-		text += arg.players[i] + " " + BOARDFUL.Mngr.get(arg.cards[i]).name + "\n";
-	}
-	text += "winner " + arg.player;
-	this.output("duel", text);
-};
-
-// config command line
-BOARDFUL.DESKTOP.Cmdline.setCmdline = function () {
-	process.stdin.setEncoding('utf8');
-	process.stdin.resume();
-};
-// show menu
-BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
-	var that = this;
-	if (BOARDFUL.BoardList.length > 0) {
-		for (var i in BOARDFUL.BoardList) {
-			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			console.log(i + ". " + board.config.name);
-			console.log("\t" + board.config.descrip);
-		}
-		console.log("select a board:");
-		process.stdin.once('data', function (text) {
-			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function (id) {
-				var room = BOARDFUL.Mngr.get(id);
-				// input config for room
-				BOARDFUL.Cmdline.output("config room");
-				var that = this;
-				process.stdin.once('data', function (text) {
-					BOARDFUL.Cmdline.output("config room done");
-					var game = new BOARDFUL.ENGINE.Game(room);
-					BOARDFUL.Cmdline.output("game start");
-					game.run();
-				});
-			});
-		});
-	}
-	else {
-		setTimeout(BOARDFUL.DESKTOP.Cmdline.showMenu, 300);
-	}
-};
-
-// launch project in desktop
-BOARDFUL.init("desktop");
-BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
-BOARDFUL.DESKTOP.Cmdline.setCmdline();
-BOARDFUL.DESKTOP.Cmdline.showMenu();
 
 /**
  * Board game.
@@ -377,8 +279,8 @@ BOARDFUL.init = function (config) {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/engine/gamelist.json"], function () {
-		var board_list = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list["src/engine/gamelist.json"]].content.games;
+	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/core/gamelist.json"], function () {
+		var board_list = BOARDFUL.ENGINE.File.list[BOARDFUL.ENGINE.File.name_list["src/core/gamelist.json"]].content.games;
 		for (var i in board_list) {
 			BOARDFUL.BoardList.push(new BOARDFUL.ENGINE.Board(board_list[i]).id);
 		}
@@ -894,7 +796,7 @@ BOARDFUL.ENGINE.Game = function (config) {
 	this.owner = config.id;
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
-	this.ui = new BOARDFUL.DESKTOP.Cmdline(this.id);
+	this.ui = undefined;
 	this.status = "init";
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {
@@ -1172,8 +1074,8 @@ BOARDFUL.ENGINE.WinstonLogger = function (config) {
 /**
  * Object manager.
  *
- * @author  Fei Zhan
- * @version 0.0
+ * @author		Fei Zhan
+ * @version		0.0
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
@@ -1526,6 +1428,198 @@ BOARDFUL.ENGINE.shuffle = function (o) {
 };
 
 /**
+ * Command line interface.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
+**/
+
+var $ = require('jquery');
+//var $ = jquery.create();
+var keypress = require('keypress');
+var BOARDFUL = require("../build/boardful.core.js");
+BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
+
+// command line
+BOARDFUL.DESKTOP.Cmdline = function (owner) {
+	this.type = "Cmdline";
+	this.owner = owner;
+	if (this.owner) {
+		BOARDFUL.Mngr.add(this);
+		BOARDFUL.ENGINE.Command.owner = this.owner;
+	}
+	this.wait_status = "init";
+	this.wait_result = "";
+	this.addListeners();
+	var that = this;
+	// set keypress
+	if (this.owner) {
+		keypress(process.stdin);
+		process.stdin.on('keypress', function () {
+			that.keypress.apply(that, arguments);
+		});
+		process.stdin.setRawMode(true);
+	}
+};
+// add listeners
+BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
+	if (undefined === this.owner) {
+		return;
+	}
+	var that = this;
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayerStart", {
+		level: "game",
+		callback: function (arg) {
+			that.playerStart(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardsUi", {
+		level: "game",
+		callback: function (arg) {
+			that.dealCardsUi(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("SettlePlayersDuelUi", {
+		level: "game",
+		callback: function (arg) {
+			that.settlePlayersDuelUi(arg);
+		},
+		id: that.id
+	});
+};
+// output
+BOARDFUL.DESKTOP.Cmdline.prototype.output = function () {
+	console.log.apply(console, arguments);
+};
+// input
+BOARDFUL.DESKTOP.Cmdline.prototype.input = function (callback) {
+	// disable keypress
+	if (this.owner) {
+		process.stdin.removeListener('keypress', function () {
+			that.keypress.apply(that, arguments);
+		});
+		process.stdin.setRawMode(false);
+	}
+	process.stdout.write("?> ");
+	var that = this;
+	process.stdin.once('data', function (text) {
+		callback(text);
+		// enable keypress
+		if (that.owner) {
+			process.stdin.on('keypress', function () {
+				that.keypress.apply(that, arguments);
+			});
+			process.stdin.setRawMode(true);
+		}
+	});
+};
+// wait input
+BOARDFUL.DESKTOP.Cmdline.prototype.waitInput = function (check, callback) {
+	var that = this;
+	switch (that.wait_status) {
+	case "init":
+		that.wait_status = "wait";
+		that.input(function (text) {
+			text = text.trim();
+			that.wait_result = text;
+			that.wait_status = "get";
+		});
+		break;
+	case "wait":
+		break;
+	case "get":
+		if (! check(that.wait_result)) {
+			that.wait_status = "init";
+		} else {
+			return callback(that.wait_result);
+		}
+		break;
+	}
+	setTimeout(function () {
+		that.waitInput(check, callback);
+	}, 100);
+};
+// wait keypress
+BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
+	if (key && key.ctrl && key.name == 'c') {
+		process.exit();
+	}
+	if (key && "p" == key.name && "pause" != BOARDFUL.Mngr.get(this.owner).status) {
+		var that = this;
+		BOARDFUL.Mngr.get(that.owner).pause();
+		that.waitInput(function (text) {
+			BOARDFUL.ENGINE.Command.call(text);
+			return "" == text;
+		}, function (text) {
+			BOARDFUL.Mngr.get(that.owner).resume();
+		});
+	}
+};
+
+// ui for player start
+BOARDFUL.DESKTOP.Cmdline.prototype.playerStart = function (arg) {
+	this.output("player start", arg.player);
+};
+// ui for deal cards
+BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
+	this.output("deal cards", arg.cards);
+};
+// ui for settle players duel
+BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
+	var text = "";
+	for (var i in arg.players) {
+		text += arg.players[i] + " " + BOARDFUL.Mngr.get(arg.cards[i]).name + "\n";
+	}
+	text += "winner " + arg.player;
+	this.output("duel", text);
+};
+
+// config command line
+BOARDFUL.DESKTOP.Cmdline.setCmdline = function () {
+	process.stdin.setEncoding('utf8');
+	process.stdin.resume();
+};
+// show menu
+BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
+	var that = this;
+	if (BOARDFUL.BoardList.length > 0) {
+		for (var i in BOARDFUL.BoardList) {
+			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
+			console.log(i + ". " + board.config.name);
+			console.log("\t" + board.config.descrip);
+		}
+		console.log("select a board:");
+		process.stdin.once('data', function (text) {
+			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function (id) {
+				var room = BOARDFUL.Mngr.get(id);
+				// input config for room
+				BOARDFUL.Cmdline.output("config room");
+				var that = this;
+				process.stdin.once('data', function (text) {
+					BOARDFUL.Cmdline.output("config room done");
+					var game = new BOARDFUL.ENGINE.Game(room);
+					game.ui = new BOARDFUL.DESKTOP.Cmdline(game.id);
+					BOARDFUL.Cmdline.output("game start");
+					game.run();
+				});
+			});
+		});
+	}
+	else {
+		setTimeout(BOARDFUL.DESKTOP.Cmdline.showMenu, 300);
+	}
+};
+
+// launch project in desktop
+BOARDFUL.init("desktop");
+BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
+BOARDFUL.DESKTOP.Cmdline.setCmdline();
+BOARDFUL.DESKTOP.Cmdline.showMenu();
+
+/**
  * Server.
  * Start the server:
  * goto project root directory;
@@ -1536,7 +1630,7 @@ BOARDFUL.ENGINE.shuffle = function (o) {
  * 
 **/
 
-var BOARDFUL = require("../build/boardful.engine.js");
+var BOARDFUL = require("../build/boardful.core.js");
 BOARDFUL.SERVER = BOARDFUL.SERVER || new Object();
 
 var http = require("http"),
@@ -1609,7 +1703,10 @@ var Poker = function (owner) {
 };
 if (typeof module !== 'undefined' && module.exports) {
 	module.exports.Poker = Poker;
+} else {
+	BOARDFUL.MODS.Poker = Poker;
 }
+
 // create cards
 Poker.prototype.createCards = function () {
 	var card_list = new Array();

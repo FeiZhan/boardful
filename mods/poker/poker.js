@@ -18,7 +18,10 @@ var Poker = function (owner) {
 };
 if (typeof module !== 'undefined' && module.exports) {
 	module.exports.Poker = Poker;
+} else {
+	BOARDFUL.MODS.Poker = Poker;
 }
+
 // create cards
 Poker.prototype.createCards = function () {
 	var card_list = new Array();

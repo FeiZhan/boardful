@@ -56,7 +56,9 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
 		$("#content button#ok").on("click", function () {
-			console.log("game start");
+			var game = new BOARDFUL.ENGINE.Game(room);
+			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
+			game.run();
 		});
 		$("#content #name").html(room.config.name);
 		$("#content #descrip1").html(room.config.descrip);

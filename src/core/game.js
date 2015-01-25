@@ -14,7 +14,7 @@ BOARDFUL.ENGINE.Game = function (config) {
 	this.owner = config.id;
 	BOARDFUL.Mngr.add(this);
 	this.event_mngr = new BOARDFUL.ENGINE.EventMngr(this.id);
-	this.ui = new BOARDFUL.DESKTOP.Cmdline(this.id);
+	this.ui = undefined;
 	this.status = "init";
 	// create from room
 	if (config instanceof BOARDFUL.ENGINE.Room) {
