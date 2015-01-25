@@ -7,10 +7,10 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // card
-BOARDFUL.ENGINE.Card = function (config) {
+BOARDFUL.CORE.Card = function (config) {
 	this.type = "Card";
 	this.rank = config.rank;
 	this.suit = config.suit;
@@ -20,7 +20,7 @@ BOARDFUL.ENGINE.Card = function (config) {
 	BOARDFUL.Mngr.add(this);
 };
 // load cards
-BOARDFUL.ENGINE.Card.load = function (config) {
+BOARDFUL.CORE.Card.load = function (config) {
 	var card_list = new Array();
 	switch (config) {
 	case "poker":

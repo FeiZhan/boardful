@@ -13,7 +13,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	this.instance = instance;
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
-	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
+	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
 BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {

@@ -6,25 +6,26 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // command
-BOARDFUL.ENGINE.Command = new Object();
-BOARDFUL.ENGINE.Command.owner = undefined;
-BOARDFUL.ENGINE.Command.call = function (cmd) {
+BOARDFUL.CORE.Command = BOARDFUL.CORE.Command || new Object();
+BOARDFUL.CORE.Command.owner = undefined;
+// call command function
+BOARDFUL.CORE.Command.call = function (cmd) {
 	var arg_list = cmd.replace(/\s/g, " ").split(" ");
 	if (0 == arg_list.length) {
 		return;
 	}
 	cmd = arg_list[0];
 	arg_list.shift();
-	if (cmd in BOARDFUL.ENGINE.Command.list) {
-		return BOARDFUL.ENGINE.Command.list[cmd](arg_list);
+	if (cmd in BOARDFUL.CORE.Command.list) {
+		return BOARDFUL.CORE.Command.list[cmd](arg_list);
 	} else {
 		console.log("unknow cmd", cmd);
 	}
 };
-BOARDFUL.ENGINE.Command.list = {
+BOARDFUL.CORE.Command.list = {
 	"test": function (args) {
 		console.log("Hello Boardful !");
 	},
@@ -40,15 +41,15 @@ BOARDFUL.ENGINE.Command.list = {
 		console.log(BOARDFUL.Mngr.get(args[0]));
 	},
 	"currentEvent": function (args) {
-		if (BOARDFUL.ENGINE.Command.owner) {
-			console.log(BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).event_mngr.current.name);
+		if (BOARDFUL.CORE.Command.owner) {
+			console.log(BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).event_mngr.current.name);
 		} else {
 			console.log(undefined);
 		}
 	},
 	"nextEvent": function (args) {
-		if (BOARDFUL.ENGINE.Command.owner) {
-			console.log(BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).event_mngr.list[0]);
+		if (BOARDFUL.CORE.Command.owner) {
+			console.log(BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).event_mngr.list[0]);
 		} else {
 			console.log(undefined);
 		}
@@ -57,13 +58,13 @@ BOARDFUL.ENGINE.Command.list = {
 		console.log(BOARDFUL.BoardList);
 	},
 	"pause": function (args) {
-		if (BOARDFUL.ENGINE.Command.owner) {
-			BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).pause();
+		if (BOARDFUL.CORE.Command.owner) {
+			BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).pause();
 		}
 	},
 	"resume": function (args) {
-		if (BOARDFUL.ENGINE.Command.owner) {
-			BOARDFUL.Mngr.get(BOARDFUL.ENGINE.Command.owner).resume();
+		if (BOARDFUL.CORE.Command.owner) {
+			BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).resume();
 		}
 	},
 	"exit": function (args) {

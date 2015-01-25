@@ -6,10 +6,10 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // player
-BOARDFUL.ENGINE.Player = function (config, owner) {
+BOARDFUL.CORE.Player = function (config, owner) {
 	this.type = "Player";
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner);
@@ -31,7 +31,7 @@ BOARDFUL.ENGINE.Player = function (config, owner) {
 	this.addListeners();
 };
 // add event listeners
-BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
+BOARDFUL.CORE.Player.prototype.addListeners = function () {
 	var that = this;
 	this.game.event_mngr.on("StartPlayer" + this.id, {
 		level: "game",
@@ -49,20 +49,20 @@ BOARDFUL.ENGINE.Player.prototype.addListeners = function () {
 	});
 };
 // player start
-BOARDFUL.ENGINE.Player.prototype.start = function (arg) {
-	var event = new BOARDFUL.ENGINE.Event({
+BOARDFUL.CORE.Player.prototype.start = function (arg) {
+	var event = new BOARDFUL.CORE.Event({
 		name: "PlayerEnd",
 		source: this.id
 	});
 	this.game.event_mngr.front(event.id);
 };
 // play card
-BOARDFUL.ENGINE.Player.prototype.playCard = function (arg) {
+BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
 	if (0 == this.hand.length) {
 		return;
 	}
 	var card = this.hand[Math.floor((Math.random() * this.hand.length))];
-	var event = new BOARDFUL.ENGINE.Event({
+	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: this.id,
 		source_event: arg.source_event,

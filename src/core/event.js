@@ -1,15 +1,15 @@
 /**
  * Event.
  *
- * @author  Fei Zhan
- * @version 0.0
+ * @author		Fei Zhan
+ * @version		0.0
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // event
-BOARDFUL.ENGINE.Event = function (arg) {
+BOARDFUL.CORE.Event = function (arg) {
 	this.type = "Event";
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
@@ -19,9 +19,9 @@ BOARDFUL.ENGINE.Event = function (arg) {
 };
 
 // event level precedence
-BOARDFUL.ENGINE.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
+BOARDFUL.CORE.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
 // event manager
-BOARDFUL.ENGINE.EventMngr = function (owner) {
+BOARDFUL.CORE.EventMngr = function (owner) {
 	this.type = "EventMngr";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
@@ -29,7 +29,7 @@ BOARDFUL.ENGINE.EventMngr = function (owner) {
 	this.list = new Array();
 	this.listener_list = new Object();
 	this.timeout = 100;
-	this.logger = new BOARDFUL.ENGINE.Logger();
+	this.logger = new BOARDFUL.CORE.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/event.log'
 	})
@@ -37,7 +37,7 @@ BOARDFUL.ENGINE.EventMngr = function (owner) {
 	this.logger.log('info', "----------launch----------");
 };
 // see or push to the front of event list
-BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
+BOARDFUL.CORE.EventMngr.prototype.front = function (id) {
 	if (undefined === id) {
 		if (0 == this.list.length) {
 			return undefined;
@@ -54,7 +54,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.front = function (id) {
 	return BOARDFUL.Mngr.get(this.list[0]);
 };
 // add to the rear of event list
-BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
+BOARDFUL.CORE.EventMngr.prototype.add = function (id) {
 	if ("array" == typeof id || "object" == typeof id) {
 		this.list = this.list.concat(id);
 		this.logger.log("info", "append events", id);
@@ -65,7 +65,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.add = function (id) {
 	}
 };
 // add event listener
-BOARDFUL.ENGINE.EventMngr.prototype.on = function (event, config) {
+BOARDFUL.CORE.EventMngr.prototype.on = function (event, config) {
 	if (! (event in this.listener_list)) {
 		this.listener_list[event] = new Object();
 	}
@@ -77,7 +77,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.on = function (event, config) {
 	this.logger.log("info", "add listener", event);
 };
 // remove event listener
-BOARDFUL.ENGINE.EventMngr.prototype.off = function (event, config) {
+BOARDFUL.CORE.EventMngr.prototype.off = function (event, config) {
 	if (! (event in this.listener_list)) {
 		return;
 	}
@@ -91,7 +91,7 @@ BOARDFUL.ENGINE.EventMngr.prototype.off = function (event, config) {
 	}
 };
 // launch event manager
-BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
+BOARDFUL.CORE.EventMngr.prototype.run = function () {
 	switch (BOARDFUL.Mngr.get(this.owner).status) {
 	case "pause":
 	case "exit":
@@ -104,10 +104,10 @@ BOARDFUL.ENGINE.EventMngr.prototype.run = function () {
 			this.logger.log("info", "event", this.current.name);
 			this.list.shift();
 			if (this.current && (this.current.name in this.listener_list)) {
-				for (var i in BOARDFUL.ENGINE.EVENT_LEVELS) {
-					if (BOARDFUL.ENGINE.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
-						for (var j in this.listener_list[this.current.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]]) {
-							var listener = this.listener_list[this.current.name][BOARDFUL.ENGINE.EVENT_LEVELS[i]][j];
+				for (var i in BOARDFUL.CORE.EVENT_LEVELS) {
+					if (BOARDFUL.CORE.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
+						for (var j in this.listener_list[this.current.name][BOARDFUL.CORE.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[this.current.name][BOARDFUL.CORE.EVENT_LEVELS[i]][j];
 							this.logger.log("info", "trigger", listener);
 							// trigger listener callback for event
 							listener.callback(this.current.arg);

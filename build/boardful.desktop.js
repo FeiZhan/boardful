@@ -7,7 +7,6 @@
 **/
 
 var $ = require('jquery');
-//var $ = jquery.create();
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.core.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
@@ -18,7 +17,7 @@ BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	this.owner = owner;
 	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
-		BOARDFUL.ENGINE.Command.owner = this.owner;
+		BOARDFUL.CORE.Command.owner = this.owner;
 	}
 	this.wait_status = "init";
 	this.wait_result = "";
@@ -122,7 +121,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
 		var that = this;
 		BOARDFUL.Mngr.get(that.owner).pause();
 		that.waitInput(function (text) {
-			BOARDFUL.ENGINE.Command.call(text);
+			BOARDFUL.CORE.Command.call(text);
 			return "" == text;
 		}, function (text) {
 			BOARDFUL.Mngr.get(that.owner).resume();
@@ -154,7 +153,7 @@ BOARDFUL.DESKTOP.Cmdline.setCmdline = function () {
 	process.stdin.resume();
 };
 // show menu
-BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
+BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
 		for (var i in BOARDFUL.BoardList) {
@@ -171,7 +170,7 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 				var that = this;
 				process.stdin.once('data', function (text) {
 					BOARDFUL.Cmdline.output("config room done");
-					var game = new BOARDFUL.ENGINE.Game(room);
+					var game = new BOARDFUL.CORE.Game(room);
 					game.ui = new BOARDFUL.DESKTOP.Cmdline(game.id);
 					BOARDFUL.Cmdline.output("game start");
 					game.run();
@@ -180,7 +179,7 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 		});
 	}
 	else {
-		setTimeout(BOARDFUL.DESKTOP.Cmdline.showMenu, 300);
+		setTimeout(BOARDFUL.DESKTOP.Cmdline.loadMenu, 300);
 	}
 };
 
@@ -188,4 +187,4 @@ BOARDFUL.DESKTOP.Cmdline.showMenu = function () {
 BOARDFUL.init("desktop");
 BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
 BOARDFUL.DESKTOP.Cmdline.setCmdline();
-BOARDFUL.DESKTOP.Cmdline.showMenu();
+BOARDFUL.DESKTOP.Cmdline.loadMenu();

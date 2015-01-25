@@ -6,10 +6,10 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // table
-BOARDFUL.ENGINE.Table = function (owner) {
+BOARDFUL.CORE.Table = function (owner) {
 	this.type = "Table";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
@@ -17,7 +17,7 @@ BOARDFUL.ENGINE.Table = function (owner) {
 	this.addListeners();
 };
 // add listeners
-BOARDFUL.ENGINE.Table.prototype.addListeners = function () {
+BOARDFUL.CORE.Table.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayersDuel", {
 		level: "game",
@@ -42,11 +42,11 @@ BOARDFUL.ENGINE.Table.prototype.addListeners = function () {
 	});
 };
 // players duel
-BOARDFUL.ENGINE.Table.prototype.playersDuel = function (arg) {
+BOARDFUL.CORE.Table.prototype.playersDuel = function (arg) {
 	var event_list = new Array();
 	var event;
 	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		event = new BOARDFUL.ENGINE.Event({
+		event = new BOARDFUL.CORE.Event({
 			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
 			source: this.id,
 			source_event: "PlayersDuel",
@@ -55,7 +55,7 @@ BOARDFUL.ENGINE.Table.prototype.playersDuel = function (arg) {
 		});
 		event_list.push(event.id);
 	}
-	event = new BOARDFUL.ENGINE.Event({
+	event = new BOARDFUL.CORE.Event({
 		name: "SettlePlayersDuel",
 		source: this.id,
 		source_event: "PlayersDuel"
@@ -64,13 +64,13 @@ BOARDFUL.ENGINE.Table.prototype.playersDuel = function (arg) {
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
 // place card on table
-BOARDFUL.ENGINE.Table.prototype.placeCardOnTable = function (arg) {
+BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
 	var index = BOARDFUL.Mngr.get(arg.player).hand.indexOf(arg.card);
 	BOARDFUL.Mngr.get(arg.player).hand.splice(index, 1);
 	this.arg_list.push(arg);
 };
 // settle players duel
-BOARDFUL.ENGINE.Table.prototype.settlePlayersDuel = function (arg) {
+BOARDFUL.CORE.Table.prototype.settlePlayersDuel = function (arg) {
 	var select_list = new Array();
 	for (var i in this.arg_list) {
 		if ("PlayersDuel" == this.arg_list[i].source_event) {
@@ -93,7 +93,7 @@ BOARDFUL.ENGINE.Table.prototype.settlePlayersDuel = function (arg) {
 	}
 
 	var event_list = new Array();
-	var event = new BOARDFUL.ENGINE.Event({
+	var event = new BOARDFUL.CORE.Event({
 		name: "SettlePlayersDuelUi",
 		source: this.id,
 		cards: card_list,

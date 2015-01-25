@@ -6,7 +6,7 @@
  * 
 **/
 if (typeof module !== 'undefined' && module.exports) {
-	var BOARDFUL = require("../../build/boardful.engine.js");
+	var BOARDFUL = require("../../build/boardful.core.js");
 }
 
 // poker
@@ -28,12 +28,12 @@ Poker.prototype.createCards = function () {
 	var card;
 	for (var i in Poker.RANKS) {
 		if ("Joker" == i) {
-			card = new BOARDFUL.ENGINE.Card({
+			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Spade"
 			});
 			card_list.push(card.id);
-			card = new BOARDFUL.ENGINE.Card({
+			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Heart"
 			});
@@ -41,7 +41,7 @@ Poker.prototype.createCards = function () {
 		}
 		else {
 			for (var j in Poker.SUITS) {
-				card = new BOARDFUL.ENGINE.Card({
+				card = new BOARDFUL.CORE.Card({
 					rank: i,
 					suit: j
 				});

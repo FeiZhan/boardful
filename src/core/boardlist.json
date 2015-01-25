@@ -1,6 +1,6 @@
 {
   "version": "0.0.0",
-  "games": [
+  "boards": [
     {
       "name": "poker",
       "descrip": "description of poker",

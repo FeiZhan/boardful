@@ -23,7 +23,7 @@ BOARDFUL.BRSR.run = function () {
 			console.log("options");
 		});
 	});
-	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
 };
 BOARDFUL.BRSR.Selected = undefined;
 // load menu1
@@ -48,7 +48,7 @@ BOARDFUL.BRSR.loadMenu1 = function () {
 			});
 		}
 	});
-	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
 };
 // load menu2
 BOARDFUL.BRSR.loadMenu2 = function (id) {
@@ -56,7 +56,7 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
 		$("#content button#ok").on("click", function () {
-			var game = new BOARDFUL.ENGINE.Game(room);
+			var game = new BOARDFUL.CORE.Game(room);
 			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
 			game.run();
 		});
@@ -74,5 +74,5 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 			}
 		}
 	});
-	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };

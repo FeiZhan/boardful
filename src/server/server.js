@@ -18,7 +18,7 @@ var http = require("http"),
 	fs = require("fs");
 
 // create a server
-BOARDFUL.SERVER.createServer = function () {
+BOARDFUL.SERVER.loadServer = function () {
 	http.createServer(function(request, response) {
 		var uri = url.parse(request.url).pathname, filename = path.join(process.cwd(), uri);
 		var contentTypesByExtension = {
@@ -59,4 +59,4 @@ BOARDFUL.SERVER.createServer = function () {
 // launch project
 BOARDFUL.init("server");
 BOARDFUL.SERVER.port = process.argv[3] || 8080;
-BOARDFUL.SERVER.createServer();
+BOARDFUL.SERVER.loadServer();

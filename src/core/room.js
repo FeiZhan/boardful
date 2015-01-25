@@ -6,10 +6,10 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.ENGINE = BOARDFUL.ENGINE || new Object();
+BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // room
-BOARDFUL.ENGINE.Room = function (config, owner) {
+BOARDFUL.CORE.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);

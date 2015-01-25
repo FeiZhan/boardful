@@ -13,7 +13,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	this.instance = instance;
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
-	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
+	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
 BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
@@ -74,7 +74,7 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 	this.owner = owner;
 	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
-		BOARDFUL.ENGINE.Command.owner = this.owner;
+		BOARDFUL.CORE.Command.owner = this.owner;
 	}
 	this.addListeners();
 	$("#content").empty();
@@ -82,7 +82,7 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 		$("#content #ok").on("click", function () {
 		});
 	});
-	var load_files = new BOARDFUL.ENGINE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
+	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
 BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
@@ -133,7 +133,7 @@ BOARDFUL.BRSR.run = function () {
 			console.log("options");
 		});
 	});
-	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
 };
 BOARDFUL.BRSR.Selected = undefined;
 // load menu1
@@ -158,7 +158,7 @@ BOARDFUL.BRSR.loadMenu1 = function () {
 			});
 		}
 	});
-	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
 };
 // load menu2
 BOARDFUL.BRSR.loadMenu2 = function (id) {
@@ -166,7 +166,7 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
 		$("#content button#ok").on("click", function () {
-			var game = new BOARDFUL.ENGINE.Game(room);
+			var game = new BOARDFUL.CORE.Game(room);
 			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
 			game.run();
 		});
@@ -184,5 +184,5 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 			}
 		}
 	});
-	var load = new BOARDFUL.ENGINE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };
