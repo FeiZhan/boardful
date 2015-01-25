@@ -14,6 +14,7 @@ BOARDFUL.CORE.Room = function (config, owner) {
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
-	this.options = config.options;
+	// set default players
 	this.player_list = config.player_list || ["me", "ai"];
+	this.mod_list = config.mod_list || ["Poker"];
 };

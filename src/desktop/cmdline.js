@@ -170,7 +170,7 @@ BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
 				var that = this;
 				process.stdin.once('data', function (text) {
 					BOARDFUL.Cmdline.output("config room done");
-					var game = new BOARDFUL.CORE.Game(room);
+					var game = new BOARDFUL.CORE.Game(id);
 					game.ui = new BOARDFUL.DESKTOP.Cmdline(game.id);
 					BOARDFUL.Cmdline.output("game start");
 					game.run();

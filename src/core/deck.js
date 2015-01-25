@@ -20,13 +20,6 @@ BOARDFUL.CORE.Deck = function (owner) {
 // add listeners
 BOARDFUL.CORE.Deck.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("CreateDeck", {
-		level: "game",
-		callback: function (arg) {
-			that.createDeck(arg);
-		},
-		id: that.id
-	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ShuffleDeck", {
 		level: "game",
 		callback: function (arg) {
@@ -41,23 +34,6 @@ BOARDFUL.CORE.Deck.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
-};
-// create deck
-BOARDFUL.CORE.Deck.prototype.createDeck = function (arg) {
-	if (arg.deck != this.id) {
-		return;
-	}
-	var card_list = BOARDFUL.CORE.Card.load(arg.type);
-	BOARDFUL.Mngr.get(arg.deck).getCards(card_list);
-
-	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
-		name: "CreateDeckUi",
-		source: this.id,
-		cards: card_list
-	});
-	event_list.push(event.id);
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
 // shuffle deck
 BOARDFUL.CORE.Deck.prototype.shuffleDeck = function (arg) {

@@ -166,7 +166,7 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
 		$("#content button#ok").on("click", function () {
-			var game = new BOARDFUL.CORE.Game(room);
+			var game = new BOARDFUL.CORE.Game(id);
 			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
 			game.run();
 		});
@@ -179,8 +179,8 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 		for (var i in room.config.options) {
 			$("#content #roomoptions").append('<div id="' + i + '"></div>');
 			$("#content #roomoptions #" + i).append('<span>' + i + '</span><select></select>');
-			for (var j in room.options[i].value) {
-				$("#content #roomoptions #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.options[i].value[j] + '</option>');
+			for (var j in room.config.options[i].value) {
+				$("#content #roomoptions #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
 			}
 		}
 	});

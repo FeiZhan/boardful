@@ -10,24 +10,12 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // card
-BOARDFUL.CORE.Card = function (config) {
+BOARDFUL.CORE.Card = function (config, owner) {
 	this.type = "Card";
 	this.rank = config.rank;
 	this.suit = config.suit;
 	this.color = config.color;
 	this.name = "card_" + this.rank + "_" + this.suit;
-	this.owner = undefined;
+	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
-};
-// load cards
-BOARDFUL.CORE.Card.load = function (config) {
-	var card_list = new Array();
-	switch (config) {
-	case "poker":
-		card_list = new BOARDFUL.MODS.Poker().card_list;
-		break;
-	default:
-		break;
-	}
-	return card_list;
 };
