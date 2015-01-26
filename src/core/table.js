@@ -47,8 +47,9 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 };
 // place card on table
 BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
-	var index = BOARDFUL.Mngr.get(arg.player).hand.indexOf(arg.card);
-	BOARDFUL.Mngr.get(arg.player).hand.splice(index, 1);
+	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
+	var index = hand.indexOf(arg.card);
+	hand.splice(index, 1);
 	BOARDFUL.Mngr.get(arg.card).owner = this.id;
 	this.arg_list.push(arg);
 };

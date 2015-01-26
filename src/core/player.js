@@ -13,7 +13,7 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	this.type = "Player";
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner);
-	this.hand = new Array();
+	this.hand = new BOARDFUL.CORE.Deck(this.owner).id;
 	this.turn = undefined;
 	this.name;
 	switch (config) {
@@ -63,10 +63,11 @@ BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
 		});
 		this.game.event_mngr.front(event.id);
 	} else {
-		if (0 == this.hand.length) {
+		var hand = BOARDFUL.Mngr.get(this.hand).card_list;
+		if (0 == hand.length) {
 			return;
 		}
-		var card = this.hand[Math.floor((Math.random() * this.hand.length))];
+		var card = hand[Math.floor((Math.random() * hand.length))];
 		var event = new BOARDFUL.CORE.Event({
 			name: "PlaceCardOnTable",
 			source: this.id,

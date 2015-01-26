@@ -157,11 +157,11 @@ Poker.prototype.reorderDeck = function (arg) {
 };
 // play card AI
 Poker.prototype.playCard = function (arg) {
-	var player = BOARDFUL.Mngr.get(arg.player);
-	if (0 == player.hand.length) {
+	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
+	if (0 == hand.length) {
 		return;
 	}
-	var card = player.hand[Math.floor((Math.random() * player.hand.length))];
+	var card = hand[Math.floor((Math.random() * hand.length))];
 	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: arg.player,

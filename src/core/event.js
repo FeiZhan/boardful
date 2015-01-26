@@ -28,7 +28,7 @@ BOARDFUL.CORE.EventMngr = function (owner) {
 	this.current = undefined;
 	this.list = new Array();
 	this.listener_list = new Object();
-	this.timeout = 100;
+	this.timeout = 20;
 	this.logger = new BOARDFUL.CORE.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/event.log'
