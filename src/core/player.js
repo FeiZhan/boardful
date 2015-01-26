@@ -15,7 +15,7 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	this.game = BOARDFUL.Mngr.get(this.owner);
 	this.hand = new Array();
 	this.turn = undefined;
-	this.name = undefined;
+	this.name;
 	switch (config) {
 	case "me":
 		this.name = "me";
@@ -50,24 +50,30 @@ BOARDFUL.CORE.Player.prototype.addListeners = function () {
 };
 // player start
 BOARDFUL.CORE.Player.prototype.start = function (arg) {
-	var event = new BOARDFUL.CORE.Event({
-		name: "PlayerEnd",
-		source: this.id
-	});
-	this.game.event_mngr.front(event.id);
+	BOARDFUL.Mngr.get(this.owner).current_player = this.id;
 };
 // play card
 BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
-	if (0 == this.hand.length) {
-		return;
+	if ("ai" == this.name) {
+		var event = new BOARDFUL.CORE.Event({
+			name: "PlayCardAi",
+			source: this.id,
+			source_event: arg.source_event,
+			player: this.id
+		});
+		this.game.event_mngr.front(event.id);
+	} else {
+		if (0 == this.hand.length) {
+			return;
+		}
+		var card = this.hand[Math.floor((Math.random() * this.hand.length))];
+		var event = new BOARDFUL.CORE.Event({
+			name: "PlaceCardOnTable",
+			source: this.id,
+			source_event: arg.source_event,
+			player: this.id,
+			card: card
+		});
+		this.game.event_mngr.front(event.id);
 	}
-	var card = this.hand[Math.floor((Math.random() * this.hand.length))];
-	var event = new BOARDFUL.CORE.Event({
-		name: "PlaceCardOnTable",
-		source: this.id,
-		source_event: arg.source_event,
-		player: this.id,
-		card: card
-	});
-	this.game.event_mngr.front(event.id);
 };

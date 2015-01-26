@@ -12,9 +12,9 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 // deck
 BOARDFUL.CORE.Deck = function (owner) {
 	this.type = "Deck";
-	this.card_list = new Array();
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.card_list = new Array();
 	this.addListeners();
 };
 // add listeners
@@ -37,11 +37,12 @@ BOARDFUL.CORE.Deck.prototype.addListeners = function () {
 };
 // shuffle deck
 BOARDFUL.CORE.Deck.prototype.shuffleDeck = function (arg) {
+	// not me
 	if (arg.deck != this.id) {
 		return;
 	}
 	this.card_list = BOARDFUL.CORE.shuffle(this.card_list);
-
+	// add ui event
 	var event_list = new Array();
 	var event = new BOARDFUL.CORE.Event({
 		name: "ShuffleDeckUi",
@@ -60,6 +61,7 @@ BOARDFUL.CORE.Deck.prototype.getCards = function (card_list) {
 };
 // deal cards
 BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
+	// not me
 	if (arg.deck != this.id) {
 		return;
 	}
@@ -69,12 +71,13 @@ BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
 		this.card_list.shift();
 	}
 	BOARDFUL.Mngr.get(arg.player).hand = BOARDFUL.Mngr.get(arg.player).hand.concat(card_list);
-
+	// create event for ui
 	var event_list = new Array();
 	var event = new BOARDFUL.CORE.Event({
 		name: "DealCardsUi",
 		source: this.id,
-		cards: card_list
+		cards: card_list,
+		player: arg.player
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);

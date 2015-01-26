@@ -16,13 +16,21 @@ BOARDFUL.CORE.Table = function (owner) {
 	this.arg_list = new Array();
 	this.addListeners();
 };
+// get cards by source event
 BOARDFUL.CORE.Table.prototype.getCardsBySource = function (event) {
 	var select_list = new Array();
 	for (var i in this.arg_list) {
 		if (event == this.arg_list[i].source_event) {
+			// deep copy
 			select_list.push(this.arg_list[i]);
-			this.arg_list.splice(i, 1);
+			this.arg_list[i] = undefined;
 		}
+	}
+	// remove taken cards
+	var index = this.arg_list.indexOf(undefined);
+	while (-1 != index) {
+		this.arg_list.splice(index, 1);
+		index = this.arg_list.indexOf(undefined);
 	}
 	return select_list;
 };
@@ -41,5 +49,6 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
 	var index = BOARDFUL.Mngr.get(arg.player).hand.indexOf(arg.card);
 	BOARDFUL.Mngr.get(arg.player).hand.splice(index, 1);
+	BOARDFUL.Mngr.get(arg.card).owner = this.id;
 	this.arg_list.push(arg);
 };

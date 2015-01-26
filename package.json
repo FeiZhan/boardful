@@ -21,14 +21,14 @@
     "url": "https://github.com/FeiZhan/boardful/issues"
   },
   "homepage": "https://github.com/FeiZhan/boardful",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-uglify": "^0.7.0",
     "jquery": "^2.1.3",
     "keypress": "^0.2.1",
+    "underscore": "^1.7.0",
     "winston": "^0.8.3"
   }
 }

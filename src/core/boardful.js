@@ -11,6 +11,8 @@ var BOARDFUL = BOARDFUL || new Object();
 // if nodejs, export as module
 if (typeof module !== 'undefined' && module.exports) {
 	module.exports = BOARDFUL;
+	var $ = require('jquery');
+	var _ = require("underscore");
 }
 BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
@@ -55,5 +57,4 @@ BOARDFUL.loadBoards = function () {
 			BOARDFUL.BoardList.push(new BOARDFUL.CORE.Board(board_list[i]).id);
 		}
 	});
-	
 };

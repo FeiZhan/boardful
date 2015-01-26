@@ -28,7 +28,7 @@ BOARDFUL.CORE.Board.prototype.load = function (callback) {
 					BOARDFUL.CORE.File.setToMods(package.files[i]);
 				}
 			}
-			console.log("load board", that.name);
+			BOARDFUL.Logger.log("info", "load board", that.name);
 			that.createRoom(package, callback);
 		});
 	});

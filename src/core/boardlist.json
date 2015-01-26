@@ -2,6 +2,11 @@
   "version": "0.0.0",
   "boards": [
     {
+      "name": "test",
+      "descrip": "description of test",
+      "package": "mods/test/boardful.json"
+    },
+    {
       "name": "poker",
       "descrip": "description of poker",
       "package": "mods/poker/boardful.json"

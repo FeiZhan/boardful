@@ -6,7 +6,6 @@
  * 
 **/
 
-var $ = require('jquery');
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.core.js");
 BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
@@ -38,10 +37,24 @@ BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
 		return;
 	}
 	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayerStart", {
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ResumeGame", {
 		level: "game",
 		callback: function (arg) {
-			that.playerStart(arg);
+			that.resumeGame(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("StartRound", {
+		level: "game",
+		callback: function (arg) {
+			that.startRound(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("StartPlayer", {
+		level: "game",
+		callback: function (arg) {
+			that.startPlayer(arg);
 		},
 		id: that.id
 	});
@@ -129,9 +142,17 @@ BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
 	}
 };
 
+// ui for resume game
+BOARDFUL.DESKTOP.Cmdline.prototype.resumeGame = function (arg) {
+	this.output("resume game");
+};
+// ui for start round
+BOARDFUL.DESKTOP.Cmdline.prototype.startRound = function (arg) {
+	this.output("round", arg.number);
+};
 // ui for player start
-BOARDFUL.DESKTOP.Cmdline.prototype.playerStart = function (arg) {
-	this.output("player start", arg.player);
+BOARDFUL.DESKTOP.Cmdline.prototype.startPlayer = function (arg) {
+	this.output("start player", arg.player);
 };
 // ui for deal cards
 BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
@@ -141,9 +162,9 @@ BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
 BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
 	var text = "";
 	for (var i in arg.players) {
-		text += arg.players[i] + " " + BOARDFUL.Mngr.get(arg.cards[i]).name + "\n";
+		text += arg.players[i] + " " + BOARDFUL.Mngr.get(arg.cards[i]).name + "\t";
 	}
-	text += "winner " + arg.player;
+	text += "\nwinner " + arg.player;
 	this.output("duel", text);
 };
 
@@ -156,10 +177,10 @@ BOARDFUL.DESKTOP.Cmdline.setCmdline = function () {
 BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
+		// board menu
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			console.log(i + ". " + board.config.name);
-			console.log("\t" + board.config.descrip);
+			console.log(i + ". " + board.config.name + "\t" + board.config.descrip);
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {
@@ -170,7 +191,9 @@ BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
 				var that = this;
 				process.stdin.once('data', function (text) {
 					BOARDFUL.Cmdline.output("config room done");
+					// create game
 					var game = new BOARDFUL.CORE.Game(id);
+					// set a new cmdline as ui
 					game.ui = new BOARDFUL.DESKTOP.Cmdline(game.id);
 					BOARDFUL.Cmdline.output("game start");
 					game.run();
