@@ -110,10 +110,10 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 };
 BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardsUi", {
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardUi", {
 		level: "game",
 		callback: function (arg) {
-			that.dealCardsUi(arg);
+			that.dealCardUi(arg);
 		},
 		id: that.id
 	});

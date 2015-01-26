@@ -55,6 +55,20 @@ Poker.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("Discard", {
+		level: "game",
+		callback: function (arg) {
+			that.discard(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ReorderDeck", {
+		level: "game",
+		callback: function (arg) {
+			that.reorderDeck(arg);
+		},
+		id: that.id
+	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayCardAi", {
 		level: "game",
 		callback: function (arg) {
@@ -121,7 +135,25 @@ Poker.prototype.settle = function (arg) {
 		player: winner
 	});
 	event_list.push(event.id);
+	event = new BOARDFUL.CORE.Event({
+		name: "Discard",
+		source: BOARDFUL.Mngr.get(this.owner).table,
+		cards: card_list
+	});
+	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
+};
+// discard
+Poker.prototype.discard = function (arg) {
+	var deck = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).deck_list.discard);
+	deck.getCards(arg.cards);
+};
+// reorder deck
+Poker.prototype.reorderDeck = function (arg) {
+	var discard = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).deck_list.discard);
+	discard.card_list = BOARDFUL.CORE.shuffle(discard.card_list);
+	BOARDFUL.Mngr.get(arg.deck).getCards(discard.card_list);
+	discard.card_list = new Array();
 };
 // play card AI
 Poker.prototype.playCard = function (arg) {
