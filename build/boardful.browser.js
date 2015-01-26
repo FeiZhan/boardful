@@ -16,7 +16,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
-BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
+BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	config = config || new Object();
 	config.parent = config.parent || "";
 	var that = this;
@@ -28,6 +28,27 @@ BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
 			card_jq.css(config.position);
 		}
 		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
+		card_jq.draggable({
+			stop: function (event, ui) {
+				// expand and disappear
+				card_jq.animate({
+					top: '-=100px',
+					left: '-=100px',
+					height: '+=200px',
+					width: '+=200px',
+					opacity: 0,
+				}, "slow", function () {
+					$(this).remove();
+				});
+			},
+		});
+		card_jq.hover(function () {
+			// move to front
+			$(this).css("z-index", 1);
+		}, function () {
+			// move back
+			$(this).css("z-index", 0);
+		});
 		if ("function" == typeof callback) {
 			callback(card_jq);
 		}
@@ -37,7 +58,7 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 	var jq = $("#content #" + this.id);
 	if (0 == jq.length) {
 		var that = this;
-		this.draw({
+		this.load({
 			position: {
 				top: "50%",
 				left: "80%"
@@ -72,16 +93,18 @@ BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 BOARDFUL.BRSR.GameUi = function (owner) {
 	this.type = "GameUi";
 	this.owner = owner;
-	if (this.owner) {
-		BOARDFUL.Mngr.add(this);
-		BOARDFUL.CORE.Command.owner = this.owner;
-	}
+	BOARDFUL.Mngr.add(this);
+	BOARDFUL.CORE.Command.owner = this.owner;
 	this.addListeners();
 	$("#content").empty();
 	$("#content").load("src/browser/game.html", function () {
 		$("#content #ok").on("click", function () {
 		});
 	});
+	this.player_list = new Array();
+	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
+		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.owner).player_list[i]).id);
+	}
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
@@ -185,4 +208,34 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 		}
 	});
 	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
+};
+
+/**
+ * Gui for player.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+**/
+
+var BOARDFUL = BOARDFUL || new Object();
+BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
+
+BOARDFUL.BRSR.PlayerUi = function (owner) {
+	this.type = "PlayerUi";
+	this.owner = owner;
+	BOARDFUL.Mngr.add(this);
+	var load;
+	switch (BOARDFUL.Mngr.get(this.owner).name) {
+	case "ai":
+		load = "src/browser/player_you.html";
+		break;
+	case "me":
+	default:
+		load = "src/browser/player_me.html";
+		break;
+	}
+	$.get(load, function (text, status, xhr) {
+		$("#content").append(text);
+	});
+	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
 };

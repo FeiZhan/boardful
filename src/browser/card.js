@@ -16,7 +16,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
-BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
+BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	config = config || new Object();
 	config.parent = config.parent || "";
 	var that = this;
@@ -28,6 +28,27 @@ BOARDFUL.BRSR.CardUi.prototype.draw = function (config, callback) {
 			card_jq.css(config.position);
 		}
 		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
+		card_jq.draggable({
+			stop: function (event, ui) {
+				// expand and disappear
+				card_jq.animate({
+					top: '-=100px',
+					left: '-=100px',
+					height: '+=200px',
+					width: '+=200px',
+					opacity: 0,
+				}, "slow", function () {
+					$(this).remove();
+				});
+			},
+		});
+		card_jq.hover(function () {
+			// move to front
+			$(this).css("z-index", 1);
+		}, function () {
+			// move back
+			$(this).css("z-index", 0);
+		});
 		if ("function" == typeof callback) {
 			callback(card_jq);
 		}
@@ -37,7 +58,7 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 	var jq = $("#content #" + this.id);
 	if (0 == jq.length) {
 		var that = this;
-		this.draw({
+		this.load({
 			position: {
 				top: "50%",
 				left: "80%"

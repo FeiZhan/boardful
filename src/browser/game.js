@@ -11,16 +11,18 @@ BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 BOARDFUL.BRSR.GameUi = function (owner) {
 	this.type = "GameUi";
 	this.owner = owner;
-	if (this.owner) {
-		BOARDFUL.Mngr.add(this);
-		BOARDFUL.CORE.Command.owner = this.owner;
-	}
+	BOARDFUL.Mngr.add(this);
+	BOARDFUL.CORE.Command.owner = this.owner;
 	this.addListeners();
 	$("#content").empty();
 	$("#content").load("src/browser/game.html", function () {
 		$("#content #ok").on("click", function () {
 		});
 	});
+	this.player_list = new Array();
+	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
+		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.owner).player_list[i]).id);
+	}
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
