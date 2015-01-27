@@ -5,4 +5,20 @@
 	width: 10%;
 	text-align: center;
 	overflow: hidden;
+	/* for card flip */
+	transform-style: preserve-3d;
+	transition: transform 1s;
+}
+.card img {
+	backface-visibility: hidden;
+}
+.card .front {
+	background-color: Beige;
+}
+.card .back {
+	background-color: DarkBlue;
+	transform: rotateY( 180deg );
+}
+.card.flip {
+	transform: rotateY( 180deg );
 }

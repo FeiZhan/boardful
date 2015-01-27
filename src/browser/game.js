@@ -37,15 +37,12 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 	});
 };
 
-BOARDFUL.BRSR.GameUi.prototype.dealCardsUi = function (arg) {
-	console.log("deal cards", arg.cards);
-	for (var i in arg.cards) {
-		var card = new BOARDFUL.BRSR.CardUi(arg.cards[i], this);
-		card.move({
-			position: {
-				top: "65%",
-				left: "50%"
-			}
-		});
-	}
+BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
+	var card = new BOARDFUL.BRSR.CardUi(arg.card, this);
+	card.move({
+		position: {
+			top: "65%",
+			left: "50%"
+		}
+	});
 };
