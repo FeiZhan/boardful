@@ -48,8 +48,12 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 // place card on table
 BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
-	var index = hand.indexOf(arg.card);
-	hand.splice(index, 1);
-	BOARDFUL.Mngr.get(arg.card).owner = this.id;
+	for (var i in arg.cards) {
+		var index = hand.indexOf(arg.cards[i]);
+		if (index >= 0) {
+			hand.splice(index, 1);
+		}
+		BOARDFUL.Mngr.get(arg.cards[i]).owner = this.id;
+	}
 	this.arg_list.push(arg);
 };

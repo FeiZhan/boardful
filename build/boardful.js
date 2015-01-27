@@ -1025,6 +1025,21 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 	var event_list = new Array();
 	var event;
 	for (var i in this.player_list) {
+		var cards = 0;
+		// get number of cards for each round from room config
+		if (BOARDFUL.Mngr.get(this.owner).config.cards) {
+			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
+		}
+		event = new BOARDFUL.CORE.Event({
+			name: "DealCards",
+			source: this.id,
+			deck: this.deck_list.draw,
+			player: this.player_list[i],
+			number: cards
+		});
+		event_list.push(event.id);
+	}
+	for (var i in this.player_list) {
 		event = new BOARDFUL.CORE.Event({
 			name: "StartPlayer" + this.player_list[i],
 			source: this.id,
@@ -1245,29 +1260,11 @@ BOARDFUL.CORE.Player.prototype.start = function (arg) {
 };
 // play card
 BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
-	if ("ai" == this.name) {
-		var event = new BOARDFUL.CORE.Event({
-			name: "PlayCardAi",
-			source: this.id,
-			source_event: arg.source_event,
-			player: this.id
-		});
+	//if ("ai" == this.name) {
+		var event = new BOARDFUL.CORE.Event(arg);
+		event.name = "PlayCardAi";
 		this.game.event_mngr.front(event.id);
-	} else {
-		var hand = BOARDFUL.Mngr.get(this.hand).card_list;
-		if (0 == hand.length) {
-			return;
-		}
-		var card = hand[Math.floor((Math.random() * hand.length))];
-		var event = new BOARDFUL.CORE.Event({
-			name: "PlaceCardOnTable",
-			source: this.id,
-			source_event: arg.source_event,
-			player: this.id,
-			card: card
-		});
-		this.game.event_mngr.front(event.id);
-	}
+	//}
 };
 /**
  * Room.
@@ -1339,9 +1336,13 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 // place card on table
 BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
-	var index = hand.indexOf(arg.card);
-	hand.splice(index, 1);
-	BOARDFUL.Mngr.get(arg.card).owner = this.id;
+	for (var i in arg.cards) {
+		var index = hand.indexOf(arg.cards[i]);
+		if (index >= 0) {
+			hand.splice(index, 1);
+		}
+		BOARDFUL.Mngr.get(arg.cards[i]).owner = this.id;
+	}
 	this.arg_list.push(arg);
 };
 /**
@@ -1623,7 +1624,18 @@ BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
 BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
 	var text = "";
 	for (var i in arg.players) {
-		text += arg.players[i] + " " + BOARDFUL.Mngr.get(arg.cards[i]).name + "\t";
+		text += arg.players[i] + ": ";
+		if ("array" == typeof arg.cards[i] || "object" == typeof arg.cards[i]) {
+			var hand_type = BOARDFUL.MODS.Poker.getHandType(arg.cards[i]);
+			text += hand_type.type + " " + BOARDFUL.Mngr.get(hand_type.card).name + "(";
+			for (var j in arg.cards[i]) {
+				text += " " + BOARDFUL.Mngr.get(arg.cards[i][j]).name;
+			}
+			text += ")";
+		} else {
+			text += BOARDFUL.Mngr.get(arg.cards[i]).name;
+		}
+		text += "\n";
 	}
 	text += "\nwinner " + arg.player;
 	this.output("duel", text);
@@ -1793,10 +1805,24 @@ Poker.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("Discard", {
+		level: "game",
+		callback: function (arg) {
+			that.discard(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ReorderDeck", {
+		level: "game",
+		callback: function (arg) {
+			that.reorderDeck(arg);
+		},
+		id: that.id
+	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayCardAi", {
 		level: "game",
 		callback: function (arg) {
-			that.playCard(arg);
+			that.playCardAi(arg);
 		},
 		id: that.id
 	});
@@ -1813,13 +1839,13 @@ Poker.prototype.playerAct = function (arg) {
 	var event_list = new Array();
 	var event;
 	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		// each player play one card
+		// each player play cards
 		event = new BOARDFUL.CORE.Event({
 			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
 			source: this.id,
 			source_event: "PlayersDuel",
 			player: BOARDFUL.Mngr.get(this.owner).player_list[i],
-			number: 1
+			number: 5
 		});
 		event_list.push(event.id);
 	}
@@ -1835,19 +1861,36 @@ Poker.prototype.playerAct = function (arg) {
 // settle players duel
 Poker.prototype.settle = function (arg) {
 	var select_list = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).table).getCardsBySource("PlayersDuel");
-	var that = this;
-	select_list.sort(function (a, b) {
-		return BOARDFUL.MODS.Poker.compare(a.card, b.card);
+	// group player's cards together
+	var select_player_list = new Array();
+	for (var i in select_list) {
+		if (! (select_list[i].player in select_player_list)) {
+			select_player_list[select_list[i].player] = new Array();
+		}
+		select_player_list[select_list[i].player] = select_player_list[select_list[i].player].concat(select_list[i].cards);
+	}
+	// change to array
+	var select_card_list = new Array();
+	for (var i in select_player_list) {
+		select_card_list.push({
+			player: i,
+			cards: select_player_list[i]
+		});
+	}
+	select_card_list.sort(function (a, b) {
+		return BOARDFUL.MODS.Poker.compareHand(a.cards, b.cards);
 	});
 	var player_list = new Array();
 	var card_list = new Array();
-	for (var i in select_list) {
-		player_list.push(select_list[i].player);
-		card_list.push(select_list[i].card);
+	var all_card_list = new Array();
+	for (var i in select_card_list) {
+		player_list.push(select_card_list[i].player);
+		card_list.push(select_card_list[i].cards);
+		all_card_list = all_card_list.concat(select_card_list[i].cards);
 	}
 	var winner = undefined;
-	if (select_list.length > 0) {
-		winner = select_list[select_list.length - 1].player;
+	if (select_card_list.length > 0) {
+		winner = select_card_list[select_card_list.length - 1].player;
 	}
 	// event for ui
 	var event_list = new Array();
@@ -1859,21 +1902,48 @@ Poker.prototype.settle = function (arg) {
 		player: winner
 	});
 	event_list.push(event.id);
+	event = new BOARDFUL.CORE.Event({
+		name: "Discard",
+		source: BOARDFUL.Mngr.get(this.owner).table,
+		cards: all_card_list
+	});
+	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
+// discard
+Poker.prototype.discard = function (arg) {
+	var deck = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).deck_list.discard);
+	deck.getCards(arg.cards);
+};
+// reorder deck
+Poker.prototype.reorderDeck = function (arg) {
+	var discard = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).deck_list.discard);
+	discard.card_list = BOARDFUL.CORE.shuffle(discard.card_list);
+	BOARDFUL.Mngr.get(arg.deck).getCards(discard.card_list);
+	discard.card_list = new Array();
+};
 // play card AI
-Poker.prototype.playCard = function (arg) {
-	var player = BOARDFUL.Mngr.get(arg.player);
-	if (0 == player.hand.length) {
+Poker.prototype.playCardAi = function (arg) {
+	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
+	var card_list = new Array();
+	if (0 == hand.length) {
 		return;
 	}
-	var card = player.hand[Math.floor((Math.random() * player.hand.length))];
+	else if (hand.length < arg.number) {
+		card_list = hand;
+	} else {
+		while (card_list.length < arg.number) {
+			var index = Math.floor((Math.random() * hand.length));
+			card_list.push(hand[index]);
+			hand.splice(index, 1);
+		}
+	}
 	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: arg.player,
 		source_event: arg.source_event,
 		player: arg.player,
-		card: card
+		cards: card_list
 	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event.id);
 };
@@ -1933,7 +2003,10 @@ Poker.SUITS = {
 Poker.compare = function (id0, id1) {
 	var card0 = BOARDFUL.Mngr.get(id0);
 	var card1 = BOARDFUL.Mngr.get(id1);
-	if (card0.rank != card1.rank) {
+	if (undefined === card0 || undefined === card1) {
+		return (undefined === card1) - (undefined === card0);
+	}
+	else if (card0.rank != card1.rank) {
 		return Poker.RANKS[card0.rank] - Poker.RANKS[card1.rank];
 	}
 	else if (card0.suit != card1.suit) {
@@ -1941,6 +2014,174 @@ Poker.compare = function (id0, id1) {
 	}
 	else {
 		return 0;
+	}
+};
+Poker.HAND_TYPES = {
+	"Straight flush": 9,
+	"Four of a kind": 8,
+	"Full house": 7,
+	"Flush": 6,
+	"Straight": 5,
+	"Three of a kind": 4,
+	"Two pair": 3,
+	"One pair": 2,
+	"High card": 1,
+	"Less than five": 0
+};
+// compare two set of cards
+Poker.compareHand = function (list0, list1) {
+	if (list0.length != list1.length) {
+		return list0.length - list1.length;
+	}
+	var type0 = Poker.getHandType(list0);
+	var type1 = Poker.getHandType(list1);
+	if (type0.type != type1.type) {
+		return Poker.HAND_TYPES[type0.type] - Poker.HAND_TYPES[type1.type];
+	}
+	else {
+		return Poker.compare(type0.card, type1.card);
+	}
+};
+Poker.getHandType = function (list) {
+	list.sort(Poker.compare);
+	if (0 == list.length) {
+		return {
+			type: "Less than five",
+			card: undefined
+		};
+	}
+	else if (list.length < 5) {
+		return {
+			type: "Less than five",
+			card: list[list.length - 1]
+		};
+	}
+	var card_list = new Array();
+	var suit_list = new Object();
+	var ranks = new Array();
+	var rank_list = new Object();
+	for (var i in list) {
+		var card = BOARDFUL.Mngr.get(list[i]);
+		if (! (card.suit in suit_list)) {
+			suit_list[card.suit] = 0;
+		}
+		++ suit_list[card.suit];
+		var rank = Poker.RANKS[card.rank];
+		if (! (rank in rank_list)) {
+			rank_list[rank] = 0;
+		}
+		ranks.push(rank);
+		++ rank_list[rank];
+		card_list.push(card);
+	}
+	var max_rank_count = 0;
+	var max_count_rank = 0;
+	for (var i in rank_list) {
+		if (rank_list[i] > max_rank_count) {
+			max_rank_count = rank_list[i];
+			max_count_rank = i;
+		}
+	}
+	var cont_count = 1;
+	var max_cont_count = 0;
+	var max_cont_rank = 0;
+	for (var i in ranks) {
+		if (i > 0 && ranks[i] - ranks[i - 1] == 1) {
+			++ cont_count;
+		} else {
+			cont_count = 1;
+		}
+		if (cont_count >= max_cont_count) {
+			max_cont_count = cont_count;
+			max_cont_rank = ranks[i];
+		}
+		prev = i;
+	}
+	if (1 == Object.keys(suit_list).length && 5 == max_cont_count) {
+		return {
+			type: "Straight flush",
+			card: list[list.length - 1]
+		};
+	}
+	else if (4 == max_rank_count) {
+		var return_index = card_list.length - 1;
+		for (var i = card_list.length - 1; i >= 0; -- i) {
+			if (Poker.RANKS[card_list[i].rank] == max_count_rank) {
+				return_index = i;
+				break;
+			}
+		}
+		return {
+			type: "Four of a kind",
+			card: list[return_index]
+		};
+	}
+	else if (2 == Object.keys(rank_list).length && 3 == max_rank_count) {
+		var return_index = card_list.length - 1;
+		for (var i = card_list.length - 1; i >= 0; -- i) {
+			if (Poker.RANKS[card_list[i].rank] == max_count_rank) {
+				return_index = i;
+				break;
+			}
+		}
+		return {
+			type: "Full house",
+			card: list[return_index]
+		};
+	}
+	else if (1 == Object.keys(suit_list).length) {
+		return {
+			type: "Flush",
+			card: list[card_list.length - 1]
+		};
+	}
+	else if (5 == max_cont_count) {
+		return {
+			type: "Straight",
+			card: list[card_list.length - 1]
+		};
+	}
+	else if (3 == max_rank_count) {
+		var return_index = card_list.length - 1;
+		for (var i = card_list.length - 1; i >= 0; -- i) {
+			if (Poker.RANKS[card_list[i].rank] == max_count_rank) {
+				return_index = i;
+				break;
+			}
+		}
+		return {
+			type: "Three of a kind",
+			card: list[return_index]
+		};
+	}
+	else if (3 == Object.keys(rank_list).length) {
+		var return_index = card_list.length - 1;
+		for (var i in card_list) {
+			if (i > 1 && card_list[i].rank == card_list[i - 1].rank) {
+				return_index = i;
+			}
+		}
+		return {
+			type: "Two pair",
+			card: list[return_index]
+		};
+	}
+	else if (4 == Object.keys(rank_list).length) {
+		var return_index = card_list.length - 1;
+		for (var i in card_list) {
+			if (i > 1 && card_list[i].rank == card_list[i - 1].rank) {
+				return_index = i;
+			}
+		}
+		return {
+			type: "One pair",
+			card: list[return_index]
+		};
+	} else {
+		return {
+			type: "High card",
+			card: list[card_list.length - 1]
+		};
 	}
 };
 /**

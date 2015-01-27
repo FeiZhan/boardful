@@ -188,6 +188,21 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 	var event_list = new Array();
 	var event;
 	for (var i in this.player_list) {
+		var cards = 0;
+		// get number of cards for each round from room config
+		if (BOARDFUL.Mngr.get(this.owner).config.cards) {
+			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
+		}
+		event = new BOARDFUL.CORE.Event({
+			name: "DealCards",
+			source: this.id,
+			deck: this.deck_list.draw,
+			player: this.player_list[i],
+			number: cards
+		});
+		event_list.push(event.id);
+	}
+	for (var i in this.player_list) {
 		event = new BOARDFUL.CORE.Event({
 			name: "StartPlayer" + this.player_list[i],
 			source: this.id,

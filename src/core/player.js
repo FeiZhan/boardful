@@ -54,27 +54,9 @@ BOARDFUL.CORE.Player.prototype.start = function (arg) {
 };
 // play card
 BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
-	if ("ai" == this.name) {
-		var event = new BOARDFUL.CORE.Event({
-			name: "PlayCardAi",
-			source: this.id,
-			source_event: arg.source_event,
-			player: this.id
-		});
+	//if ("ai" == this.name) {
+		var event = new BOARDFUL.CORE.Event(arg);
+		event.name = "PlayCardAi";
 		this.game.event_mngr.front(event.id);
-	} else {
-		var hand = BOARDFUL.Mngr.get(this.hand).card_list;
-		if (0 == hand.length) {
-			return;
-		}
-		var card = hand[Math.floor((Math.random() * hand.length))];
-		var event = new BOARDFUL.CORE.Event({
-			name: "PlaceCardOnTable",
-			source: this.id,
-			source_event: arg.source_event,
-			player: this.id,
-			card: card
-		});
-		this.game.event_mngr.front(event.id);
-	}
+	//}
 };

@@ -784,6 +784,21 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 	var event_list = new Array();
 	var event;
 	for (var i in this.player_list) {
+		var cards = 0;
+		// get number of cards for each round from room config
+		if (BOARDFUL.Mngr.get(this.owner).config.cards) {
+			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
+		}
+		event = new BOARDFUL.CORE.Event({
+			name: "DealCards",
+			source: this.id,
+			deck: this.deck_list.draw,
+			player: this.player_list[i],
+			number: cards
+		});
+		event_list.push(event.id);
+	}
+	for (var i in this.player_list) {
 		event = new BOARDFUL.CORE.Event({
 			name: "StartPlayer" + this.player_list[i],
 			source: this.id,
@@ -1004,29 +1019,11 @@ BOARDFUL.CORE.Player.prototype.start = function (arg) {
 };
 // play card
 BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
-	if ("ai" == this.name) {
-		var event = new BOARDFUL.CORE.Event({
-			name: "PlayCardAi",
-			source: this.id,
-			source_event: arg.source_event,
-			player: this.id
-		});
+	//if ("ai" == this.name) {
+		var event = new BOARDFUL.CORE.Event(arg);
+		event.name = "PlayCardAi";
 		this.game.event_mngr.front(event.id);
-	} else {
-		var hand = BOARDFUL.Mngr.get(this.hand).card_list;
-		if (0 == hand.length) {
-			return;
-		}
-		var card = hand[Math.floor((Math.random() * hand.length))];
-		var event = new BOARDFUL.CORE.Event({
-			name: "PlaceCardOnTable",
-			source: this.id,
-			source_event: arg.source_event,
-			player: this.id,
-			card: card
-		});
-		this.game.event_mngr.front(event.id);
-	}
+	//}
 };
 /**
  * Room.
@@ -1098,9 +1095,13 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 // place card on table
 BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
-	var index = hand.indexOf(arg.card);
-	hand.splice(index, 1);
-	BOARDFUL.Mngr.get(arg.card).owner = this.id;
+	for (var i in arg.cards) {
+		var index = hand.indexOf(arg.cards[i]);
+		if (index >= 0) {
+			hand.splice(index, 1);
+		}
+		BOARDFUL.Mngr.get(arg.cards[i]).owner = this.id;
+	}
 	this.arg_list.push(arg);
 };
 /**

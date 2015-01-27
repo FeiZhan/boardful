@@ -12,8 +12,8 @@
 	"decks": ["draw", "discard"],
 	"players": ["2"],
 	"cards": {
-		"init": "5",
-		"round": "2"
+		"init": "2",
+		"round": "5"
 	},
 	"options": {
 		"deck_num": {

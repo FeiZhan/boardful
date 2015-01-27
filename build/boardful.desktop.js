@@ -162,7 +162,18 @@ BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
 BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
 	var text = "";
 	for (var i in arg.players) {
-		text += arg.players[i] + " " + BOARDFUL.Mngr.get(arg.cards[i]).name + "\t";
+		text += arg.players[i] + ": ";
+		if ("array" == typeof arg.cards[i] || "object" == typeof arg.cards[i]) {
+			var hand_type = BOARDFUL.MODS.Poker.getHandType(arg.cards[i]);
+			text += hand_type.type + " " + BOARDFUL.Mngr.get(hand_type.card).name + "(";
+			for (var j in arg.cards[i]) {
+				text += " " + BOARDFUL.Mngr.get(arg.cards[i][j]).name;
+			}
+			text += ")";
+		} else {
+			text += BOARDFUL.Mngr.get(arg.cards[i]).name;
+		}
+		text += "\n";
 	}
 	text += "\nwinner " + arg.player;
 	this.output("duel", text);

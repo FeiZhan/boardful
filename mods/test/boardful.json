@@ -13,7 +13,7 @@
 	"players": ["2"],
 	"cards": {
 		"init": "5",
-		"round": "2"
+		"turn": "2"
 	},
 	"options": {
 		"deck_num": {
