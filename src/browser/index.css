@@ -1,23 +1,56 @@
 body {
 	background-image: url('../../resources/background.jpg');
 }
-#header h1 {
-	float: left;
+#header {
+	position: fixed;
+	top: 0%;
+	left: 0%;
+	height: 5%;
+	width: 100%;
+	border-bottom: thin solid black;
 }
-#header nav {
+#header #logo {
 	position: absolute;
-	top: 5%;
+	top: 0%;
+	left: 0%;
+	margin-left: 1em;
+	font-weight: bold;
+	cursor: pointer;
+}
+#header #navmain {
+	position: absolute;
+	top: 0%;
 	left: 20%;
+	height: 100%;
+	width: 50%;
+	border-left: thin solid black;
 }
-#header menu {
-	position: absolute;
-	top: 5%;
-	left: 80%;
-}
-#header menu div {
+#header #navmain div {
+	height: 100%;
+	border-right: thin solid black;
+	padding-left: 2%;
+	padding-right: 2%;
 	float: left;
-	margin: 5px;
-    cursor: pointer;
+	cursor: pointer;
+}
+#header #navsecond {
+	position: absolute;
+	top: 0%;
+	left: 70%;
+	height: 100%;
+	width: 29%;
+	border-right: thin solid black;
+}
+#header #navsecond div {
+	height: 100%;
+	border-left: thin solid black;
+	padding-left: 2%;
+	padding-right: 2%;
+	float: right;
+	cursor: pointer;
+}
+#header #sound.disable {
+	text-decoration: line-through;
 }
 #content {
 	position: absolute;
