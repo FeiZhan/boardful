@@ -38,6 +38,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		// draggable
 		card_jq.draggable({
 			start: function() {
+				// flip card when dragging
 				flip_interval = setInterval(function () {
 					card_jq.toggleClass("flip");
 				}, 2000);
@@ -165,10 +166,10 @@ BOARDFUL.BRSR.run = function () {
 	$("#content").empty();
 	// load menu0
 	$("#content").load("src/browser/menu0.html", function () {
-		$('#content #main #local').click(function () {
+		$('#content #menu0main #local').click(function () {
 			BOARDFUL.BRSR.loadMenu1();
 		});
-		$('#content #secondary #options').click(function () {
+		$('#content #menu0secondary #options').click(function () {
 			console.log("options");
 		});
 	});

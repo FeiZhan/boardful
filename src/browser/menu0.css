@@ -1,50 +1,45 @@
-#content #main {
+#content #menu0main {
 	position: absolute;
 	top: 30%;
 	left: 20%;
 	height: 20%;
 	width: 60%;
 }
-#content #main div {
+#content .menu0 div {
 	position: relative;
 	top: 0%;
 	left: 0%;
 	height: 100%;
 	width: 26%;
 	margin: 2%;
+	border-radius: 25px;
 	float: left;
 	background-color: Aquamarine;
 	-webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
 	-moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
 	text-align: center;
-    cursor: pointer;
+	vertical-align: middle;
+	cursor: pointer;
 }
-#content #secondary {
+#content .menu0 div span {
+	/* center it */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+}
+#content #menu0main div {
+	font-size: xx-large;
+}
+#content #menu0secondary {
 	position: absolute;
 	top: 60%;
 	left: 30%;
 	height: 15%;
 	width: 40%;
 }
-#content #secondary div {
-	position: relative;
-	top: 0%;
-	left: 0%;
-	height: 100%;
-	width: 26%;
-	margin: 2%;
-	float: left;
-	background-color: Aquamarine;
-	-webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
-	-moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
-	box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
-	text-align: center;
-    cursor: pointer;
-}
-#content #main div {
-	font-size: xx-large;
-}
-#content #secondary div {
+#content #menu0secondary div {
 	font-size: large;
 }
