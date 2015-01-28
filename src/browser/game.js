@@ -8,6 +8,7 @@
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
+// game ui
 BOARDFUL.BRSR.GameUi = function (owner) {
 	this.type = "GameUi";
 	this.owner = owner;
@@ -16,7 +17,7 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 	this.addListeners();
 	$("#content").empty();
 	$("#content").load("src/browser/game.html", function () {
-		$("#content #ok").on("click", function () {
+		$("#content #playerok").on("click", function () {
 		});
 	});
 	this.player_list = new Array();

@@ -24,7 +24,14 @@ BOARDFUL.BRSR.run = function (canvas) {
 		}
 	});
 	$('#header #options').click(function () {
-		$("#dialog").dialog("open");
+		if ($("#dialog").dialog("isOpen")) {
+			$("#dialog").dialog("close");
+		} else {
+			$("#dialog").dialog("open");
+		}
+	});
+	$('#header #sound').click(function () {
+		$(this).toggleClass("disable");
 	});
 	$("#content").empty();
 	// load menu0

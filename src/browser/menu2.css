@@ -6,6 +6,9 @@
 	width: 45%;
 	margin: 2%;
 	border: thin solid black;
+	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 }
 .boardful #player_list div {
 }
@@ -16,7 +19,6 @@
 	height: 80%;
 	width: 45%;
 	margin: 2%;
-	border: thin solid black;
 }
 .boardful #room_config ul {
 	position: absolute;
@@ -27,7 +29,6 @@
 	margin: 0%;
 	padding: 0%;
 	list-style-position: inside;
-	border-bottom: thin solid black;
 	text-align: center;
 	vertical-align: middle;
 }
@@ -35,24 +36,27 @@
 	float: left;
 	height: 100%;
 	width: 33%;
-	border-left: thin solid black;
-	border-right: thin solid black;
+	border: thin solid black;
+	border-radius: 10px;
 	list-style-type: none;
 	cursor: pointer;
 	text-align: center;
 	vertical-align: middle;
-	border-radius: 10px;
 }
 .boardful #room_config li.active {
 	background-color: Plum;
 }
 .boardful #room_config div {
 	position: absolute;
-	top: 5%;
+	top: 6%;
 	left: 0%;
-	height: 95%;
-	width: 100%;
-	margin: 5%;
+	height: 83%;
+	width: 90%;
+	padding: 5%;
+	border: thin solid black;
+	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	visibility: hidden;
 }
 .boardful #room_config div.active {

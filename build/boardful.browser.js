@@ -174,7 +174,14 @@ BOARDFUL.BRSR.run = function (canvas) {
 		}
 	});
 	$('#header #options').click(function () {
-		$("#dialog").dialog("open");
+		if ($("#dialog").dialog("isOpen")) {
+			$("#dialog").dialog("close");
+		} else {
+			$("#dialog").dialog("open");
+		}
+	});
+	$('#header #sound').click(function () {
+		$(this).toggleClass("disable");
 	});
 	$("#content").empty();
 	// load menu0
@@ -184,7 +191,11 @@ BOARDFUL.BRSR.run = function (canvas) {
 			BOARDFUL.BRSR.loadMenu1();
 		});
 		$('#content #menu0_secondary #options').click(function () {
-			$("#dialog").dialog("open");
+			if ($("#dialog").dialog("isOpen")) {
+				$("#dialog").dialog("close");
+			} else {
+				$("#dialog").dialog("open");
+			}
 		});
 	});
 	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});

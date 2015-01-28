@@ -1,13 +1,34 @@
-#table {
-	border: 1px solid black;
+.boardful #table {
 	position: absolute;
-	top: 35%;
+	top: 25%;
 	left: 30%;
-	height: 30%;
+	height: 45%;
 	width: 40%;
+	border: 1px solid black;
+	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 }
-#playerok {
+.boardful #playerok {
 	position: absolute;
 	top: 50%;
 	left: 80%;
+	height: 10%;
+	width: 10%;
+	background-color: Khaki;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: center;
+	vertical-align: middle;
+	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+}
+.boardful #playerok span {
+	/* center it */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
 }

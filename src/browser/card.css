@@ -1,23 +1,17 @@
 .card {
-	border: 1px solid black;
 	position: absolute;
 	height: 30%;
 	width: 10%;
-	text-align: center;
+	-webkit-box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3);
+	-moz-box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3);
+	box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3);
 	overflow: hidden;
+	text-align: center;
 	/* for card flip */
 	transform-style: preserve-3d;
 	transition: transform 1s;
 }
 .card img {
-	backface-visibility: hidden;
-}
-.card .front {
-	background-color: Beige;
-}
-.card .back {
-	background-color: DarkBlue;
-	transform: rotateY( 180deg );
 }
 .card.flip {
 	transform: rotateY( 180deg );
