@@ -1,6 +1,9 @@
 body {
 	background-image: url('../../resources/background.jpg');
 }
+a {
+	text-decoration: none;
+}
 #header {
 	position: fixed;
 	top: 0%;
@@ -58,4 +61,6 @@ body {
 	left: 0%;
 	height: 95%;
 	width: 100%;
+}
+#dialog {
 }

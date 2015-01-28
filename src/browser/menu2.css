@@ -34,12 +34,14 @@
 .boardful #room_config li {
 	float: left;
 	height: 100%;
-	width: 30%;
+	width: 33%;
+	border-left: thin solid black;
 	border-right: thin solid black;
 	list-style-type: none;
 	cursor: pointer;
 	text-align: center;
 	vertical-align: middle;
+	border-radius: 10px;
 }
 .boardful #room_config li.active {
 	background-color: Plum;
