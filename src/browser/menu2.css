@@ -12,6 +12,7 @@
 }
 .boardful #player_list div {
 }
+
 .boardful #room_config {
 	position: absolute;
 	top: 0%;
@@ -46,7 +47,7 @@
 .boardful #room_config li.active {
 	background-color: Plum;
 }
-.boardful #room_config div {
+.boardful #room_config > div {
 	position: absolute;
 	top: 6%;
 	left: 0%;
@@ -61,4 +62,11 @@
 }
 .boardful #room_config div.active {
 	visibility: visible;
+}
+.boardful #room_config #description1 #name {
+	text-align: center;
+	font-weight: bold;
+	font-size: large;
+}
+.boardful #room_config #description1 #description2 {
 }

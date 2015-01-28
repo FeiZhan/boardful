@@ -3,17 +3,17 @@
   "boards": [
     {
       "name": "test",
-      "descrip": "description of test",
+      "description": "description of test",
       "package": "mods/test/boardful.json"
     },
     {
       "name": "poker",
-      "descrip": "description of poker",
+      "description": "description of poker",
       "package": "mods/poker/boardful.json"
     },
     {
       "name": "uno",
-      "descrip": "description of uno",
+      "description": "description of uno",
       "package": "mods/uno/boardful.json"
     }
   ]

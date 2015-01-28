@@ -191,7 +191,7 @@ BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
 		// board menu
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			console.log(i + ". " + board.config.name + "\t" + board.config.descrip);
+			console.log(i + ". " + board.config.name + "\t" + board.config.description);
 		}
 		console.log("select a board:");
 		process.stdin.once('data', function (text) {

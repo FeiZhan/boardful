@@ -43,7 +43,7 @@
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
-.boardful #descrip {
+.boardful #description {
 	position: absolute;
 	top: 0%;
 	left: 50%;
@@ -55,7 +55,7 @@
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 }
-.boardful #descrip div {
+.boardful #description div {
 	margin: 5%;
 }
 .boardful .button {
