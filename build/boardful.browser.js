@@ -159,17 +159,18 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // launch in browser
-BOARDFUL.BRSR.run = function () {
+BOARDFUL.BRSR.run = function (canvas) {
+	$("#" + canvas).addClass("boardful");
 	$('#header #options').click(function () {
 		console.log("options");
 	});
 	$("#content").empty();
 	// load menu0
 	$("#content").load("src/browser/menu0.html", function () {
-		$('#content #menu0main #local').click(function () {
+		$('#content #menu0_main #local').click(function () {
 			BOARDFUL.BRSR.loadMenu1();
 		});
-		$('#content #menu0secondary #options').click(function () {
+		$('#content #menu0_secondary #options').click(function () {
 			console.log("options");
 		});
 	});
@@ -180,7 +181,7 @@ BOARDFUL.BRSR.Selected = undefined;
 BOARDFUL.BRSR.loadMenu1 = function () {
 	$("#content").empty();
 	$("#content").load("src/browser/menu1.html", function () {
-		$("#content button#ok").click(function () {
+		$("#content #ok").click(function () {
 			if (undefined === BOARDFUL.BRSR.Selected) {
 				return;
 			}
@@ -189,12 +190,15 @@ BOARDFUL.BRSR.loadMenu1 = function () {
 		});
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			$("#content #boardlist ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
-			$("#content #boardlist ul li:last").click(function () {
+			$("#content #board_list ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
+			if (0 == i) {
+				//$("#content #board_list ul li:last").addClass("active");
+			}
+			$("#content #board_list ul li:last").click(function () {
 				BOARDFUL.BRSR.Selected = $(this).attr('id');
-				$("#content #boardlist li").removeClass("active");
+				$("#content #board_list li").removeClass("active");
 				$(this).addClass("active");
-				$("#content #descrip").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.descrip);
+				$("#content #descrip div").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.descrip);
 			});
 		}
 	});
@@ -205,22 +209,28 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 	var room = BOARDFUL.Mngr.get(id);
 	$("#content").empty();
 	$("#content").load("src/browser/menu2.html", function () {
-		$("#content button#ok").on("click", function () {
+		$("#content #room_config li").on("click", function () {
+			$("#content #room_config li").removeClass("active");
+			$("#content #room_config div").removeClass("active");
+			$(this).addClass("active");
+			$("#content #room_config div#" + $(this).attr("id")).addClass("active");
+		});
+		$("#content #ok").on("click", function () {
 			var game = new BOARDFUL.CORE.Game(id);
 			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
 			game.run();
 		});
 		$("#content #name").html(room.config.name);
-		$("#content #descrip1").html(room.config.descrip);
-		$("#content #players").append("<div><span>me</span></div>");
+		$("#content #description1").html(room.config.descrip);
+		$("#content #player_list").append("<div><span>me</span></div>");
 		for (var i = 1; i < room.config.max_players; ++ i) {
-			$("#content #players").append("<div><span>empty</span></div>");
+			$("#content #player_list").append("<div><span>empty</span></div>");
 		}
 		for (var i in room.config.options) {
-			$("#content #roomoptions").append('<div id="' + i + '"></div>');
-			$("#content #roomoptions #" + i).append('<span>' + i + '</span><select></select>');
+			$("#content #room_config").append('<div id="' + i + '"></div>');
+			$("#content #room_config #" + i).append('<span>' + i + '</span><select></select>');
 			for (var j in room.config.options[i].value) {
-				$("#content #roomoptions #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
+				$("#content #room_config #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
 			}
 		}
 	});

@@ -1,34 +1,58 @@
-#detail {
-	border: 1px solid black;
+.boardful #player_list {
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	height: 90%;
+	width: 45%;
+	margin: 2%;
+	border: thin solid black;
+}
+.boardful #player_list div {
+}
+.boardful #room_config {
+	position: absolute;
+	top: 0%;
+	left: 50%;
+	height: 80%;
+	width: 45%;
+	margin: 2%;
+	border: thin solid black;
+}
+.boardful #room_config ul {
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	height: 5%;
+	width: 100%;
+	margin: 0%;
+	padding: 0%;
+	list-style-position: inside;
+	border-bottom: thin solid black;
+	text-align: center;
+	vertical-align: middle;
+}
+.boardful #room_config li {
+	float: left;
+	height: 100%;
+	width: 30%;
+	border-right: thin solid black;
+	list-style-type: none;
+	cursor: pointer;
+	text-align: center;
+	vertical-align: middle;
+}
+.boardful #room_config li.active {
+	background-color: Plum;
+}
+.boardful #room_config div {
 	position: absolute;
 	top: 5%;
-	left: 5%;
-	height: 10%;
-	width: 90%;
+	left: 0%;
+	height: 95%;
+	width: 100%;
+	margin: 5%;
+	visibility: hidden;
 }
-#players {
-	border: 1px solid black;
-	position: absolute;
-	top: 20%;
-	left: 5%;
-	height: 75%;
-	width: 40%;
-}
-#roomoptions {
-	border: 1px solid black;
-	position: absolute;
-	top: 20%;
-	left: 55%;
-	height: 60%;
-	width: 40%;
-}
-#ok {
-	position: absolute;
-	top: 85%;
-	left: 75%;
-}
-#exit {
-	position: absolute;
-	top: 85%;
-	left: 85%;
+.boardful #room_config div.active {
+	visibility: visible;
 }

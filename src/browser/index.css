@@ -17,7 +17,7 @@ body {
 	font-weight: bold;
 	cursor: pointer;
 }
-#header #navmain {
+#header #nav_main {
 	position: absolute;
 	top: 0%;
 	left: 20%;
@@ -25,7 +25,7 @@ body {
 	width: 50%;
 	border-left: thin solid black;
 }
-#header #navmain div {
+#header #nav_main div {
 	height: 100%;
 	border-right: thin solid black;
 	padding-left: 2%;
@@ -33,7 +33,7 @@ body {
 	float: left;
 	cursor: pointer;
 }
-#header #navsecond {
+#header #nav_secondary {
 	position: absolute;
 	top: 0%;
 	left: 70%;
@@ -41,7 +41,7 @@ body {
 	width: 29%;
 	border-right: thin solid black;
 }
-#header #navsecond div {
+#header #nav_secondary div {
 	height: 100%;
 	border-left: thin solid black;
 	padding-left: 2%;
@@ -54,8 +54,8 @@ body {
 }
 #content {
 	position: absolute;
-	top: 10%;
+	top: 5%;
 	left: 0%;
-	height: 90%;
+	height: 95%;
 	width: 100%;
 }

@@ -1,29 +1,82 @@
-#boardlist {
-	border: 1px solid black;
+.boardful #board_list {
 	position: absolute;
-	top: 5%;
-	left: 5%;
-	height: 90%;
-	width: 40%;
+	top: 0%;
+	left: 0%;
+	height: 80%;
+	width: 45%;
+	margin: 2%;
+	border: thin solid black;
 }
-#boardlist li.active {
-	background-color: #E9E581;
+.boardful #board_list ul {
+	margin: 0;
+	padding: 0;
+	list-style-position: inside;
 }
-#descrip {
-	border: 1px solid black;
-	position: absolute;
-	top: 5%;
-	left: 55%;
-	height: 75%;
-	width: 40%;
+.boardful #board_list li {
+	padding: 2%;
+	font-size: large;
 }
-button#ok {
+.boardful #board_list li:nth-child(odd) {
+	background-color: Beige;
+}
+.boardful #board_list li:nth-child(even) {
+	background-color: LightCyan;
+}
+.boardful #board_list li.active {
+	background-color: Plum;
+}
+.boardful #mod {
 	position: absolute;
 	top: 85%;
-	left: 75%;
+	left: 0%;
+	height: 5%;
+	width: 45%;
+	margin: 2%;
+	text-align: center;
 }
-button#exit {
+.boardful #mod input {
+	width: 90%; 
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+.boardful #descrip {
 	position: absolute;
-	top: 85%;
-	left: 85%;
+	top: 0%;
+	left: 50%;
+	height: 80%;
+	width: 45%;
+	margin: 2%;
+	border: thin solid black;
+}
+.boardful #descrip div {
+	margin: 5%;
+}
+.boardful .button {
+	position: absolute;
+	top: 88%;
+	height: 10%;
+	width: 10%;
+	background-color: Khaki;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: center;
+	vertical-align: middle;
+	-webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+}
+.boardful #ok {
+	left: 65%;
+}
+.boardful #exit {
+	left: 80%;
+}
+.boardful .button span {
+	/* center it */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
 }
