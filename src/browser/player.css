@@ -1,8 +1,14 @@
 .boardful .head {
-	border: 1px solid black;
+	border: thin solid Grey;
 	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+}
+.boardful .head.active {
+	border: thin solid Red;
+	-webkit-box-shadow: 0px 0px 10px 5px rgba(255,0,0,0.7);
+	-moz-box-shadow: 0px 0px 10px 5px rgba(255,0,0,0.7);
+	box-shadow: 0px 0px 10px 5px rgba(255,0,0,0.7);
 }
 .boardful #myhead {
 	position: absolute;
@@ -18,9 +24,15 @@
 	height: 15%;
 	width: 8%;
 }
+.boardful .head img {
+	height: 100%;
+	width: 100%;
+}
 
 .boardful .hand {
-	border: 1px solid black;
+	border: thin solid black;
+	border-radius: 10px;
+	background-color: rgba(255, 255, 255, 0.5);
 	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
@@ -38,12 +50,4 @@
 	left: 8%;
 	height: 15%;
 	width: 75%;
-}
-.boardful .hand .card {
-	position: relative;
-	top: 0%;
-	left: 0%;
-	height: 100%;
-	max-height: 100%;
-	float: left;
 }

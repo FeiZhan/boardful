@@ -37,6 +37,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		var flip_interval;
 		// draggable
 		card_jq.draggable({
+			revert: "invalid",
 			start: function() {
 				// flip card when dragging
 				flip_interval = setInterval(function () {
@@ -48,7 +49,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 				clearInterval(flip_interval);
 				card_jq.removeClass("flip");
 				// expand and disappear
-				card_jq.animate({
+				/*card_jq.animate({
 					top: '-=100px',
 					left: '-=100px',
 					height: '+=200px',
@@ -56,15 +57,8 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 					opacity: 0,
 				}, "slow", function () {
 					$(this).remove();
-				});
+				});*/
 			},
-		});
-		card_jq.hover(function () {
-			// move to front
-			$(this).css("z-index", 1);
-		}, function () {
-			// move back
-			$(this).css("z-index", 0);
 		});
 		if ("function" == typeof callback) {
 			callback(card_jq);
@@ -92,11 +86,11 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 			left: config.position.left
 		}, "slow", function () {
 			jq.css({
-				top: 0,
-				left: 0
+				top: "auto",
+				left: "auto"
 			});
 			var element = jq.detach();
-			$('#content #myhand').append(element);
+			$('#content #' + config.dom_id).append(element);
 		});
 	}
 };
@@ -122,6 +116,17 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 		$(this).fadeIn("slow");
 		$("#content #playerok").on("click", function () {
 		});
+		$("#content #table").droppable({
+			drop: function(event, ui) {
+				BOARDFUL.Mngr.get(parseInt($(ui.draggable).attr("id"))).instance.owner = undefined;
+				var element = $(ui.draggable).detach();
+				element.css({
+					top: "auto",
+					left: "auto"
+				});
+				$(this).append(element);
+			}
+		});
 	});
 	this.player_list = new Array();
 	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
@@ -130,6 +135,7 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
+
 BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardUi", {
@@ -143,11 +149,28 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 // ui for deal cards
 BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 	var card = new BOARDFUL.BRSR.CardUi(arg.card, this);
+	var target_pos = new Object();
+	var target_html_id = "";
+	switch (BOARDFUL.Mngr.get(arg.player).name) {
+	case "ai":
+		target_pos = {
+			top: "10%",
+			left: "45%"
+		};
+		target_dom_id = "yourhand";
+		break;
+	case "me":
+	default:
+		target_pos = {
+			top: "70%",
+			left: "45%"
+		};
+		target_dom_id = "myhand";
+		break;
+	}
 	card.move({
-		position: {
-			top: "65%",
-			left: "50%"
-		}
+		position: target_pos,
+		dom_id: target_dom_id
 	});
 };
 /**

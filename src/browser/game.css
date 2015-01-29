@@ -4,7 +4,9 @@
 	left: 30%;
 	height: 45%;
 	width: 40%;
-	border: 1px solid black;
+	border: thin solid black;
+	border-radius: 10px;
+	background-color: rgba(255, 255, 255, 0.8);
 	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
@@ -31,4 +33,18 @@
 	left: 50%;
 	margin-right: -50%;
 	transform: translate(-50%, -50%);
+}
+.boardful #detail {
+	position: absolute;
+	top: 20%;
+	left: 70%;
+	height: 50%;
+	width: 20%;
+	border: thin solid black;
+	border-radius: 10px;
+	background-color: rgba(255, 255, 255, 0.9);
+	-webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+	z-index: 100;
 }

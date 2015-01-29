@@ -37,6 +37,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		var flip_interval;
 		// draggable
 		card_jq.draggable({
+			revert: "invalid",
 			start: function() {
 				// flip card when dragging
 				flip_interval = setInterval(function () {
@@ -48,7 +49,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 				clearInterval(flip_interval);
 				card_jq.removeClass("flip");
 				// expand and disappear
-				card_jq.animate({
+				/*card_jq.animate({
 					top: '-=100px',
 					left: '-=100px',
 					height: '+=200px',
@@ -56,15 +57,8 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 					opacity: 0,
 				}, "slow", function () {
 					$(this).remove();
-				});
+				});*/
 			},
-		});
-		card_jq.hover(function () {
-			// move to front
-			$(this).css("z-index", 1);
-		}, function () {
-			// move back
-			$(this).css("z-index", 0);
 		});
 		if ("function" == typeof callback) {
 			callback(card_jq);
@@ -92,11 +86,11 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 			left: config.position.left
 		}, "slow", function () {
 			jq.css({
-				top: 0,
-				left: 0
+				top: "auto",
+				left: "auto"
 			});
 			var element = jq.detach();
-			$('#content #myhand').append(element);
+			$('#content #' + config.dom_id).append(element);
 		});
 	}
 };
