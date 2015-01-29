@@ -20,13 +20,20 @@
 	font-size: large;
 }
 .boardful #board_list li:nth-child(odd) {
-	background-color: Beige;
+	background-color: rgba(255, 255, 200, 0.5);
+}
+.boardful #board_list li:nth-child(odd).active {
+	background-color: rgba(255, 255, 200, 1.0);
 }
 .boardful #board_list li:nth-child(even) {
-	background-color: LightCyan;
+	background-color: rgba(200, 255, 255, 0.5);
+}
+.boardful #board_list li:nth-child(even).active {
+	background-color: rgba(200, 255, 255, 1.0);
 }
 .boardful #board_list li.active {
-	background-color: Plum;
+	border: thin solid Grey;
+	border-radius: 10px;
 }
 .boardful #mod {
 	position: absolute;

@@ -25,7 +25,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	// get card html
 	$.get("src/browser/card.html", function (text, status, xhr) {
 		// add html to page
-		$("#content " + config.parent).append(text);
+		$("#content " + config.parent).append(text).fadeIn('slow');
 		$("#content " + config.parent + " .card:last").attr("id", that.id);
 		var card_jq = $("#content #" + that.id);
 		// set position

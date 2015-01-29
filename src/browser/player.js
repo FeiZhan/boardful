@@ -8,6 +8,7 @@
 var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
+// gui for player
 BOARDFUL.BRSR.PlayerUi = function (owner) {
 	this.type = "PlayerUi";
 	this.owner = owner;
@@ -23,7 +24,7 @@ BOARDFUL.BRSR.PlayerUi = function (owner) {
 		break;
 	}
 	$.get(load, function (text, status, xhr) {
-		$("#content").append(text);
+		$("#content").append(text).fadeIn('slow');
 	});
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
 };

@@ -1,4 +1,4 @@
-.boardful #player_list {
+.boardful #user_list {
 	position: absolute;
 	top: 0%;
 	left: 0%;
@@ -10,7 +10,51 @@
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 }
-.boardful #player_list div {
+.boardful #user_list .subsection {
+	line-height: 0.1;
+	text-align: center;
+}
+.boardful #user_list .subsection span {
+	width: 20%;
+	display: inline-block;
+	position: relative;
+}
+.boardful #user_list .subsection span:before, .boardful #user_list .subsection span:after {
+	content: "";
+	position: absolute;
+	height: 5px;
+	border-bottom: thin solid Grey;
+	border-top: thin solid Grey;
+	top: 0;
+	width: 150%;
+}
+.boardful #user_list .subsection span:before {
+	right: 100%;
+	margin-right: 0%;
+}
+.boardful #user_list .subsection span:after {
+	left: 100%;
+	margin-left: 0%;
+}
+.boardful #user_list .user {
+	padding-left: 5%;
+	text-align: center;
+}
+.boardful #user_list .user:nth-child(odd) {
+	background-color: rgba(255, 255, 200, 0.5);
+}
+.boardful #user_list .user:nth-child(odd).active {
+	background-color: rgba(255, 255, 200, 1.0);
+}
+.boardful #user_list .user:nth-child(even) {
+	background-color: rgba(200, 255, 255, 0.5);
+}
+.boardful #user_list .user:nth-child(even).active {
+	background-color: rgba(200, 255, 255, 1.0);
+}
+.boardful #user_list .user.active {
+	border: thin solid Grey;
+	border-radius: 10px;
 }
 
 .boardful #room_config {

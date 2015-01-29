@@ -100,13 +100,18 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 			$(this).addClass("active");
 			$("#" + BOARDFUL.BRSR.Canvas + " #room_config div#" + $(this).attr("id")).addClass("active");
 		});
-		console.log($("#" + BOARDFUL.BRSR.Canvas + " #room_config #name"), room.config.name);
 		$("#" + BOARDFUL.BRSR.Canvas + " #room_config #name").html(room.config.name);
 		$("#" + BOARDFUL.BRSR.Canvas + " #room_config #description2").html(room.config.description);
-		$("#" + BOARDFUL.BRSR.Canvas + " #player_list").append("<div><span>me</span></div>");
-		for (var i = 1; i < room.config.max_players; ++ i) {
-			$("#" + BOARDFUL.BRSR.Canvas + " #player_list").append("<div><span>empty</span></div>");
+		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #players").append('<div class="user"><span>me</span></div>');
+		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #judges").append('<div class="user"><span>empty</span></div>');
+		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #audience").append('<div class="user"><span>empty</span></div>');
+		for (var i = 1; i < room.config.players[0]; ++ i) {
+			$("#" + BOARDFUL.BRSR.Canvas + " #user_list #players").append('<div class="user"><span>empty</span></div>');
 		}
+		$("#" + BOARDFUL.BRSR.Canvas + " #user_list .user").on("click", function () {
+			$("#" + BOARDFUL.BRSR.Canvas + " #user_list .user").removeClass("active");
+			$(this).addClass("active");
+		});
 		for (var i in room.config.options) {
 			$("#" + BOARDFUL.BRSR.Canvas + " #room_config").append('<div id="' + i + '"></div>');
 			$("#" + BOARDFUL.BRSR.Canvas + " #room_config #" + i).append('<span>' + i + '</span><select></select>');

@@ -16,7 +16,8 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 	BOARDFUL.CORE.Command.owner = this.owner;
 	this.addListeners();
 	$("#content").empty();
-	$("#content").load("src/browser/game.html", function () {
+	$("#content").hide().load("src/browser/game.html", function () {
+		$(this).fadeIn("slow");
 		$("#content #playerok").on("click", function () {
 		});
 	});
@@ -37,7 +38,7 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 		id: that.id
 	});
 };
-
+// ui for deal cards
 BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 	var card = new BOARDFUL.BRSR.CardUi(arg.card, this);
 	card.move({
