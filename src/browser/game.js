@@ -20,6 +20,9 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 		$(this).fadeIn("slow");
 		$("#content #playerok").on("click", function () {
 		});
+		$("#content #chat div").on("click", function () {
+			$(this).toggleClass("disable");
+		});
 		$("#content #table").droppable({
 			drop: function(event, ui) {
 				BOARDFUL.Mngr.get(parseInt($(ui.draggable).attr("id"))).instance.owner = undefined;

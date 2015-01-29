@@ -60,6 +60,15 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 				});*/
 			},
 		});
+		card_jq.hover(function () {
+			if (! $(".boardful #detail").hasClass("active")) {
+				$(".boardful #detail").addClass("active").fadeIn("slow");
+			}
+		}, function () {
+			if ($(".boardful #detail").hasClass("active")) {
+				$(".boardful #detail").removeClass("active").fadeOut("fast");
+			}
+		});
 		if ("function" == typeof callback) {
 			callback(card_jq);
 		}
@@ -87,7 +96,7 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 		}, "slow", function () {
 			jq.css({
 				top: "auto",
-				left: "auto"
+				left: "auto",
 			});
 			var element = jq.detach();
 			$('#content #' + config.dom_id).append(element);
@@ -115,6 +124,9 @@ BOARDFUL.BRSR.GameUi = function (owner) {
 	$("#content").hide().load("src/browser/game.html", function () {
 		$(this).fadeIn("slow");
 		$("#content #playerok").on("click", function () {
+		});
+		$("#content #chat div").on("click", function () {
+			$(this).toggleClass("disable");
 		});
 		$("#content #table").droppable({
 			drop: function(event, ui) {

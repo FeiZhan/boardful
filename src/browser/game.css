@@ -34,6 +34,20 @@
 	margin-right: -50%;
 	transform: translate(-50%, -50%);
 }
+.boardful #chat {
+	position: absolute;
+	top: 70%;
+	left: 5%;
+	height: 5%;
+	width: 20%;
+	border-radius: 3px;
+}
+.boardful #chat div {
+	display:inline-block;
+}
+.boardful #chat div.disable {
+	text-decoration: line-through;
+}
 .boardful #detail {
 	position: absolute;
 	top: 20%;
@@ -47,4 +61,8 @@
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	z-index: 100;
+	text-align: center;
+	display: none;
+}
+.boardful #detail.active {
 }
