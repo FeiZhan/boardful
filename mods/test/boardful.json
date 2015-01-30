@@ -12,7 +12,7 @@
 	"decks": ["draw", "discard"],
 	"players": ["2"],
 	"cards": {
-		"init": "5",
+		"init": "3",
 		"turn": "2"
 	},
 	"options": {

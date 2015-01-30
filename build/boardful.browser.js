@@ -62,7 +62,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		});
 		card_jq.hover(function () {
 			if (! $(".boardful #detail").hasClass("active")) {
-				$(".boardful #detail").addClass("active").fadeIn("slow");
+				//$(".boardful #detail").addClass("active").fadeIn("slow");
 			}
 		}, function () {
 			if ($(".boardful #detail").hasClass("active")) {
@@ -114,43 +114,58 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // game ui
-BOARDFUL.BRSR.GameUi = function (owner) {
+BOARDFUL.BRSR.GameUi = function (instance) {
 	this.type = "GameUi";
-	this.owner = owner;
+	this.instance = instance;
 	BOARDFUL.Mngr.add(this);
-	BOARDFUL.CORE.Command.owner = this.owner;
+	BOARDFUL.CORE.Command.owner = this.instance;
 	this.addListeners();
-	$("#content").empty();
-	$("#content").hide().load("src/browser/game.html", function () {
+	$("#" + BOARDFUL.BRSR.Canvas).empty();
+	var that = this;
+	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/game.html", function () {
 		$(this).fadeIn("slow");
-		$("#content #playerok").on("click", function () {
+		$("#" + BOARDFUL.BRSR.Canvas + " #playerok").on("click", function () {
+			if ("userinput" != BOARDFUL.Mngr.get(that.instance).status) {
+				return;
+			}
+			for (var i in that.player_list) {
+				if ("me" == BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(that.player_list[i]).instance).name) {
+					// cannot use event here
+					BOARDFUL.Mngr.get(that.player_list[i]).playerOk();
+				}
+			}
 		});
-		$("#content #chat div").on("click", function () {
+		$("#" + BOARDFUL.BRSR.Canvas + " #chat div").on("click", function () {
 			$(this).toggleClass("disable");
 		});
-		$("#content #table").droppable({
-			drop: function(event, ui) {
-				BOARDFUL.Mngr.get(parseInt($(ui.draggable).attr("id"))).instance.owner = undefined;
-				var element = $(ui.draggable).detach();
-				element.css({
-					top: "auto",
-					left: "auto"
-				});
-				$(this).append(element);
+		$("#" + BOARDFUL.BRSR.Canvas + " #table").droppable({
+			drop: function (event, ui) {
+				that.dropCardOnTable(event, ui, this);
 			}
 		});
 	});
 	this.player_list = new Array();
-	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.owner).player_list[i]).id);
+	for (var i in BOARDFUL.Mngr.get(this.instance).player_list) {
+		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.instance).player_list[i], this.id).id);
 	}
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
+BOARDFUL.BRSR.GameUi.prototype.dropCardOnTable = function (event, ui, droppable) {
+	if ("userinput" != BOARDFUL.Mngr.get(this.instance).status) {
+		return;
+	}
+	var element = $(ui.draggable).detach();
+	element.css({
+		top: "auto",
+		left: "auto"
+	});
+	$(droppable).append(element);
+};
 
 BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardUi", {
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("DealCardUi", {
 		level: "game",
 		callback: function (arg) {
 			that.dealCardUi(arg);
@@ -321,12 +336,13 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // gui for player
-BOARDFUL.BRSR.PlayerUi = function (owner) {
+BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.type = "PlayerUi";
+	this.instance = instance;
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	var load;
-	switch (BOARDFUL.Mngr.get(this.owner).name) {
+	switch (BOARDFUL.Mngr.get(this.instance).name) {
 	case "ai":
 		load = "src/browser/player_you.html";
 		break;
@@ -335,8 +351,49 @@ BOARDFUL.BRSR.PlayerUi = function (owner) {
 		load = "src/browser/player_me.html";
 		break;
 	}
+	this.addListeners();
+	this.play_card_arg = undefined;
 	$.get(load, function (text, status, xhr) {
 		$("#content").append(text).fadeIn('slow');
 	});
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
+};
+BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
+		level: "game",
+		callback: function (arg) {
+			that.playCardUi(arg);
+		},
+		id: that.id
+	});
+};
+// ui for deal cards
+BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
+	if (arg.player != this.instance) {
+		return;
+	}
+	this.play_card_arg = arg;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
+};
+// 
+BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
+	if ("me" != BOARDFUL.Mngr.get(this.instance).name || "userinput" != BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status || undefined === this.play_card_arg) {
+		return;
+	}
+	var card_list = new Array();
+	$("#content #table .card").each(function () {
+		card_list.push(parseInt($(this).attr("id")));
+	});
+	if (card_list.length != this.play_card_arg.number) {
+		return;
+	}
+	var event = new BOARDFUL.CORE.Event({
+		name: "PlaceCardOnTable",
+		source: this.instance,
+		player: this.instance,
+		cards: card_list
+	});
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.front(event.id);
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "run";
 };

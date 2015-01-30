@@ -149,7 +149,7 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 	event_list.push(event.id);
 	var init_cards = 0;
 	// get number of init cards from room config
-	if (BOARDFUL.Mngr.get(this.owner).config.cards) {
+	if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.init) {
 		init_cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.init);
 	}
 	for (var i in this.player_list) {
@@ -190,7 +190,7 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 	for (var i in this.player_list) {
 		var cards = 0;
 		// get number of cards for each round from room config
-		if (BOARDFUL.Mngr.get(this.owner).config.cards) {
+		if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.round) {
 			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
 		}
 		event = new BOARDFUL.CORE.Event({
@@ -216,9 +216,9 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		});
 		event_list.push(event.id);
 		var cards = 0;
-		// get number of cards for each round from room config
-		if (BOARDFUL.Mngr.get(this.owner).config.cards) {
-			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
+		// get number of cards for each turn from room config
+		if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.turn) {
+			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.turn);
 		}
 		event = new BOARDFUL.CORE.Event({
 			name: "DealCards",

@@ -9,43 +9,58 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // game ui
-BOARDFUL.BRSR.GameUi = function (owner) {
+BOARDFUL.BRSR.GameUi = function (instance) {
 	this.type = "GameUi";
-	this.owner = owner;
+	this.instance = instance;
 	BOARDFUL.Mngr.add(this);
-	BOARDFUL.CORE.Command.owner = this.owner;
+	BOARDFUL.CORE.Command.owner = this.instance;
 	this.addListeners();
-	$("#content").empty();
-	$("#content").hide().load("src/browser/game.html", function () {
+	$("#" + BOARDFUL.BRSR.Canvas).empty();
+	var that = this;
+	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/game.html", function () {
 		$(this).fadeIn("slow");
-		$("#content #playerok").on("click", function () {
+		$("#" + BOARDFUL.BRSR.Canvas + " #playerok").on("click", function () {
+			if ("userinput" != BOARDFUL.Mngr.get(that.instance).status) {
+				return;
+			}
+			for (var i in that.player_list) {
+				if ("me" == BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(that.player_list[i]).instance).name) {
+					// cannot use event here
+					BOARDFUL.Mngr.get(that.player_list[i]).playerOk();
+				}
+			}
 		});
-		$("#content #chat div").on("click", function () {
+		$("#" + BOARDFUL.BRSR.Canvas + " #chat div").on("click", function () {
 			$(this).toggleClass("disable");
 		});
-		$("#content #table").droppable({
-			drop: function(event, ui) {
-				BOARDFUL.Mngr.get(parseInt($(ui.draggable).attr("id"))).instance.owner = undefined;
-				var element = $(ui.draggable).detach();
-				element.css({
-					top: "auto",
-					left: "auto"
-				});
-				$(this).append(element);
+		$("#" + BOARDFUL.BRSR.Canvas + " #table").droppable({
+			drop: function (event, ui) {
+				that.dropCardOnTable(event, ui, this);
 			}
 		});
 	});
 	this.player_list = new Array();
-	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.owner).player_list[i]).id);
+	for (var i in BOARDFUL.Mngr.get(this.instance).player_list) {
+		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.instance).player_list[i], this.id).id);
 	}
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
+BOARDFUL.BRSR.GameUi.prototype.dropCardOnTable = function (event, ui, droppable) {
+	if ("userinput" != BOARDFUL.Mngr.get(this.instance).status) {
+		return;
+	}
+	var element = $(ui.draggable).detach();
+	element.css({
+		top: "auto",
+		left: "auto"
+	});
+	$(droppable).append(element);
+};
 
 BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCardUi", {
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("DealCardUi", {
 		level: "game",
 		callback: function (arg) {
 			that.dealCardUi(arg);

@@ -10,8 +10,8 @@ var BOARDFUL = BOARDFUL || new Object();
 BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 var winston = {
 	transports: {
-		File: undefined,
-		Console: undefined
+		File: "File",
+		Console: "Console"
 	}
 };
 
@@ -39,16 +39,25 @@ BOARDFUL.CORE.Logger = function () {
 
 // default logger
 BOARDFUL.CORE.DefaultLogger = function () {
+	this.enable = true;
 	//return console;
 };
 BOARDFUL.CORE.DefaultLogger.prototype.log = function () {
-	//console.log.apply(console, arguments);
+	if (this.enable) {
+		console.log.apply(console, arguments);
+	}
 	return this;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.add = function () {
+BOARDFUL.CORE.DefaultLogger.prototype.add = function (type) {
+	if ("Console" == type) {
+		this.enable = true;
+	}
 	return this;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.remove = function () {
+BOARDFUL.CORE.DefaultLogger.prototype.remove = function (type) {
+	if ("Console" == type) {
+		this.enable = false;
+	}
 	return this;
 };
 

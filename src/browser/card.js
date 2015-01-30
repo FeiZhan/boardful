@@ -62,7 +62,7 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		});
 		card_jq.hover(function () {
 			if (! $(".boardful #detail").hasClass("active")) {
-				$(".boardful #detail").addClass("active").fadeIn("slow");
+				//$(".boardful #detail").addClass("active").fadeIn("slow");
 			}
 		}, function () {
 			if ($(".boardful #detail").hasClass("active")) {
