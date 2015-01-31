@@ -24,7 +24,8 @@ BOARDFUL.CORE.Game = function (owner) {
 	if (room.mod_list) {
 		for (var i in room.mod_list) {
 			if (room.mod_list[i] in BOARDFUL.MODS) {
-				this.mod_list.push(new BOARDFUL.MODS[room.mod_list[i]](this.id).id);
+				var mod = BOARDFUL.MODS[room.mod_list[i]].register(this.id);
+				this.mod_list.push(mod);
 			}
 		}
 	}

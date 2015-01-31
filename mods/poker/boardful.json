@@ -4,8 +4,9 @@
 	"authors": ["Fei Zhan"],
 	"license": "GNU GENERAL PUBLIC LICENSE",
 	"description": "description of poker",
-	"dependencies": {},
+	"dependencies": [],
 	"files": [
+		"mods/poker/cards.js",
 		"mods/poker/game.js"
 	],
 	"tables": "1",

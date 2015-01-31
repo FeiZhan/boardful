@@ -4,7 +4,7 @@
 	"authors": ["Fei Zhan"],
 	"license": "GNU GENERAL PUBLIC LICENSE",
 	"description": "description of test",
-	"dependencies": {},
+	"dependencies": [],
 	"files": [
 		"mods/test/game.js"
 	],
