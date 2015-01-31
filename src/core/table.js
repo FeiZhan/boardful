@@ -12,6 +12,7 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Table = function (owner) {
 	this.type = "Table";
 	this.owner = owner;
+	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.arg_list = new Array();
@@ -22,7 +23,6 @@ BOARDFUL.CORE.Table.prototype.getCardsBySource = function (event) {
 	var select_list = new Array();
 	for (var i in this.arg_list) {
 		if (event == this.arg_list[i].source_event) {
-			// deep copy
 			select_list.push(this.arg_list[i]);
 			this.arg_list[i] = undefined;
 		}

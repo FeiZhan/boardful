@@ -58,7 +58,9 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	$("#" + BOARDFUL.BRSR.Canvas + " #table .card").each(function () {
 		var card_ui = parseInt($(this).attr("id"));
 		var card = BOARDFUL.Mngr.get(card_ui).instance;
-		card_list.push(card);
+		if ("me" == BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(card).owner).owner).name) {
+			card_list.push(card);
+		}
 	});
 	if (card_list.length != this.play_card_arg.number) {
 		return;

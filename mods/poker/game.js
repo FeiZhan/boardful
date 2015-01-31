@@ -16,7 +16,6 @@ var Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
-	this.card_list = this.createCards();
 };
 // if nodejs, export as module
 if (typeof module !== 'undefined' && module.exports) {
@@ -82,7 +81,7 @@ Poker.prototype.startGame = function () {
 };
 // create deck
 Poker.prototype.createDeck = function (arg) {
-	BOARDFUL.Mngr.get(arg.deck).getCards(this.card_list);
+	BOARDFUL.Mngr.get(arg.deck).getCards(this.createCards());
 };
 // players duel
 Poker.prototype.playerAct = function (arg) {

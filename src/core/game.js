@@ -13,6 +13,7 @@ BOARDFUL.CORE.Game = function (owner) {
 	this.type = "Game";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.game = this.id;
 	this.event_mngr = new BOARDFUL.CORE.EventMngr(this.id);
 	this.ui = undefined;
 	this.status = "init";
@@ -33,6 +34,7 @@ BOARDFUL.CORE.Game = function (owner) {
 	if (room.config.decks) {
 		for (var i in room.config.decks) {
 			this.deck_list[room.config.decks[i]] = new BOARDFUL.CORE.Deck(this.id).id;
+			this.deck_list[room.config.decks[i]].name = this.name + "_" + room.config.decks[i];
 		}
 	}
 	this.player_list = new Array();

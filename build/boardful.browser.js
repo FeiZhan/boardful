@@ -105,7 +105,8 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 			left: target.position().left + target.width() / 2 - jq.width() / 2
 		};
 		jq.animate(target_pos, "slow", function () {
-			target.append(jq);
+			var element = jq.detach();
+			target.append(element);
 			jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 			jq.css({
 				top: "auto",
@@ -421,7 +422,9 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	$("#" + BOARDFUL.BRSR.Canvas + " #table .card").each(function () {
 		var card_ui = parseInt($(this).attr("id"));
 		var card = BOARDFUL.Mngr.get(card_ui).instance;
-		card_list.push(card);
+		if ("me" == BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(card).owner).owner).name) {
+			card_list.push(card);
+		}
 	});
 	if (card_list.length != this.play_card_arg.number) {
 		return;

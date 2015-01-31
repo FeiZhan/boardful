@@ -13,11 +13,8 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Deck = function (owner) {
 	this.type = "Deck";
 	this.owner = owner;
-	this.game = this.owner;
+	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
-	while (BOARDFUL.Mngr.get(this.game) && "Game" != BOARDFUL.Mngr.get(this.game).type) {
-		this.game = BOARDFUL.Mngr.get(this.game).owner;
-	}
 	BOARDFUL.Mngr.add(this);
 	this.card_list = new Array();
 	this.addListeners();
@@ -33,21 +30,21 @@ BOARDFUL.CORE.Deck.prototype.getCards = function (card_list) {
 // add listeners
 BOARDFUL.CORE.Deck.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ShuffleDeck", {
+	BOARDFUL.Mngr.get(this.game).event_mngr.on("ShuffleDeck", {
 		level: "game",
 		callback: function (arg) {
 			that.shuffleDeck(arg);
 		},
 		id: that.id
 	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCards", {
+	BOARDFUL.Mngr.get(this.game).event_mngr.on("DealCards", {
 		level: "game",
 		callback: function (arg) {
 			that.dealCards(arg);
 		},
 		id: that.id
 	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("DealCard", {
+	BOARDFUL.Mngr.get(this.game).event_mngr.on("DealCard", {
 		level: "game",
 		callback: function (arg) {
 			that.dealCard(arg);
@@ -70,7 +67,7 @@ BOARDFUL.CORE.Deck.prototype.shuffleDeck = function (arg) {
 		cards: this.card_list
 	});
 	event_list.push(event.id);
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
+	BOARDFUL.Mngr.get(this.game).event_mngr.front(event_list);
 };
 // deal cards
 BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
@@ -94,7 +91,7 @@ BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
 		event = new BOARDFUL.CORE.Event(arg1);
 		event_list.push(event.id);
 	}
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
+	BOARDFUL.Mngr.get(this.game).event_mngr.front(event_list);
 };
 // deal one card
 BOARDFUL.CORE.Deck.prototype.dealCard = function (arg) {
@@ -114,5 +111,5 @@ BOARDFUL.CORE.Deck.prototype.dealCard = function (arg) {
 		player: arg.player
 	});
 	event_list.push(event.id);
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
+	BOARDFUL.Mngr.get(this.game).event_mngr.front(event_list);
 };

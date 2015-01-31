@@ -12,7 +12,7 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Player = function (config, owner) {
 	this.type = "Player";
 	this.owner = owner;
-	this.hand = new BOARDFUL.CORE.Deck(this.owner).id;
+	this.game = this.owner;
 	this.turn = undefined;
 	this.name;
 	this.ui = undefined;
@@ -28,6 +28,9 @@ BOARDFUL.CORE.Player = function (config, owner) {
 		break;
 	}
 	BOARDFUL.Mngr.add(this);
+	var hand_deck = new BOARDFUL.CORE.Deck(this.id);
+	hand_deck.name = this.name + "_" + "hand";
+	this.hand = hand_deck.id;
 	this.addListeners();
 };
 // add event listeners

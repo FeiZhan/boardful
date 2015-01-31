@@ -15,8 +15,8 @@ if (typeof module !== 'undefined' && module.exports) {
 var Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
+	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	BOARDFUL.Mngr.add(this);
-	this.card_list = this.createCards();
 };
 // if nodejs, export as module
 if (typeof module !== 'undefined' && module.exports) {
@@ -82,7 +82,7 @@ Poker.prototype.startGame = function () {
 };
 // create deck
 Poker.prototype.createDeck = function (arg) {
-	BOARDFUL.Mngr.get(arg.deck).getCards(this.card_list);
+	BOARDFUL.Mngr.get(arg.deck).getCards(this.createCards());
 };
 // players duel
 Poker.prototype.playerAct = function (arg) {
@@ -111,19 +111,35 @@ Poker.prototype.playerAct = function (arg) {
 // settle players duel
 Poker.prototype.settle = function (arg) {
 	var select_list = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).table).getCardsBySource("PlayersDuel");
+	// group player's cards together
+	var select_player_list = new Array();
+	for (var i in select_list) {
+		if (! (select_list[i].player in select_player_list)) {
+			select_player_list[select_list[i].player] = new Array();
+		}
+		select_player_list[select_list[i].player] = select_player_list[select_list[i].player].concat(select_list[i].cards);
+	}
+	// change to array
+	var select_card_list = new Array();
+	for (var i in select_player_list) {
+		select_card_list.push({
+			player: i,
+			cards: select_player_list[i]
+		});
+	}
 	var that = this;
-	select_list.sort(function (a, b) {
-		return BOARDFUL.MODS.Poker.compare(a.card, b.card);
+	select_card_list.sort(function (a, b) {
+		return BOARDFUL.MODS.Poker.compare(a.cards, b.cards);
 	});
 	var player_list = new Array();
 	var card_list = new Array();
-	for (var i in select_list) {
-		player_list.push(select_list[i].player);
-		card_list.push(select_list[i].card);
+	for (var i in select_card_list) {
+		player_list.push(select_card_list[i].player);
+		card_list.push(select_card_list[i].card);
 	}
 	var winner = undefined;
-	if (select_list.length > 0) {
-		winner = select_list[select_list.length - 1].player;
+	if (select_card_list.length > 0) {
+		winner = select_card_list[select_card_list.length - 1].player;
 	}
 	// event for ui
 	var event_list = new Array();
@@ -181,12 +197,12 @@ Poker.prototype.createCards = function () {
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Spade"
-			});
+			}, this.id);
 			card_list.push(card.id);
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Heart"
-			});
+			}, this.id);
 			card_list.push(card.id);
 		}
 		else {
@@ -194,7 +210,7 @@ Poker.prototype.createCards = function () {
 				card = new BOARDFUL.CORE.Card({
 					rank: i,
 					suit: j
-				});
+				}, this.id);
 				card_list.push(card.id);
 			}
 		}

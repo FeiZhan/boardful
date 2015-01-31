@@ -105,7 +105,8 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 			left: target.position().left + target.width() / 2 - jq.width() / 2
 		};
 		jq.animate(target_pos, "slow", function () {
-			target.append(jq);
+			var element = jq.detach();
+			target.append(element);
 			jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 			jq.css({
 				top: "auto",
