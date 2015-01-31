@@ -25,9 +25,9 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	// get card html
 	$.get("src/browser/card.html", function (text, status, xhr) {
 		// add html to page
-		$("#content " + config.parent).append(text).fadeIn('slow');
-		$("#content " + config.parent + " .card:last").attr("id", that.id);
-		var card_jq = $("#content #" + that.id);
+		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent).append(text).fadeIn('slow');
+		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
+		var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + that.id);
 		// set position
 		if (config.position) {
 			card_jq.css(config.position);
@@ -75,8 +75,9 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	});
 };
 // move card
-BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
-	var jq = $("#content #" + this.id);
+BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
+	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	source = source || jq;
 	// if not exist, load card
 	if (0 == jq.length) {
 		var that = this;
@@ -86,20 +87,30 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 				left: "80%"
 			}
 		}, function () {
-			that.move(config);
+			that.move(source, target);
 		});
 	} else {
-		// move card
-		jq.animate({
-			top: config.position.top,
-			left: config.position.left
-		}, "slow", function () {
+		// move back to source
+		var source_pos = {
+			top: source.offset().top + source.height() / 2 - jq.height() / 2,
+			left: source.offset().left + source.width() / 2 - jq.width() / 2
+		};
+		var element = jq.detach();
+		$("#" + BOARDFUL.BRSR.Canvas).append(element);
+		jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+		jq.offset(source_pos);
+		// move to target
+		var target_pos = {
+			top: target.position().top + target.height() / 2 - jq.height() / 2,
+			left: target.position().left + target.width() / 2 - jq.width() / 2
+		};
+		jq.animate(target_pos, "slow", function () {
+			target.append(jq);
+			jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 			jq.css({
 				top: "auto",
 				left: "auto",
 			});
-			var element = jq.detach();
-			$('#content #' + config.dom_id).append(element);
 		});
 	}
 };

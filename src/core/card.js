@@ -18,6 +18,7 @@ BOARDFUL.CORE.Card = function (config, owner) {
 	this.name = "card_" + this.rank + "_" + this.suit;
 	this.owner = owner;
 	this.game = this.owner;
+	this.ui = undefined;
 	while (BOARDFUL.Mngr.get(this.game) && "Game" != BOARDFUL.Mngr.get(this.game).type) {
 		this.game = BOARDFUL.Mngr.get(this.game).owner;
 	}

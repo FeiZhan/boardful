@@ -37,7 +37,7 @@ BOARDFUL.BRSR.run = function (canvas) {
 	// load menu0
 	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu0.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas +' #menu0_main #local').click(function () {
+		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_main #local').click(function () {
 			BOARDFUL.BRSR.loadMenu1();
 		});
 		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_secondary #options').click(function () {

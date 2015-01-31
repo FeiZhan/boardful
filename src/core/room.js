@@ -12,6 +12,7 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
+	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
 	// set default players

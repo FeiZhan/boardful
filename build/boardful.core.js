@@ -13,6 +13,7 @@ BOARDFUL.CORE.Board = function (config, owner) {
 	this.type = "Board";
 	this.owner = owner;
 	this.name = config.name;
+	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
 	this.room_list = new Array();
@@ -123,6 +124,7 @@ BOARDFUL.CORE.Card = function (config, owner) {
 	this.name = "card_" + this.rank + "_" + this.suit;
 	this.owner = owner;
 	this.game = this.owner;
+	this.ui = undefined;
 	while (BOARDFUL.Mngr.get(this.game) && "Game" != BOARDFUL.Mngr.get(this.game).type) {
 		this.game = BOARDFUL.Mngr.get(this.game).owner;
 	}
@@ -218,6 +220,7 @@ BOARDFUL.CORE.Deck = function (owner) {
 	this.type = "Deck";
 	this.owner = owner;
 	this.game = this.owner;
+	this.ui = undefined;
 	while (BOARDFUL.Mngr.get(this.game) && "Game" != BOARDFUL.Mngr.get(this.game).type) {
 		this.game = BOARDFUL.Mngr.get(this.game).owner;
 	}
@@ -1006,6 +1009,7 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	this.hand = new BOARDFUL.CORE.Deck(this.owner).id;
 	this.turn = undefined;
 	this.name;
+	this.ui = undefined;
 	switch (config) {
 	case "me":
 		this.name = "me";
@@ -1068,6 +1072,7 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
+	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
 	// set default players
@@ -1088,6 +1093,7 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Table = function (owner) {
 	this.type = "Table";
 	this.owner = owner;
+	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.arg_list = new Array();
 	this.addListeners();

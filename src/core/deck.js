@@ -14,6 +14,7 @@ BOARDFUL.CORE.Deck = function (owner) {
 	this.type = "Deck";
 	this.owner = owner;
 	this.game = this.owner;
+	this.ui = undefined;
 	while (BOARDFUL.Mngr.get(this.game) && "Game" != BOARDFUL.Mngr.get(this.game).type) {
 		this.game = BOARDFUL.Mngr.get(this.game).owner;
 	}

@@ -192,7 +192,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.playCardUi = function (arg) {
 			source: arg.player,
 			source_event: arg.source_event,
 			player: arg.player,
-			card: card
+			cards: [card]
 		});
 		BOARDFUL.Mngr.get(that.owner).event_mngr.front(event.id);
 		BOARDFUL.Mngr.get(that.owner).status = "run";

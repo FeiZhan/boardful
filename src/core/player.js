@@ -15,6 +15,7 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	this.hand = new BOARDFUL.CORE.Deck(this.owner).id;
 	this.turn = undefined;
 	this.name;
+	this.ui = undefined;
 	switch (config) {
 	case "me":
 		this.name = "me";

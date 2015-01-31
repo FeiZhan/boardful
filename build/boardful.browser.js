@@ -25,9 +25,9 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	// get card html
 	$.get("src/browser/card.html", function (text, status, xhr) {
 		// add html to page
-		$("#content " + config.parent).append(text).fadeIn('slow');
-		$("#content " + config.parent + " .card:last").attr("id", that.id);
-		var card_jq = $("#content #" + that.id);
+		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent).append(text).fadeIn('slow');
+		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
+		var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + that.id);
 		// set position
 		if (config.position) {
 			card_jq.css(config.position);
@@ -75,8 +75,9 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	});
 };
 // move card
-BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
-	var jq = $("#content #" + this.id);
+BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
+	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	source = source || jq;
 	// if not exist, load card
 	if (0 == jq.length) {
 		var that = this;
@@ -86,20 +87,30 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (config) {
 				left: "80%"
 			}
 		}, function () {
-			that.move(config);
+			that.move(source, target);
 		});
 	} else {
-		// move card
-		jq.animate({
-			top: config.position.top,
-			left: config.position.left
-		}, "slow", function () {
+		// move back to source
+		var source_pos = {
+			top: source.offset().top + source.height() / 2 - jq.height() / 2,
+			left: source.offset().left + source.width() / 2 - jq.width() / 2
+		};
+		var element = jq.detach();
+		$("#" + BOARDFUL.BRSR.Canvas).append(element);
+		jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+		jq.offset(source_pos);
+		// move to target
+		var target_pos = {
+			top: target.position().top + target.height() / 2 - jq.height() / 2,
+			left: target.position().left + target.width() / 2 - jq.width() / 2
+		};
+		jq.animate(target_pos, "slow", function () {
+			target.append(jq);
+			jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 			jq.css({
 				top: "auto",
 				left: "auto",
 			});
-			var element = jq.detach();
-			$('#content #' + config.dom_id).append(element);
 		});
 	}
 };
@@ -146,7 +157,10 @@ BOARDFUL.BRSR.GameUi = function (instance) {
 	});
 	this.player_list = new Array();
 	for (var i in BOARDFUL.Mngr.get(this.instance).player_list) {
-		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.instance).player_list[i], this.id).id);
+		var player = BOARDFUL.Mngr.get(this.instance).player_list[i];
+		var player_ui = new BOARDFUL.BRSR.PlayerUi(player, this.id).id;
+		BOARDFUL.Mngr.get(player).ui = player_ui;
+		this.player_list.push(player_ui);
 	}
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
@@ -172,33 +186,55 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("PlaceCardOnTable", {
+		level: "game",
+		callback: function (arg) {
+			that.placeCardOnTable(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("SettlePlayersDuelUi", {
+		level: "game",
+		callback: function (arg) {
+			that.settlePlayersDuelUi(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("Discard", {
+		level: "game",
+		callback: function (arg) {
+			that.discard(arg);
+		},
+		id: that.id
+	});
 };
 // ui for deal cards
 BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
-	var card = new BOARDFUL.BRSR.CardUi(arg.card, this);
-	var target_pos = new Object();
-	var target_html_id = "";
+	var card_ui = new BOARDFUL.BRSR.CardUi(arg.card, this);
+	BOARDFUL.Mngr.get(arg.card).ui = card_ui.id;
+	var target;
 	switch (BOARDFUL.Mngr.get(arg.player).name) {
 	case "ai":
-		target_pos = {
-			top: "10%",
-			left: "45%"
-		};
-		target_dom_id = "yourhand";
+		target = $("#yourhand");
 		break;
 	case "me":
 	default:
-		target_pos = {
-			top: "70%",
-			left: "45%"
-		};
-		target_dom_id = "myhand";
+		target = $("#myhand");
 		break;
 	}
-	card.move({
-		position: target_pos,
-		dom_id: target_dom_id
-	});
+	card_ui.move($("#deck"), target);
+};
+BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
+	for (var i in arg.cards) {
+		var card_ui = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui);
+		card_ui.move(undefined, $("#table"));
+	}
+};
+BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
+	console.log(arg);
+};
+BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
+	console.log(arg);
 };
 /**
  * Menus.
@@ -239,7 +275,7 @@ BOARDFUL.BRSR.run = function (canvas) {
 	// load menu0
 	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu0.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas +' #menu0_main #local').click(function () {
+		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_main #local').click(function () {
 			BOARDFUL.BRSR.loadMenu1();
 		});
 		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_secondary #options').click(function () {
@@ -354,7 +390,7 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.addListeners();
 	this.play_card_arg = undefined;
 	$.get(load, function (text, status, xhr) {
-		$("#content").append(text).fadeIn('slow');
+		$("#" + BOARDFUL.BRSR.Canvas).append(text).fadeIn('slow');
 	});
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
 };
@@ -382,8 +418,10 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 		return;
 	}
 	var card_list = new Array();
-	$("#content #table .card").each(function () {
-		card_list.push(parseInt($(this).attr("id")));
+	$("#" + BOARDFUL.BRSR.Canvas + " #table .card").each(function () {
+		var card_ui = parseInt($(this).attr("id"));
+		var card = BOARDFUL.Mngr.get(card_ui).instance;
+		card_list.push(card);
 	});
 	if (card_list.length != this.play_card_arg.number) {
 		return;
@@ -391,6 +429,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: this.instance,
+		source_event: this.play_card_arg.source_event,
 		player: this.instance,
 		cards: card_list
 	});

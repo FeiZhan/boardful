@@ -11,6 +11,13 @@
 	-moz-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 	box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
 }
+.boardful #deck {
+	position: absolute;
+	top: 50%;
+	left: 80%;
+	height: 0%;
+	width: 0%;
+}
 .boardful #playerok {
 	position: absolute;
 	top: 50%;

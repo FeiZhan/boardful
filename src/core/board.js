@@ -13,6 +13,7 @@ BOARDFUL.CORE.Board = function (config, owner) {
 	this.type = "Board";
 	this.owner = owner;
 	this.name = config.name;
+	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
 	this.room_list = new Array();

@@ -27,7 +27,7 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.addListeners();
 	this.play_card_arg = undefined;
 	$.get(load, function (text, status, xhr) {
-		$("#content").append(text).fadeIn('slow');
+		$("#" + BOARDFUL.BRSR.Canvas).append(text).fadeIn('slow');
 	});
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
 };
@@ -55,8 +55,10 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 		return;
 	}
 	var card_list = new Array();
-	$("#content #table .card").each(function () {
-		card_list.push(parseInt($(this).attr("id")));
+	$("#" + BOARDFUL.BRSR.Canvas + " #table .card").each(function () {
+		var card_ui = parseInt($(this).attr("id"));
+		var card = BOARDFUL.Mngr.get(card_ui).instance;
+		card_list.push(card);
 	});
 	if (card_list.length != this.play_card_arg.number) {
 		return;
@@ -64,6 +66,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: this.instance,
+		source_event: this.play_card_arg.source_event,
 		player: this.instance,
 		cards: card_list
 	});

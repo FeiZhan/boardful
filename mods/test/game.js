@@ -167,7 +167,7 @@ Poker.prototype.playCard = function (arg) {
 		source: arg.player,
 		source_event: arg.source_event,
 		player: arg.player,
-		card: card
+		cards: [card]
 	});
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event.id);
 };

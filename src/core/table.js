@@ -12,6 +12,7 @@ BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 BOARDFUL.CORE.Table = function (owner) {
 	this.type = "Table";
 	this.owner = owner;
+	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.arg_list = new Array();
 	this.addListeners();

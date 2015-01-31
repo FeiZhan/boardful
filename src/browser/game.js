@@ -41,7 +41,10 @@ BOARDFUL.BRSR.GameUi = function (instance) {
 	});
 	this.player_list = new Array();
 	for (var i in BOARDFUL.Mngr.get(this.instance).player_list) {
-		this.player_list.push(new BOARDFUL.BRSR.PlayerUi(BOARDFUL.Mngr.get(this.instance).player_list[i], this.id).id);
+		var player = BOARDFUL.Mngr.get(this.instance).player_list[i];
+		var player_ui = new BOARDFUL.BRSR.PlayerUi(player, this.id).id;
+		BOARDFUL.Mngr.get(player).ui = player_ui;
+		this.player_list.push(player_ui);
 	}
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
@@ -67,31 +70,53 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("PlaceCardOnTable", {
+		level: "game",
+		callback: function (arg) {
+			that.placeCardOnTable(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("SettlePlayersDuelUi", {
+		level: "game",
+		callback: function (arg) {
+			that.settlePlayersDuelUi(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.instance).event_mngr.on("Discard", {
+		level: "game",
+		callback: function (arg) {
+			that.discard(arg);
+		},
+		id: that.id
+	});
 };
 // ui for deal cards
 BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
-	var card = new BOARDFUL.BRSR.CardUi(arg.card, this);
-	var target_pos = new Object();
-	var target_html_id = "";
+	var card_ui = new BOARDFUL.BRSR.CardUi(arg.card, this);
+	BOARDFUL.Mngr.get(arg.card).ui = card_ui.id;
+	var target;
 	switch (BOARDFUL.Mngr.get(arg.player).name) {
 	case "ai":
-		target_pos = {
-			top: "10%",
-			left: "45%"
-		};
-		target_dom_id = "yourhand";
+		target = $("#yourhand");
 		break;
 	case "me":
 	default:
-		target_pos = {
-			top: "70%",
-			left: "45%"
-		};
-		target_dom_id = "myhand";
+		target = $("#myhand");
 		break;
 	}
-	card.move({
-		position: target_pos,
-		dom_id: target_dom_id
-	});
+	card_ui.move($("#deck"), target);
+};
+BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
+	for (var i in arg.cards) {
+		var card_ui = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui);
+		card_ui.move(undefined, $("#table"));
+	}
+};
+BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
+	console.log(arg);
+};
+BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
+	console.log(arg);
 };
