@@ -9,9 +9,14 @@
 // if nodejs, load BOARDFUL
 if (typeof module !== 'undefined' && module.exports) {
 	var BOARDFUL = require("../../build/boardful.core.js");
-	var MODS = require("./cards.js");
-	var Poker = MODS.Poker || new Object();
-	module.exports.Poker = Poker;
+	var Poker = require("./cards.js");
+	var Poker1 = require("./ai.js");
+	for (var i in Poker1) {
+		if (! (i in Poker)) {
+			Poker[i] = Poker1[i];
+		}
+	}
+	module.exports = Poker;
 } else {
 	BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 	var Poker = BOARDFUL.MODS.Poker || new Object();
@@ -19,8 +24,9 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // poker
 Poker.register = Poker.register || function (owner) {
-	Poker.type = "Poker";
+	Poker.type = "Mod";
 	Poker.owner = owner;
+	Poker.name = "Poker";
 	Poker.game = BOARDFUL.Mngr.get(Poker.owner).game;
 	BOARDFUL.Mngr.add(Poker);
 	return Poker.id;
@@ -185,19 +191,10 @@ Poker.reorderDeck = function (arg) {
 // play card AI
 Poker.playCardAi = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
-	var card_list = new Array();
 	if (0 == hand.length) {
 		return;
 	}
-	else if (hand.length < arg.number) {
-		card_list = hand;
-	} else {
-		while (card_list.length < arg.number) {
-			var index = Math.floor((Math.random() * hand.length));
-			card_list.push(hand[index]);
-			hand.splice(index, 1);
-		}
-	}
+	var card_list = Poker.getBestHand(hand, arg.number);
 	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: arg.player,

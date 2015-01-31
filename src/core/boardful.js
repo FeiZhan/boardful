@@ -50,7 +50,7 @@ BOARDFUL.init = function (config) {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	var BOARD_LIST_FILE = "src/core/boardlist.json";
+	var BOARD_LIST_FILE = "mods/boardlist.json";
 	var load_files = new BOARDFUL.CORE.FileLoader([BOARD_LIST_FILE], function () {
 		var board_list = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[BOARD_LIST_FILE]].content.boards;
 		for (var i in board_list) {

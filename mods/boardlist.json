@@ -1,0 +1,20 @@
+{
+  "version": "0.0.0",
+  "boards": [
+    {
+      "name": "poker1",
+      "description": "description of poker1",
+      "package": "mods/poker/poker1.json"
+    },
+    {
+      "name": "poker5",
+      "description": "description of poker5",
+      "package": "mods/poker/poker5.json"
+    },
+    {
+      "name": "uno",
+      "description": "description of uno",
+      "package": "mods/uno/boardful.json"
+    }
+  ]
+}

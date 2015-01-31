@@ -12,15 +12,17 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // poker
-var Poker = Poker || new Object();
+var Poker = Poker || {
+	type: "Mod",
+	name: "Poker"
+};
 // if nodejs, export as module
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports.Poker = Poker;
+	module.exports = Poker;
 } else {
 	BOARDFUL.MODS.Poker = Poker;
 }
 Poker.register = function (owner) {
-	Poker.type = "Poker";
 	Poker.owner = owner;
 	Poker.game = BOARDFUL.Mngr.get(Poker.owner).game;
 	BOARDFUL.Mngr.add(Poker);

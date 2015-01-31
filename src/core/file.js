@@ -57,8 +57,12 @@ BOARDFUL.CORE.File.getFromHtml = function () {
 // set file script to MODS scope
 BOARDFUL.CORE.File.setToMods = function (file) {
 	var script = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[file]].content;
-	for (var i in script) {
-		BOARDFUL.MODS[i] = script[i];
+	if (("array" == typeof script || "object" == typeof script || "function" == typeof script) && "name" in script) {
+		BOARDFUL.MODS[script.name] = script;
+	} else {
+		for (var i in script) {
+			BOARDFUL.MODS[i] = script[i];
+		}
 	}
 };
 

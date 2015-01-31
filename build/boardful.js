@@ -484,8 +484,13 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 		var dependencies = new Array();
 		var files = new Array();
 		for (var i in packages) {
+			if (".json" != packages[i].substr(packages[i].length - 5)) {
+				continue;
+			}
 			var pack = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[packages[i]]].content;
-			files = files.concat(pack.files);
+			if ("files" in pack) {
+				files = files.concat(pack.files);
+			}
 			if ("dependencies" in pack) {
 				dependencies = dependencies.concat(pack.dependencies);
 			}
@@ -569,7 +574,7 @@ BOARDFUL.init = function (config) {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	var BOARD_LIST_FILE = "src/core/boardlist.json";
+	var BOARD_LIST_FILE = "mods/boardlist.json";
 	var load_files = new BOARDFUL.CORE.FileLoader([BOARD_LIST_FILE], function () {
 		var board_list = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[BOARD_LIST_FILE]].content.boards;
 		for (var i in board_list) {
@@ -989,8 +994,12 @@ BOARDFUL.CORE.File.getFromHtml = function () {
 // set file script to MODS scope
 BOARDFUL.CORE.File.setToMods = function (file) {
 	var script = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[file]].content;
-	for (var i in script) {
-		BOARDFUL.MODS[i] = script[i];
+	if (("array" == typeof script || "object" == typeof script || "function" == typeof script) && "name" in script) {
+		BOARDFUL.MODS[script.name] = script;
+	} else {
+		for (var i in script) {
+			BOARDFUL.MODS[i] = script[i];
+		}
 	}
 };
 
@@ -1221,7 +1230,6 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 		source: this.id
 	});
 	event_list.push(event.id);
-	console.log(this.deck_list);
 	event = new BOARDFUL.CORE.Event({
 		name: "CreateDeck",
 		source: this.id,
@@ -1728,7 +1736,6 @@ BOARDFUL.CORE.shuffle = function (o) {
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };
-
 /**
  * Command line interface.
  *
@@ -2057,7 +2064,57 @@ BOARDFUL.init("server");
 BOARDFUL.SERVER.port = process.argv[3] || 8080;
 BOARDFUL.SERVER.loadServer();
 
+/**
+ * AI for poker game.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
+**/
 
+// if nodejs, load BOARDFUL
+if (typeof module !== 'undefined' && module.exports) {
+	var BOARDFUL = require("../../build/boardful.core.js");
+	var Poker = require("./cards.js");
+	module.exports = Poker;
+} else {
+	BOARDFUL.MODS = BOARDFUL.MODS || new Object();
+	var Poker = BOARDFUL.MODS.Poker || new Object();
+}
+
+Poker.getBestHand = function (cards, number) {
+	cards.sort(Poker.compare);
+	var comb = Poker.getCombination(cards, number);
+	comb.sort(Poker.compareHand);
+	if (0 == comb.length) {
+		return new Array();
+	} else {
+		return comb[comb.length - 1];
+	}
+};
+Poker.getCombination = function (cards, number) {
+	if (cards.length < number) {
+		return [];
+	}
+	if (0 == cards.length || number <= 0) {
+		return [[]];
+	}
+	var card0 = cards[0];
+	var cards1 = new Array();
+	for (var i = 1; i < cards.length; ++ i) {
+		cards1.push(cards[i]);
+	}
+	var ans = Poker.getCombination(cards1, number);
+	var ans1 = Poker.getCombination(cards1, number - 1);
+	for (var i in ans1) {
+		var temp = [card0];
+		for (var j in ans1[i]) {
+			temp.push(ans1[i][j]);
+		}
+		ans.push(temp);
+	}
+	return ans;
+};
 /**
  * Cards for poker game.
  *
@@ -2072,15 +2129,17 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // poker
-var Poker = Poker || new Object();
+var Poker = Poker || {
+	type: "Mod",
+	name: "Poker"
+};
 // if nodejs, export as module
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports.Poker = Poker;
+	module.exports = Poker;
 } else {
 	BOARDFUL.MODS.Poker = Poker;
 }
 Poker.register = function (owner) {
-	Poker.type = "Poker";
 	Poker.owner = owner;
 	Poker.game = BOARDFUL.Mngr.get(Poker.owner).game;
 	BOARDFUL.Mngr.add(Poker);
@@ -2334,9 +2393,14 @@ Poker.getHandType = function (list) {
 // if nodejs, load BOARDFUL
 if (typeof module !== 'undefined' && module.exports) {
 	var BOARDFUL = require("../../build/boardful.core.js");
-	var MODS = require("./cards.js");
-	var Poker = MODS.Poker || new Object();
-	module.exports.Poker = Poker;
+	var Poker = require("./cards.js");
+	var Poker1 = require("./ai.js");
+	for (var i in Poker1) {
+		if (! (i in Poker)) {
+			Poker[i] = Poker1[i];
+		}
+	}
+	module.exports = Poker;
 } else {
 	BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 	var Poker = BOARDFUL.MODS.Poker || new Object();
@@ -2344,8 +2408,206 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // poker
 Poker.register = Poker.register || function (owner) {
-	Poker.type = "Poker";
+	Poker.type = "Mod";
 	Poker.owner = owner;
+	Poker.name = "Poker";
+	Poker.game = BOARDFUL.Mngr.get(Poker.owner).game;
+	BOARDFUL.Mngr.add(Poker);
+	return Poker.id;
+};
+// add listeners
+Poker.addListeners = function () {
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("StartGame", {
+		level: "game",
+		callback: function (arg) {
+			Poker.startGame(arg);
+		},
+		id: Poker.id
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("CreateDeck", {
+		level: "game",
+		callback: function (arg) {
+			Poker.createDeck(arg);
+		},
+		id: Poker.id
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("PlayerAct", {
+		level: "game",
+		callback: function (arg) {
+			Poker.playerAct(arg);
+		},
+		id: Poker.id
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("Settle", {
+		level: "game",
+		callback: function (arg) {
+			Poker.settle(arg);
+		},
+		id: Poker.id
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("Discard", {
+		level: "game",
+		callback: function (arg) {
+			Poker.discard(arg);
+		},
+		id: Poker.id
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("ReorderDeck", {
+		level: "game",
+		callback: function (arg) {
+			Poker.reorderDeck(arg);
+		},
+		id: Poker.id
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("PlayCardAi", {
+		level: "game",
+		callback: function (arg) {
+			Poker.playCardAi(arg);
+		},
+		id: Poker.id
+	});
+};
+// start game
+Poker.startGame = function () {
+};
+// create deck
+Poker.createDeck = function (arg) {
+	BOARDFUL.Mngr.get(arg.deck).getCards(this.createCards());
+};
+// players duel
+Poker.playerAct = function (arg) {
+	var event_list = new Array();
+	var event;
+	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
+		// each player play one card
+		event = new BOARDFUL.CORE.Event({
+			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
+			source: this.id,
+			source_event: "PlayersDuel",
+			player: BOARDFUL.Mngr.get(this.owner).player_list[i],
+			number: 1
+		});
+		event_list.push(event.id);
+	}
+	// settle players duel
+	event = new BOARDFUL.CORE.Event({
+		name: "Settle",
+		source: this.id,
+		source_event: "PlayersDuel"
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
+};
+// settle players duel
+Poker.settle = function (arg) {
+	var select_list = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).table).getCardsBySource("PlayersDuel");
+	// group player's cards together
+	var select_player_list = new Array();
+	for (var i in select_list) {
+		if (! (select_list[i].player in select_player_list)) {
+			select_player_list[select_list[i].player] = new Array();
+		}
+		select_player_list[select_list[i].player] = select_player_list[select_list[i].player].concat(select_list[i].cards);
+	}
+	// change to array
+	var select_card_list = new Array();
+	for (var i in select_player_list) {
+		select_card_list.push({
+			player: i,
+			cards: select_player_list[i]
+		});
+	}
+	var that = this;
+	select_card_list.sort(function (a, b) {
+		return BOARDFUL.MODS.Poker.compare(a.cards, b.cards);
+	});
+	var player_list = new Array();
+	var card_list = new Array();
+	var all_card_list = new Array();
+	for (var i in select_card_list) {
+		player_list.push(select_card_list[i].player);
+		card_list.push(select_card_list[i].cards);
+		all_card_list = all_card_list.concat(select_card_list[i].cards);
+	}
+	var winner = undefined;
+	if (select_card_list.length > 0) {
+		winner = select_card_list[select_card_list.length - 1].player;
+	}
+	// event for ui
+	var event_list = new Array();
+	var event = new BOARDFUL.CORE.Event({
+		name: "SettlePlayersDuelUi",
+		source: Poker.id,
+		cards: card_list,
+		players: player_list,
+		player: winner
+	});
+	event_list.push(event.id);
+	event = new BOARDFUL.CORE.Event({
+		name: "Discard",
+		source: BOARDFUL.Mngr.get(Poker.owner).table,
+		cards: all_card_list
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event_list);
+};
+// discard
+Poker.discard = function (arg) {
+	var deck = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(Poker.owner).deck_list.discard);
+	deck.getCards(arg.cards);
+};
+// reorder deck
+Poker.reorderDeck = function (arg) {
+	var discard = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(Poker.owner).deck_list.discard);
+	discard.card_list = BOARDFUL.CORE.shuffle(discard.card_list);
+	BOARDFUL.Mngr.get(arg.deck).getCards(discard.card_list);
+	discard.card_list = new Array();
+};
+// play card AI
+Poker.playCardAi = function (arg) {
+	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
+	if (0 == hand.length) {
+		return;
+	}
+	var card_list = Poker.getBestHand(hand, arg.number);
+	var event = new BOARDFUL.CORE.Event({
+		name: "PlaceCardOnTable",
+		source: arg.player,
+		source_event: arg.source_event,
+		player: arg.player,
+		cards: card_list
+	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event.id);
+};
+/**
+ * Poker game.
+ *
+ * @author		Fei Zhan
+ * @version		0.0
+ * 
+**/
+
+// if nodejs, load BOARDFUL
+if (typeof module !== 'undefined' && module.exports) {
+	var BOARDFUL = require("../../build/boardful.core.js");
+	var Poker = require("./cards.js");
+	var Poker1 = require("./ai.js");
+	for (var i in Poker1) {
+		if (! (i in Poker)) {
+			Poker[i] = Poker1[i];
+		}
+	}
+	module.exports = Poker;
+} else {
+	BOARDFUL.MODS = BOARDFUL.MODS || new Object();
+	var Poker = BOARDFUL.MODS.Poker || new Object();
+}
+
+// poker
+Poker.register = Poker.register || function (owner) {
+	Poker.type = "Mod";
+	Poker.owner = owner;
+	Poker.name = "Poker";
 	Poker.game = BOARDFUL.Mngr.get(Poker.owner).game;
 	BOARDFUL.Mngr.add(Poker);
 	return Poker.id;
@@ -2426,7 +2688,6 @@ Poker.endRound = function (arg) {
 // create deck
 Poker.createDeck = function (arg) {
 	var card_list = Poker.createCards();
-	console.log(arg);
 	BOARDFUL.Mngr.get(arg.deck).getCards(card_list);
 };
 // players duel
@@ -2511,19 +2772,10 @@ Poker.reorderDeck = function (arg) {
 // play card AI
 Poker.playCardAi = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
-	var card_list = new Array();
 	if (0 == hand.length) {
 		return;
 	}
-	else if (hand.length < arg.number) {
-		card_list = hand;
-	} else {
-		while (card_list.length < arg.number) {
-			var index = Math.floor((Math.random() * hand.length));
-			card_list.push(hand[index]);
-			hand.splice(index, 1);
-		}
-	}
+	var card_list = Poker.getBestHand(hand, arg.number);
 	var event = new BOARDFUL.CORE.Event({
 		name: "PlaceCardOnTable",
 		source: arg.player,
@@ -2532,262 +2784,4 @@ Poker.playCardAi = function (arg) {
 		cards: card_list
 	});
 	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event.id);
-};
-
-/**
- * Poker game.
- *
- * @author		Fei Zhan
- * @version		0.0
- * 
-**/
-
-// if nodejs, load BOARDFUL
-if (typeof module !== 'undefined' && module.exports) {
-	var BOARDFUL = require("../../build/boardful.core.js");
-}
-
-// poker
-var Poker = function (owner) {
-	this.type = "Poker";
-	this.owner = owner;
-	this.game = BOARDFUL.Mngr.get(this.owner).game;
-	BOARDFUL.Mngr.add(this);
-};
-// if nodejs, export as module
-if (typeof module !== 'undefined' && module.exports) {
-	module.exports.Poker = Poker;
-} else {
-	BOARDFUL.MODS.Poker = Poker;
-}
-// add listeners
-Poker.prototype.addListeners = function () {
-	var that = this;
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("StartGame", {
-		level: "game",
-		callback: function (arg) {
-			that.startGame(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("CreateDeck", {
-		level: "game",
-		callback: function (arg) {
-			that.createDeck(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayerAct", {
-		level: "game",
-		callback: function (arg) {
-			that.playerAct(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("Settle", {
-		level: "game",
-		callback: function (arg) {
-			that.settle(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("Discard", {
-		level: "game",
-		callback: function (arg) {
-			that.discard(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("ReorderDeck", {
-		level: "game",
-		callback: function (arg) {
-			that.reorderDeck(arg);
-		},
-		id: that.id
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayCardAi", {
-		level: "game",
-		callback: function (arg) {
-			that.playCardAi(arg);
-		},
-		id: that.id
-	});
-};
-// start game
-Poker.prototype.startGame = function () {
-};
-// create deck
-Poker.prototype.createDeck = function (arg) {
-	BOARDFUL.Mngr.get(arg.deck).getCards(this.createCards());
-};
-// players duel
-Poker.prototype.playerAct = function (arg) {
-	var event_list = new Array();
-	var event;
-	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		// each player play one card
-		event = new BOARDFUL.CORE.Event({
-			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
-			source: this.id,
-			source_event: "PlayersDuel",
-			player: BOARDFUL.Mngr.get(this.owner).player_list[i],
-			number: 1
-		});
-		event_list.push(event.id);
-	}
-	// settle players duel
-	event = new BOARDFUL.CORE.Event({
-		name: "Settle",
-		source: this.id,
-		source_event: "PlayersDuel"
-	});
-	event_list.push(event.id);
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
-};
-// settle players duel
-Poker.prototype.settle = function (arg) {
-	var select_list = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).table).getCardsBySource("PlayersDuel");
-	// group player's cards together
-	var select_player_list = new Array();
-	for (var i in select_list) {
-		if (! (select_list[i].player in select_player_list)) {
-			select_player_list[select_list[i].player] = new Array();
-		}
-		select_player_list[select_list[i].player] = select_player_list[select_list[i].player].concat(select_list[i].cards);
-	}
-	// change to array
-	var select_card_list = new Array();
-	for (var i in select_player_list) {
-		select_card_list.push({
-			player: i,
-			cards: select_player_list[i]
-		});
-	}
-	var that = this;
-	select_card_list.sort(function (a, b) {
-		return BOARDFUL.MODS.Poker.compare(a.cards, b.cards);
-	});
-	var player_list = new Array();
-	var card_list = new Array();
-	var all_card_list = new Array();
-	for (var i in select_card_list) {
-		player_list.push(select_card_list[i].player);
-		card_list.push(select_card_list[i].cards);
-		all_card_list = all_card_list.concat(select_card_list[i].cards);
-	}
-	var winner = undefined;
-	if (select_card_list.length > 0) {
-		winner = select_card_list[select_card_list.length - 1].player;
-	}
-	// event for ui
-	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
-		name: "SettlePlayersDuelUi",
-		source: this.id,
-		cards: card_list,
-		players: player_list,
-		player: winner
-	});
-	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
-		name: "Discard",
-		source: BOARDFUL.Mngr.get(this.owner).table,
-		cards: all_card_list
-	});
-	event_list.push(event.id);
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
-};
-// discard
-Poker.prototype.discard = function (arg) {
-	var deck = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).deck_list.discard);
-	deck.getCards(arg.cards);
-};
-// reorder deck
-Poker.prototype.reorderDeck = function (arg) {
-	var discard = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.owner).deck_list.discard);
-	discard.card_list = BOARDFUL.CORE.shuffle(discard.card_list);
-	BOARDFUL.Mngr.get(arg.deck).getCards(discard.card_list);
-	discard.card_list = new Array();
-};
-// play card AI
-Poker.prototype.playCardAi = function (arg) {
-	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
-	if (0 == hand.length) {
-		return;
-	}
-	var card = hand[Math.floor((Math.random() * hand.length))];
-	var event = new BOARDFUL.CORE.Event({
-		name: "PlaceCardOnTable",
-		source: arg.player,
-		source_event: arg.source_event,
-		player: arg.player,
-		cards: [card]
-	});
-	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event.id);
-};
-
-// create cards
-Poker.prototype.createCards = function () {
-	var card_list = new Array();
-	var card;
-	for (var i in Poker.RANKS) {
-		if ("Joker" == i) {
-			card = new BOARDFUL.CORE.Card({
-				rank: i,
-				suit: "Spade"
-			}, this.id);
-			card_list.push(card.id);
-			card = new BOARDFUL.CORE.Card({
-				rank: i,
-				suit: "Heart"
-			}, this.id);
-			card_list.push(card.id);
-		}
-		else {
-			for (var j in Poker.SUITS) {
-				card = new BOARDFUL.CORE.Card({
-					rank: i,
-					suit: j
-				}, this.id);
-				card_list.push(card.id);
-			}
-		}
-	}
-	return card_list;
-};
-Poker.RANKS = {
-	"2": 2,
-	"3": 3,
-	"4": 4,
-	"5": 5,
-	"6": 6,
-	"7": 7,
-	"8": 8,
-	"9": 9,
-	"10": 10,
-	"Jack": 11,
-	"Queen": 12,
-	"King": 13,
-	"Ace": 14,
-	"Joker": 15
-};
-Poker.SUITS = {
-	"Spade": 4,
-	"Heart": 3,
-	"Diamond": 2,
-	"Club": 1
-};
-// compare two cards
-Poker.compare = function (id0, id1) {
-	var card0 = BOARDFUL.Mngr.get(id0);
-	var card1 = BOARDFUL.Mngr.get(id1);
-	if (card0.rank != card1.rank) {
-		return Poker.RANKS[card0.rank] - Poker.RANKS[card1.rank];
-	}
-	else if (card0.suit != card1.suit) {
-		return Poker.SUITS[card0.suit] - Poker.SUITS[card1.suit];
-	}
-	else {
-		return 0;
-	}
 };

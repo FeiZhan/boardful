@@ -28,8 +28,13 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 		var dependencies = new Array();
 		var files = new Array();
 		for (var i in packages) {
+			if (".json" != packages[i].substr(packages[i].length - 5)) {
+				continue;
+			}
 			var pack = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[packages[i]]].content;
-			files = files.concat(pack.files);
+			if ("files" in pack) {
+				files = files.concat(pack.files);
+			}
 			if ("dependencies" in pack) {
 				dependencies = dependencies.concat(pack.dependencies);
 			}
@@ -113,7 +118,7 @@ BOARDFUL.init = function (config) {
 BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
-	var BOARD_LIST_FILE = "src/core/boardlist.json";
+	var BOARD_LIST_FILE = "mods/boardlist.json";
 	var load_files = new BOARDFUL.CORE.FileLoader([BOARD_LIST_FILE], function () {
 		var board_list = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[BOARD_LIST_FILE]].content.boards;
 		for (var i in board_list) {
@@ -533,8 +538,12 @@ BOARDFUL.CORE.File.getFromHtml = function () {
 // set file script to MODS scope
 BOARDFUL.CORE.File.setToMods = function (file) {
 	var script = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[file]].content;
-	for (var i in script) {
-		BOARDFUL.MODS[i] = script[i];
+	if (("array" == typeof script || "object" == typeof script || "function" == typeof script) && "name" in script) {
+		BOARDFUL.MODS[script.name] = script;
+	} else {
+		for (var i in script) {
+			BOARDFUL.MODS[i] = script[i];
+		}
 	}
 };
 
@@ -765,7 +774,6 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 		source: this.id
 	});
 	event_list.push(event.id);
-	console.log(this.deck_list);
 	event = new BOARDFUL.CORE.Event({
 		name: "CreateDeck",
 		source: this.id,

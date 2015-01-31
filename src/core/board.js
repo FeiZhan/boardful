@@ -28,8 +28,13 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 		var dependencies = new Array();
 		var files = new Array();
 		for (var i in packages) {
+			if (".json" != packages[i].substr(packages[i].length - 5)) {
+				continue;
+			}
 			var pack = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[packages[i]]].content;
-			files = files.concat(pack.files);
+			if ("files" in pack) {
+				files = files.concat(pack.files);
+			}
 			if ("dependencies" in pack) {
 				dependencies = dependencies.concat(pack.dependencies);
 			}

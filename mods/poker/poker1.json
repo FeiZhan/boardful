@@ -1,19 +1,22 @@
 {
-	"name": "test",
+	"name": "poker1",
 	"version": "0.0.0",
 	"authors": ["Fei Zhan"],
 	"license": "GNU GENERAL PUBLIC LICENSE",
-	"description": "description of test",
-	"dependencies": [],
+	"description": "description of poker1",
+	"dependencies": [
+		"mods/poker/cards.js",
+		"mods/poker/ai.js"
+	],
 	"files": [
-		"mods/test/game.js"
+		"mods/poker/poker1.js"
 	],
 	"tables": "1",
 	"decks": ["draw", "discard"],
 	"players": ["2"],
 	"cards": {
 		"init": "3",
-		"turn": "2"
+		"round": "2"
 	},
 	"options": {
 		"deck_num": {
