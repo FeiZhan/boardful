@@ -857,16 +857,16 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		source: this.id
 	});
 	event_list.push(event.id);
-	this.event_mngr.front(event_list);
-};
-// end a round
-BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
-	var event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.CORE.Event({
 		name: "StartRound",
 		source: this.id,
 		number: this.round + 1
 	});
-	this.event_mngr.add(event.id);
+	event_list.push(event.id);
+	this.event_mngr.front(event_list);
+};
+// end a round
+BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
 };
 /**
  * Logger.

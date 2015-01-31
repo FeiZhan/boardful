@@ -48,16 +48,6 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 			stop: function (event, ui) {
 				clearInterval(flip_interval);
 				card_jq.removeClass("flip");
-				// expand and disappear
-				/*card_jq.animate({
-					top: '-=100px',
-					left: '-=100px',
-					height: '+=200px',
-					width: '+=200px',
-					opacity: 0,
-				}, "slow", function () {
-					$(this).remove();
-				});*/
 			},
 		});
 		card_jq.hover(function () {
@@ -114,6 +104,29 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 			});
 		});
 	}
+};
+BOARDFUL.BRSR.CardUi.prototype.remove = function () {
+	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	// move out
+	var source_pos = {
+		top: jq.offset().top + jq.height() / 2 - jq.height() / 2,
+		left: jq.offset().left + jq.width() / 2 - jq.width() / 2
+	};
+	var element = jq.detach();
+	$("#" + BOARDFUL.BRSR.Canvas).append(element);
+	jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	jq.offset(source_pos);
+	jq.attr("float", "inherit");
+	// expand and disappear
+	jq.animate({
+		top: '-=100px',
+		left: '-=100px',
+		height: '+=200px',
+		width: '+=200px',
+		opacity: 0,
+	}, "slow", function () {
+		$(this).remove();
+	});
 };
 /**
  * Gui for game.
@@ -232,10 +245,12 @@ BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
 	}
 };
 BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
-	console.log(arg);
+	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
 };
 BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
-	console.log(arg);
+	for (var i in arg.cards) {
+		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).remove();
+	}
 };
 /**
  * Menus.

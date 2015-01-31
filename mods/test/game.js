@@ -72,7 +72,7 @@ Poker.prototype.addListeners = function () {
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayCardAi", {
 		level: "game",
 		callback: function (arg) {
-			that.playCard(arg);
+			that.playCardAi(arg);
 		},
 		id: that.id
 	});
@@ -133,9 +133,11 @@ Poker.prototype.settle = function (arg) {
 	});
 	var player_list = new Array();
 	var card_list = new Array();
+	var all_card_list = new Array();
 	for (var i in select_card_list) {
 		player_list.push(select_card_list[i].player);
-		card_list.push(select_card_list[i].card);
+		card_list.push(select_card_list[i].cards);
+		all_card_list = all_card_list.concat(select_card_list[i].cards);
 	}
 	var winner = undefined;
 	if (select_card_list.length > 0) {
@@ -154,7 +156,7 @@ Poker.prototype.settle = function (arg) {
 	event = new BOARDFUL.CORE.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(this.owner).table,
-		cards: card_list
+		cards: all_card_list
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
@@ -172,7 +174,7 @@ Poker.prototype.reorderDeck = function (arg) {
 	discard.card_list = new Array();
 };
 // play card AI
-Poker.prototype.playCard = function (arg) {
+Poker.prototype.playCardAi = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
 	if (0 == hand.length) {
 		return;

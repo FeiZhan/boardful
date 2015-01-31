@@ -15,6 +15,7 @@ if (typeof module !== 'undefined' && module.exports) {
 var Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
+	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	BOARDFUL.Mngr.add(this);
 };
 // if nodejs, export as module
@@ -30,6 +31,13 @@ Poker.prototype.addListeners = function () {
 		level: "game",
 		callback: function (arg) {
 			that.startGame(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("EndRound", {
+		level: "game",
+		callback: function (arg) {
+			that.endRound(arg);
 		},
 		id: that.id
 	});
@@ -77,7 +85,18 @@ Poker.prototype.addListeners = function () {
 	});
 };
 // start game
-Poker.prototype.startGame = function () {
+Poker.prototype.startGame = function (arg) {
+};
+Poker.prototype.endRound = function (arg) {
+	var event_list = new Array();
+	// settle players duel
+	var event = new BOARDFUL.CORE.Event({
+		name: "Settle",
+		source: this.id,
+		source_event: "PlayersDuel"
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
 // create deck
 Poker.prototype.createDeck = function (arg) {
@@ -87,22 +106,13 @@ Poker.prototype.createDeck = function (arg) {
 Poker.prototype.playerAct = function (arg) {
 	var event_list = new Array();
 	var event;
-	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		// each player play cards
-		event = new BOARDFUL.CORE.Event({
-			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
-			source: this.id,
-			source_event: "PlayersDuel",
-			player: BOARDFUL.Mngr.get(this.owner).player_list[i],
-			number: 5
-		});
-		event_list.push(event.id);
-	}
-	// settle players duel
+	// each player play cards
 	event = new BOARDFUL.CORE.Event({
-		name: "Settle",
+		name: "Player" + arg.player + "PlayCard",
 		source: this.id,
-		source_event: "PlayersDuel"
+		source_event: "PlayersDuel",
+		player: arg.player,
+		number: 5
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
@@ -206,12 +216,12 @@ Poker.prototype.createCards = function () {
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Spade"
-			});
+			}, this.id);
 			card_list.push(card.id);
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Heart"
-			});
+			}, this.id);
 			card_list.push(card.id);
 		}
 		else {
@@ -219,7 +229,7 @@ Poker.prototype.createCards = function () {
 				card = new BOARDFUL.CORE.Card({
 					rank: i,
 					suit: j
-				});
+				}, this.id);
 				card_list.push(card.id);
 			}
 		}

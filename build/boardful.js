@@ -48,16 +48,6 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 			stop: function (event, ui) {
 				clearInterval(flip_interval);
 				card_jq.removeClass("flip");
-				// expand and disappear
-				/*card_jq.animate({
-					top: '-=100px',
-					left: '-=100px',
-					height: '+=200px',
-					width: '+=200px',
-					opacity: 0,
-				}, "slow", function () {
-					$(this).remove();
-				});*/
 			},
 		});
 		card_jq.hover(function () {
@@ -114,6 +104,29 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 			});
 		});
 	}
+};
+BOARDFUL.BRSR.CardUi.prototype.remove = function () {
+	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	// move out
+	var source_pos = {
+		top: jq.offset().top + jq.height() / 2 - jq.height() / 2,
+		left: jq.offset().left + jq.width() / 2 - jq.width() / 2
+	};
+	var element = jq.detach();
+	$("#" + BOARDFUL.BRSR.Canvas).append(element);
+	jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	jq.offset(source_pos);
+	jq.attr("float", "inherit");
+	// expand and disappear
+	jq.animate({
+		top: '-=100px',
+		left: '-=100px',
+		height: '+=200px',
+		width: '+=200px',
+		opacity: 0,
+	}, "slow", function () {
+		$(this).remove();
+	});
 };
 /**
  * Gui for game.
@@ -232,10 +245,12 @@ BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
 	}
 };
 BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
-	console.log(arg);
+	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
 };
 BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
-	console.log(arg);
+	for (var i in arg.cards) {
+		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).remove();
+	}
 };
 /**
  * Menus.
@@ -1298,16 +1313,16 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		source: this.id
 	});
 	event_list.push(event.id);
-	this.event_mngr.front(event_list);
-};
-// end a round
-BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
-	var event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.CORE.Event({
 		name: "StartRound",
 		source: this.id,
 		number: this.round + 1
 	});
-	this.event_mngr.add(event.id);
+	event_list.push(event.id);
+	this.event_mngr.front(event_list);
+};
+// end a round
+BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
 };
 /**
  * Logger.
@@ -2039,6 +2054,7 @@ if (typeof module !== 'undefined' && module.exports) {
 var Poker = function (owner) {
 	this.type = "Poker";
 	this.owner = owner;
+	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	BOARDFUL.Mngr.add(this);
 };
 // if nodejs, export as module
@@ -2054,6 +2070,13 @@ Poker.prototype.addListeners = function () {
 		level: "game",
 		callback: function (arg) {
 			that.startGame(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(this.owner).event_mngr.on("EndRound", {
+		level: "game",
+		callback: function (arg) {
+			that.endRound(arg);
 		},
 		id: that.id
 	});
@@ -2101,7 +2124,18 @@ Poker.prototype.addListeners = function () {
 	});
 };
 // start game
-Poker.prototype.startGame = function () {
+Poker.prototype.startGame = function (arg) {
+};
+Poker.prototype.endRound = function (arg) {
+	var event_list = new Array();
+	// settle players duel
+	var event = new BOARDFUL.CORE.Event({
+		name: "Settle",
+		source: this.id,
+		source_event: "PlayersDuel"
+	});
+	event_list.push(event.id);
+	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
 };
 // create deck
 Poker.prototype.createDeck = function (arg) {
@@ -2111,22 +2145,13 @@ Poker.prototype.createDeck = function (arg) {
 Poker.prototype.playerAct = function (arg) {
 	var event_list = new Array();
 	var event;
-	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
-		// each player play cards
-		event = new BOARDFUL.CORE.Event({
-			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
-			source: this.id,
-			source_event: "PlayersDuel",
-			player: BOARDFUL.Mngr.get(this.owner).player_list[i],
-			number: 5
-		});
-		event_list.push(event.id);
-	}
-	// settle players duel
+	// each player play cards
 	event = new BOARDFUL.CORE.Event({
-		name: "Settle",
+		name: "Player" + arg.player + "PlayCard",
 		source: this.id,
-		source_event: "PlayersDuel"
+		source_event: "PlayersDuel",
+		player: arg.player,
+		number: 5
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
@@ -2230,12 +2255,12 @@ Poker.prototype.createCards = function () {
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Spade"
-			});
+			}, this.id);
 			card_list.push(card.id);
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
 				suit: "Heart"
-			});
+			}, this.id);
 			card_list.push(card.id);
 		}
 		else {
@@ -2243,7 +2268,7 @@ Poker.prototype.createCards = function () {
 				card = new BOARDFUL.CORE.Card({
 					rank: i,
 					suit: j
-				});
+				}, this.id);
 				card_list.push(card.id);
 			}
 		}
@@ -2531,7 +2556,7 @@ Poker.prototype.addListeners = function () {
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlayCardAi", {
 		level: "game",
 		callback: function (arg) {
-			that.playCard(arg);
+			that.playCardAi(arg);
 		},
 		id: that.id
 	});
@@ -2592,9 +2617,11 @@ Poker.prototype.settle = function (arg) {
 	});
 	var player_list = new Array();
 	var card_list = new Array();
+	var all_card_list = new Array();
 	for (var i in select_card_list) {
 		player_list.push(select_card_list[i].player);
-		card_list.push(select_card_list[i].card);
+		card_list.push(select_card_list[i].cards);
+		all_card_list = all_card_list.concat(select_card_list[i].cards);
 	}
 	var winner = undefined;
 	if (select_card_list.length > 0) {
@@ -2613,7 +2640,7 @@ Poker.prototype.settle = function (arg) {
 	event = new BOARDFUL.CORE.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(this.owner).table,
-		cards: card_list
+		cards: all_card_list
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(this.owner).event_mngr.front(event_list);
@@ -2631,7 +2658,7 @@ Poker.prototype.reorderDeck = function (arg) {
 	discard.card_list = new Array();
 };
 // play card AI
-Poker.prototype.playCard = function (arg) {
+Poker.prototype.playCardAi = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
 	if (0 == hand.length) {
 		return;

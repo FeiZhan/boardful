@@ -115,8 +115,10 @@ BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
 	}
 };
 BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
-	console.log(arg);
+	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
 };
 BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
-	console.log(arg);
+	for (var i in arg.cards) {
+		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).remove();
+	}
 };
