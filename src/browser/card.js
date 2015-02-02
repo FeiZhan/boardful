@@ -38,7 +38,12 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		}
 		// set name
 		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
-		card_jq.find(".back").attr("src","resources/poker_back.jpg");
+		var card_config = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(that.instance).game).owner).config.cards;
+		var back_img = "resources/poker_back.jpg";
+		if (card_config && card_config.back) {
+			back_img = card_config.back;
+		}
+		card_jq.find(".back").attr("src", back_img);
 		var flip_interval;
 		// draggable
 		card_jq.draggable({

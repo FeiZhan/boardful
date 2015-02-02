@@ -1,23 +1,22 @@
 {
-	"name": "poker1",
+	"name": "uno",
 	"version": "0.0.0",
 	"authors": ["Fei Zhan"],
 	"license": "GNU GENERAL PUBLIC LICENSE",
-	"description": "description of poker1",
+	"description": "description of uno",
 	"dependencies": [
-		"mods/poker/cards.js",
-		"mods/poker/ai.js"
+		"mods/uno/cards.js",
+		"mods/uno/ai.js"
 	],
 	"files": [
-		"mods/poker/poker1.js"
+		"mods/uno/uno.js"
 	],
 	"tables": "1",
 	"decks": ["draw", "discard"],
 	"players": ["2"],
 	"cards": {
-		"back": "mods/poker/back.jpg",
-		"init": "3",
-		"round": "2"
+		"back": "mods/uno/back.jpg",
+		"init": "7"
 	},
 	"options": {
 		"deck_num": {

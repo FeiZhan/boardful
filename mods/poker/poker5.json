@@ -15,6 +15,7 @@
 	"decks": ["draw", "discard"],
 	"players": ["2"],
 	"cards": {
+		"back": "mods/poker/back.jpg",
 		"init": "2",
 		"round": "5"
 	},
