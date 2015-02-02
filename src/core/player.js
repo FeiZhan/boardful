@@ -30,6 +30,9 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	BOARDFUL.Mngr.add(this);
 	var hand_deck = new BOARDFUL.CORE.Deck(this.id);
 	hand_deck.name = this.name + "_" + "hand";
+	if ("me" == this.name) {
+		hand_deck.visible = true;
+	}
 	this.hand = hand_deck.id;
 	this.addListeners();
 };

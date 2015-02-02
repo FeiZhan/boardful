@@ -13,6 +13,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	this.type = "CardUi";
 	this.instance = instance;
 	this.owner = owner;
+	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
@@ -28,12 +29,16 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent).append(text).fadeIn('slow');
 		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
 		var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + that.id);
+		if (that.visible) {
+			card_jq.addClass("visible");
+		}
 		// set position
 		if (config.position) {
 			card_jq.css(config.position);
 		}
 		// set name
 		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
+		card_jq.find(".back").attr("src","resources/poker_back.jpg");
 		var flip_interval;
 		// draggable
 		card_jq.draggable({
@@ -105,18 +110,17 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
+BOARDFUL.BRSR.CardUi.prototype.show = function () {
+	this.visible = true;
+	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	card_jq.addClass("visible");
+};
 BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	// move out
-	var source_pos = {
-		top: jq.offset().top + jq.height() / 2 - jq.height() / 2,
-		left: jq.offset().left + jq.width() / 2 - jq.width() / 2
-	};
-	var element = jq.detach();
-	$("#" + BOARDFUL.BRSR.Canvas).append(element);
-	jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	jq.offset(source_pos);
-	jq.attr("float", "inherit");
+	// don't disturb other cards during removing
+	jq.css({
+		"position": "absolute"
+	});
 	// expand and disappear
 	jq.animate({
 		top: '-=100px',
@@ -207,13 +211,6 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
-	BOARDFUL.Mngr.get(this.instance).event_mngr.on("SettlePlayersDuelUi", {
-		level: "game",
-		callback: function (arg) {
-			that.settlePlayersDuelUi(arg);
-		},
-		id: that.id
-	});
 	BOARDFUL.Mngr.get(this.instance).event_mngr.on("Discard", {
 		level: "game",
 		callback: function (arg) {
@@ -233,6 +230,7 @@ BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 		break;
 	case "me":
 	default:
+		card_ui.visible = true;
 		target = $("#myhand");
 		break;
 	}
@@ -244,9 +242,7 @@ BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
 		card_ui.move(undefined, $("#table"));
 	}
 };
-BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
-	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
-};
+// discard
 BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
 	for (var i in arg.cards) {
 		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).remove();
@@ -600,7 +596,7 @@ BOARDFUL.CORE.Card = function (config, owner) {
 	this.rank = config.rank;
 	this.suit = config.suit;
 	this.color = config.color;
-	this.name = "card_" + this.rank + "_" + this.suit;
+	this.name = config.name || this.suit + "_" + this.rank;
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
@@ -697,6 +693,7 @@ BOARDFUL.CORE.Deck = function (owner) {
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
+	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	this.card_list = new Array();
 	this.addListeners();
@@ -1504,6 +1501,9 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	BOARDFUL.Mngr.add(this);
 	var hand_deck = new BOARDFUL.CORE.Deck(this.id);
 	hand_deck.name = this.name + "_" + "hand";
+	if ("me" == this.name) {
+		hand_deck.visible = true;
+	}
 	this.hand = hand_deck.id;
 	this.addListeners();
 };
@@ -2154,12 +2154,14 @@ Poker.createCards = function () {
 		if ("Joker" == i) {
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
-				suit: "Spade"
+				suit: "Spade",
+				name: "♠" + i
 			}, Poker.id);
 			card_list.push(card.id);
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
-				suit: "Heart"
+				suit: "Heart",
+				name: "♥" + i
 			}, Poker.id);
 			card_list.push(card.id);
 		}
@@ -2167,7 +2169,8 @@ Poker.createCards = function () {
 			for (var j in Poker.SUITS) {
 				card = new BOARDFUL.CORE.Card({
 					rank: i,
-					suit: j
+					suit: j,
+					name: Poker.SUIT_NAMES[j] + i
 				}, Poker.id);
 				card_list.push(card.id);
 			}
@@ -2196,6 +2199,12 @@ Poker.SUITS = {
 	"Heart": 3,
 	"Diamond": 2,
 	"Club": 1
+};
+Poker.SUIT_NAMES = {
+	"Spade": "♠",
+	"Heart": "♥",
+	"Diamond": "♦",
+	"Club": "♣"
 };
 // compare two cards
 Poker.compare = function (id0, id1) {
@@ -2445,6 +2454,13 @@ Poker.addListeners = function () {
 		},
 		id: Poker.id
 	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("SettlePlayersDuelUi", {
+		level: "game",
+		callback: function (arg) {
+			Poker.settlePlayersDuelUi(arg);
+		},
+		id: Poker.id
+	});
 	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("Discard", {
 		level: "game",
 		callback: function (arg) {
@@ -2539,17 +2555,28 @@ Poker.settle = function (arg) {
 		name: "SettlePlayersDuelUi",
 		source: Poker.id,
 		cards: card_list,
+		all_cards: all_card_list,
 		players: player_list,
 		player: winner
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event_list);
+};
+Poker.settlePlayersDuelUi = function (arg) {
+	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
+	for (var i in arg.all_cards) {
+		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).show();
+	}
+	var event_list = new Array();
+	var event = new BOARDFUL.CORE.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(Poker.owner).table,
-		cards: all_card_list
+		cards: arg.all_cards
 	});
 	event_list.push(event.id);
-	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event_list);
+	setTimeout(function () {
+		BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event_list);
+	}, 1000);
 };
 // discard
 Poker.discard = function (arg) {

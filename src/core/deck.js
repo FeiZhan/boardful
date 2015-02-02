@@ -15,6 +15,7 @@ BOARDFUL.CORE.Deck = function (owner) {
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
+	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	this.card_list = new Array();
 	this.addListeners();

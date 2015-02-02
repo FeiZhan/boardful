@@ -13,6 +13,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	this.type = "CardUi";
 	this.instance = instance;
 	this.owner = owner;
+	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
@@ -28,12 +29,16 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent).append(text).fadeIn('slow');
 		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
 		var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + that.id);
+		if (that.visible) {
+			card_jq.addClass("visible");
+		}
 		// set position
 		if (config.position) {
 			card_jq.css(config.position);
 		}
 		// set name
 		card_jq.find("h4").html(BOARDFUL.Mngr.get(that.instance).name);
+		card_jq.find(".back").attr("src","resources/poker_back.jpg");
 		var flip_interval;
 		// draggable
 		card_jq.draggable({
@@ -105,18 +110,17 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
+BOARDFUL.BRSR.CardUi.prototype.show = function () {
+	this.visible = true;
+	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	card_jq.addClass("visible");
+};
 BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	// move out
-	var source_pos = {
-		top: jq.offset().top + jq.height() / 2 - jq.height() / 2,
-		left: jq.offset().left + jq.width() / 2 - jq.width() / 2
-	};
-	var element = jq.detach();
-	$("#" + BOARDFUL.BRSR.Canvas).append(element);
-	jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	jq.offset(source_pos);
-	jq.attr("float", "inherit");
+	// don't disturb other cards during removing
+	jq.css({
+		"position": "absolute"
+	});
 	// expand and disappear
 	jq.animate({
 		top: '-=100px',

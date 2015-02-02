@@ -37,12 +37,14 @@ Poker.createCards = function () {
 		if ("Joker" == i) {
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
-				suit: "Spade"
+				suit: "Spade",
+				name: "♠" + i
 			}, Poker.id);
 			card_list.push(card.id);
 			card = new BOARDFUL.CORE.Card({
 				rank: i,
-				suit: "Heart"
+				suit: "Heart",
+				name: "♥" + i
 			}, Poker.id);
 			card_list.push(card.id);
 		}
@@ -50,7 +52,8 @@ Poker.createCards = function () {
 			for (var j in Poker.SUITS) {
 				card = new BOARDFUL.CORE.Card({
 					rank: i,
-					suit: j
+					suit: j,
+					name: Poker.SUIT_NAMES[j] + i
 				}, Poker.id);
 				card_list.push(card.id);
 			}
@@ -79,6 +82,12 @@ Poker.SUITS = {
 	"Heart": 3,
 	"Diamond": 2,
 	"Club": 1
+};
+Poker.SUIT_NAMES = {
+	"Spade": "♠",
+	"Heart": "♥",
+	"Diamond": "♦",
+	"Club": "♣"
 };
 // compare two cards
 Poker.compare = function (id0, id1) {

@@ -144,7 +144,7 @@ BOARDFUL.CORE.Card = function (config, owner) {
 	this.rank = config.rank;
 	this.suit = config.suit;
 	this.color = config.color;
-	this.name = "card_" + this.rank + "_" + this.suit;
+	this.name = config.name || this.suit + "_" + this.rank;
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
@@ -241,6 +241,7 @@ BOARDFUL.CORE.Deck = function (owner) {
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
 	this.ui = undefined;
+	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	this.card_list = new Array();
 	this.addListeners();
@@ -1048,6 +1049,9 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	BOARDFUL.Mngr.add(this);
 	var hand_deck = new BOARDFUL.CORE.Deck(this.id);
 	hand_deck.name = this.name + "_" + "hand";
+	if ("me" == this.name) {
+		hand_deck.visible = true;
+	}
 	this.hand = hand_deck.id;
 	this.addListeners();
 };

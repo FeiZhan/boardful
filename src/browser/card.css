@@ -18,6 +18,26 @@
 	z-index: 1;
 }
 .boardful .card img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+.boardful .card h4 {
+	visibility: hidden;
+}
+.boardful .card.visible h4 {
+	visibility: inherit;
+}
+.boardful .card .front {
+	visibility: hidden;
+}
+.boardful .card.visible .front {
+	visibility: inherit;
+}
+.boardful .card.visible .back {
+	visibility: hidden;
 }
 .boardful .card.flip {
 	transform: rotateY( 180deg );

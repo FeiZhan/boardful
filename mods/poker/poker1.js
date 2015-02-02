@@ -61,6 +61,13 @@ Poker.addListeners = function () {
 		},
 		id: Poker.id
 	});
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("SettlePlayersDuelUi", {
+		level: "game",
+		callback: function (arg) {
+			Poker.settlePlayersDuelUi(arg);
+		},
+		id: Poker.id
+	});
 	BOARDFUL.Mngr.get(Poker.owner).event_mngr.on("Discard", {
 		level: "game",
 		callback: function (arg) {
@@ -155,14 +162,23 @@ Poker.settle = function (arg) {
 		name: "SettlePlayersDuelUi",
 		source: Poker.id,
 		cards: card_list,
+		all_cards: all_card_list,
 		players: player_list,
 		player: winner
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event_list);
+};
+Poker.settlePlayersDuelUi = function (arg) {
+	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
+	for (var i in arg.all_cards) {
+		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).show();
+	}
+	var event_list = new Array();
+	var event = new BOARDFUL.CORE.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(Poker.owner).table,
-		cards: all_card_list
+		cards: arg.all_cards
 	});
 	event_list.push(event.id);
 	BOARDFUL.Mngr.get(Poker.owner).event_mngr.front(event_list);

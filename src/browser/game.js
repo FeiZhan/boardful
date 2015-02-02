@@ -77,13 +77,6 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 		},
 		id: that.id
 	});
-	BOARDFUL.Mngr.get(this.instance).event_mngr.on("SettlePlayersDuelUi", {
-		level: "game",
-		callback: function (arg) {
-			that.settlePlayersDuelUi(arg);
-		},
-		id: that.id
-	});
 	BOARDFUL.Mngr.get(this.instance).event_mngr.on("Discard", {
 		level: "game",
 		callback: function (arg) {
@@ -103,6 +96,7 @@ BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 		break;
 	case "me":
 	default:
+		card_ui.visible = true;
 		target = $("#myhand");
 		break;
 	}
@@ -114,9 +108,7 @@ BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
 		card_ui.move(undefined, $("#table"));
 	}
 };
-BOARDFUL.BRSR.GameUi.prototype.settlePlayersDuelUi = function (arg) {
-	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
-};
+// discard
 BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
 	for (var i in arg.cards) {
 		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).remove();
