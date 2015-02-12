@@ -40,9 +40,23 @@ BOARDFUL.CORE.Logger = function () {
 // default logger
 BOARDFUL.CORE.DefaultLogger = function () {
 	this.enable = true;
+	this.list = new Array();
 	//return console;
 };
 BOARDFUL.CORE.DefaultLogger.prototype.log = function () {
+	var content = "";
+	for (var i in arguments) {
+		if ("array" == typeof arguments[i] || "object" == typeof arguments[i] || "function" == typeof arguments[i]) {
+			content += JSON.stringify(arguments[i]);
+		} else {
+			content += arguments[i];
+		}
+		content += " ";
+	}
+	this.list.push({
+		time: new Date(),
+		content: content
+	});
 	if (this.enable) {
 		console.log.apply(console, arguments);
 	}

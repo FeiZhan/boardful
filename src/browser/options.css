@@ -1,0 +1,96 @@
+#dialog {
+	position: absolute;
+	top: 15%;
+	left: 15%;
+	height: 70%;
+	width: 70%;
+	visibility: hidden;
+	background-color: rgba(255, 255, 255, 0.8);
+	-webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	-moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+	border: thin solid Grey;
+}
+#dialog.active {
+	visibility: inherit;
+}
+#dialog > div {
+	visibility: hidden;
+}
+#dialog > div.active {
+	visibility: inherit;
+}
+
+#dialog #options_main {
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	height: 100%;
+	width: 100%;
+}
+#dialog #options_main div {
+	position: relative;
+	top: 0%;
+	left: 0%;
+	height: 20%;
+	width: 20%;
+	margin: 2%;
+	border-radius: 25px;
+	float: left;
+	border: thin solid Grey;
+	text-align: center;
+	vertical-align: middle;
+	cursor: pointer;
+	font-size: large;
+}
+#dialog #options_main div span {
+	/* center it */
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-right: -50%;
+	transform: translate(-50%, -50%);
+}
+
+#dialog #options_l1_debug {
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	height: 100%;
+	width: 100%;
+}
+#dialog #options_l1_debug ul {
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	height: 5%;
+	width: 100%;
+	margin: 0%;
+	padding: 0%;
+	list-style-position: inside;
+	text-align: center;
+	vertical-align: middle;
+}
+#dialog #options_l1_debug li {
+	float: left;
+	height: 100%;
+	width: 19.4%;
+	border: thin solid black;
+	border-radius: 10px;
+	list-style-type: none;
+	cursor: pointer;
+	text-align: center;
+	vertical-align: middle;
+}
+#dialog #options_l1_debug li.active {
+	background-color: Plum;
+}
+#dialog #options_l1_debug #options_debug_log {
+	position: absolute;
+	top: 6%;
+	left: 0%;
+	height: 83%;
+	width: 95%;
+	padding: 2%;
+	overflow: auto;
+}

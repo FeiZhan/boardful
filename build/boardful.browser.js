@@ -267,27 +267,57 @@ BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 BOARDFUL.BRSR.run = function (canvas) {
 	BOARDFUL.BRSR.Canvas = canvas;
 	$("#" + BOARDFUL.BRSR.Canvas).addClass("boardful");
-	$("#dialog").dialog({
-		autoOpen: false,
-		show: {
-			effect: "fadeIn",
-			duration: 500
-		},
-		hide: {
-			effect: "fadeOut",
-			duration: 500
-		}
-	});
 	$('#header #options').click(function () {
-		if ($("#dialog").dialog("isOpen")) {
-			$("#dialog").dialog("close");
-		} else {
-			$("#dialog").dialog("open");
-		}
+		$("#dialog").toggleClass("active");
 	});
 	$('#header #sound').click(function () {
 		$(this).toggleClass("disable");
 	});
+	BOARDFUL.BRSR.loadOptions();
+	BOARDFUL.BRSR.loadMenu0();
+};
+BOARDFUL.BRSR.loadOptions = function () {
+	$("#dialog").empty();
+	$("#dialog").load("src/browser/options.html", function () {
+		$('#dialog #options_debug').click(function () {
+			$('#dialog > div').removeClass("active");
+			$('#dialog #options_l1_debug').addClass("active");
+		});
+		$('#dialog #options_l1_debug li').click(function () {
+			$('#dialog #options_l1_debug li').removeClass("active");
+			$(this).addClass("active");
+			var id = $(this).attr("id");
+			var log_list = new Array();
+			switch (id) {
+			case "debug_logger":
+				log_list = BOARDFUL.Logger.list;
+				break;
+			case "debug_debugger":
+				log_list = BOARDFUL.Debugger.list;
+				break;
+			case "debug_events":
+				log_list = BOARDFUL.Mngr.logger.list;
+				break;
+			case "debug_files":
+				log_list = BOARDFUL.CORE.File.logger.list;
+				break;
+			case "debug_objects":
+				log_list = new Array();
+				break;
+			default:
+				log_list = new Array();
+				break;
+			}
+			$('#dialog #options_debug_log').empty();
+			for (var i in log_list) {
+				$('#dialog #options_debug_log').append('<div>' + log_list[i].content + '</div>');
+			}
+		});
+	});
+	var load = new BOARDFUL.CORE.FileLoader(["src/browser/options.html", "src/browser/options.css"], function () {});
+};
+
+BOARDFUL.BRSR.loadMenu0 = function () {
 	$("#" + BOARDFUL.BRSR.Canvas).empty();
 	// load menu0
 	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu0.html", function () {
@@ -296,11 +326,12 @@ BOARDFUL.BRSR.run = function (canvas) {
 			BOARDFUL.BRSR.loadMenu1();
 		});
 		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_secondary #options').click(function () {
-			$("#dialog").dialog("open");
+			$("#dialog").toggleClass("active");
 		});
 	});
 	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
 };
+
 BOARDFUL.BRSR.Selected = undefined;
 // load menu1
 BOARDFUL.BRSR.loadMenu1 = function () {
