@@ -15,6 +15,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	this.owner = owner;
 	this.visible = false;
 	BOARDFUL.Mngr.add(this);
+	this.addListeners();
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
@@ -135,7 +136,7 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 
 BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ShowCard", {
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).game).event_mngr.on("ShowCard", {
 		level: "game",
 		callback: function (arg) {
 			that.show(arg);

@@ -15,6 +15,7 @@ BOARDFUL.BRSR.CardUi = function (instance, owner) {
 	this.owner = owner;
 	this.visible = false;
 	BOARDFUL.Mngr.add(this);
+	this.addListeners();
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
@@ -135,7 +136,7 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 
 BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
 	var that = this;
-	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ShowCard", {
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).game).event_mngr.on("ShowCard", {
 		level: "game",
 		callback: function (arg) {
 			that.show(arg);
@@ -245,12 +246,12 @@ BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 	var target;
 	switch (BOARDFUL.Mngr.get(arg.player).name) {
 	case "ai":
-		target = $("#yourhand");
+		target = $("#player_you .hand");
 		break;
 	case "me":
 	default:
 		card_ui.visible = true;
-		target = $("#myhand");
+		target = $("#player_me .hand");
 		break;
 	}
 	card_ui.move($("#deck"), target);
@@ -322,7 +323,9 @@ BOARDFUL.BRSR.loadOptions = function () {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
 						var game = BOARDFUL.Mngr.get(room.game_list[0]);
-						log_list = game.event_mngr.logger.list;
+						if (game) {
+							log_list = game.event_mngr.logger.list;
+						}
 					}
 				}
 				break;
@@ -333,7 +336,9 @@ BOARDFUL.BRSR.loadOptions = function () {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
 						var game = BOARDFUL.Mngr.get(room.game_list[0]);
-						log_list = game.event_mngr.name_logger.list;
+						if (game) {
+							log_list = game.event_mngr.name_logger.list;
+						}
 					}
 				}
 				break;
@@ -458,14 +463,17 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.instance = instance;
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.canvas = "";
 	var load;
 	switch (BOARDFUL.Mngr.get(this.instance).name) {
 	case "ai":
 		load = "src/browser/player_you.html";
+		this.canvas = "player_you";
 		break;
 	case "me":
 	default:
 		load = "src/browser/player_me.html";
+		this.canvas = "player_me";
 		break;
 	}
 	this.addListeners();
@@ -474,24 +482,6 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 		$("#" + BOARDFUL.BRSR.Canvas).append(text).fadeIn('slow');
 	});
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
-};
-BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
-	var that = this;
-	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
-		level: "game",
-		callback: function (arg) {
-			that.playCardUi(arg);
-		},
-		id: that.id
-	});
-};
-// ui for deal cards
-BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
-	if (arg.player != this.instance) {
-		return;
-	}
-	this.play_card_arg = arg;
-	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
 };
 // 
 BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
@@ -518,4 +508,39 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	});
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.front(event.id);
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "run";
+};
+
+BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
+		level: "game",
+		callback: function (arg) {
+			that.playCardUi(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ChangePlayerValueUi", {
+		level: "game",
+		callback: function (arg) {
+			that.changePlayerValueUi(arg);
+		},
+		id: that.id
+	});
+};
+// ui for deal cards
+BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
+	if (arg.player != this.instance) {
+		return;
+	}
+	this.play_card_arg = arg;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
+};
+
+BOARDFUL.BRSR.PlayerUi.prototype.changePlayerValueUi = function (arg) {
+	if (arg.player != this.instance) {
+		return;
+	}
+	var target_jq = $("#" + this.canvas + " .head #" + arg.target + " span");
+	var value = parseInt(target_jq.html());
+	target_jq.html(value + arg.value);
 };

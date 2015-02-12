@@ -14,14 +14,17 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.instance = instance;
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
+	this.canvas = "";
 	var load;
 	switch (BOARDFUL.Mngr.get(this.instance).name) {
 	case "ai":
 		load = "src/browser/player_you.html";
+		this.canvas = "player_you";
 		break;
 	case "me":
 	default:
 		load = "src/browser/player_me.html";
+		this.canvas = "player_me";
 		break;
 	}
 	this.addListeners();
@@ -30,24 +33,6 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 		$("#" + BOARDFUL.BRSR.Canvas).append(text).fadeIn('slow');
 	});
 	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
-};
-BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
-	var that = this;
-	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
-		level: "game",
-		callback: function (arg) {
-			that.playCardUi(arg);
-		},
-		id: that.id
-	});
-};
-// ui for deal cards
-BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
-	if (arg.player != this.instance) {
-		return;
-	}
-	this.play_card_arg = arg;
-	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
 };
 // 
 BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
@@ -74,4 +59,39 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	});
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.front(event.id);
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "run";
+};
+
+BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
+		level: "game",
+		callback: function (arg) {
+			that.playCardUi(arg);
+		},
+		id: that.id
+	});
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ChangePlayerValueUi", {
+		level: "game",
+		callback: function (arg) {
+			that.changePlayerValueUi(arg);
+		},
+		id: that.id
+	});
+};
+// ui for deal cards
+BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
+	if (arg.player != this.instance) {
+		return;
+	}
+	this.play_card_arg = arg;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
+};
+
+BOARDFUL.BRSR.PlayerUi.prototype.changePlayerValueUi = function (arg) {
+	if (arg.player != this.instance) {
+		return;
+	}
+	var target_jq = $("#" + this.canvas + " .head #" + arg.target + " span");
+	var value = parseInt(target_jq.html());
+	target_jq.html(value + arg.value);
 };

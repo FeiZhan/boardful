@@ -53,7 +53,9 @@ BOARDFUL.BRSR.loadOptions = function () {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
 						var game = BOARDFUL.Mngr.get(room.game_list[0]);
-						log_list = game.event_mngr.logger.list;
+						if (game) {
+							log_list = game.event_mngr.logger.list;
+						}
 					}
 				}
 				break;
@@ -64,7 +66,9 @@ BOARDFUL.BRSR.loadOptions = function () {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
 						var game = BOARDFUL.Mngr.get(room.game_list[0]);
-						log_list = game.event_mngr.name_logger.list;
+						if (game) {
+							log_list = game.event_mngr.name_logger.list;
+						}
 					}
 				}
 				break;
