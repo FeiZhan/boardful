@@ -6,30 +6,29 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // gui for card
-BOARDFUL.BRSR.CardUi = function (instance, owner) {
+BOARDFUL.CardUi = function (instance, owner) {
 	this.type = "CardUi";
 	this.instance = instance;
 	this.owner = owner;
 	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	this.addListeners();
-	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
+	var load_files = new BOARDFUL.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
 // display card
-BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
+BOARDFUL.CardUi.prototype.load = function (config, callback) {
 	config = config || new Object();
 	config.parent = config.parent || "";
 	var that = this;
 	// get card html
 	$.get("src/browser/card.html", function (text, status, xhr) {
 		// add html to page
-		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent).append(text).fadeIn('slow');
-		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
-		var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + that.id);
+		$("#" + BOARDFUL.Menu.Canvas + " " + config.parent).append(text).fadeIn('slow');
+		$("#" + BOARDFUL.Menu.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
+		var card_jq = $("#" + BOARDFUL.Menu.Canvas + " #" + that.id);
 		if (that.visible) {
 			card_jq.addClass("visible");
 		}
@@ -76,8 +75,8 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	});
 };
 // move card
-BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
-	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+BOARDFUL.CardUi.prototype.move = function (source, target) {
+	var jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 	source = source || jq;
 	// if not exist, load card
 	if (0 == jq.length) {
@@ -97,8 +96,8 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 			left: source.offset().left + source.width() / 2 - jq.width() / 2
 		};
 		var element = jq.detach();
-		$("#" + BOARDFUL.BRSR.Canvas).append(element);
-		jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+		$("#" + BOARDFUL.Menu.Canvas).append(element);
+		jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 		jq.offset(source_pos);
 		// move to target
 		var target_pos = {
@@ -108,7 +107,7 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		jq.animate(target_pos, "slow", function () {
 			var element = jq.detach();
 			target.append(element);
-			jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+			jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 			jq.css({
 				top: "auto",
 				left: "auto",
@@ -116,8 +115,8 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
-BOARDFUL.BRSR.CardUi.prototype.remove = function () {
-	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+BOARDFUL.CardUi.prototype.remove = function () {
+	var jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 	// don't disturb other cards during removing
 	jq.css({
 		"position": "absolute"
@@ -134,7 +133,7 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	});
 };
 
-BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
+BOARDFUL.CardUi.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).game).event_mngr.on("ShowCard", {
 		level: "game",
@@ -144,12 +143,12 @@ BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
 		id: that.id
 	});
 };
-BOARDFUL.BRSR.CardUi.prototype.show = function (arg) {
+BOARDFUL.CardUi.prototype.show = function (arg) {
 	if (undefined !== arg && arg.card != this.id && arg.card != this.instance) {
 		return;
 	}
 	this.visible = true;
-	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	var card_jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 	card_jq.addClass("visible");
 };
 /**
@@ -160,20 +159,19 @@ BOARDFUL.BRSR.CardUi.prototype.show = function (arg) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // game ui
-BOARDFUL.BRSR.GameUi = function (instance) {
+BOARDFUL.GameUi = function (instance) {
 	this.type = "GameUi";
 	this.instance = instance;
 	BOARDFUL.Mngr.add(this);
-	BOARDFUL.CORE.Command.owner = this.instance;
+	BOARDFUL.Command.owner = this.instance;
 	this.addListeners();
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
+	$("#" + BOARDFUL.Menu.Canvas).empty();
 	var that = this;
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/game.html", function () {
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/game.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + " #playerok").on("click", function () {
+		$("#" + BOARDFUL.Menu.Canvas + " #playerok").on("click", function () {
 			if ("userinput" != BOARDFUL.Mngr.get(that.instance).status) {
 				return;
 			}
@@ -184,10 +182,10 @@ BOARDFUL.BRSR.GameUi = function (instance) {
 				}
 			}
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #chat div").on("click", function () {
+		$("#" + BOARDFUL.Menu.Canvas + " #chat div").on("click", function () {
 			$(this).toggleClass("disable");
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #table").droppable({
+		$("#" + BOARDFUL.Menu.Canvas + " #table").droppable({
 			drop: function (event, ui) {
 				that.dropCardOnTable(event, ui, this);
 			}
@@ -196,14 +194,14 @@ BOARDFUL.BRSR.GameUi = function (instance) {
 	this.player_list = new Array();
 	for (var i in BOARDFUL.Mngr.get(this.instance).player_list) {
 		var player = BOARDFUL.Mngr.get(this.instance).player_list[i];
-		var player_ui = new BOARDFUL.BRSR.PlayerUi(player, this.id).id;
+		var player_ui = new BOARDFUL.PlayerUi(player, this.id).id;
 		BOARDFUL.Mngr.get(player).ui = player_ui;
 		this.player_list.push(player_ui);
 	}
-	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
+	var load_files = new BOARDFUL.FileLoader(["src/browser/game.html", "src/browser/game.css"], function () {
 	});
 };
-BOARDFUL.BRSR.GameUi.prototype.dropCardOnTable = function (event, ui, droppable) {
+BOARDFUL.GameUi.prototype.dropCardOnTable = function (event, ui, droppable) {
 	if ("userinput" != BOARDFUL.Mngr.get(this.instance).status) {
 		return;
 	}
@@ -215,7 +213,7 @@ BOARDFUL.BRSR.GameUi.prototype.dropCardOnTable = function (event, ui, droppable)
 	$(droppable).append(element);
 };
 
-BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
+BOARDFUL.GameUi.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.instance).event_mngr.on("DealCardUi", {
 		level: "game",
@@ -240,8 +238,8 @@ BOARDFUL.BRSR.GameUi.prototype.addListeners = function () {
 	});
 };
 // ui for deal cards
-BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
-	var card_ui = new BOARDFUL.BRSR.CardUi(arg.card, this);
+BOARDFUL.GameUi.prototype.dealCardUi = function (arg) {
+	var card_ui = new BOARDFUL.CardUi(arg.card, this);
 	BOARDFUL.Mngr.get(arg.card).ui = card_ui.id;
 	var target;
 	switch (BOARDFUL.Mngr.get(arg.player).name) {
@@ -256,14 +254,14 @@ BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 	}
 	card_ui.move($("#deck"), target);
 };
-BOARDFUL.BRSR.GameUi.prototype.placeCardOnTable = function (arg) {
+BOARDFUL.GameUi.prototype.placeCardOnTable = function (arg) {
 	for (var i in arg.cards) {
 		var card_ui = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui);
 		card_ui.move(undefined, $("#table"));
 	}
 };
 // discard
-BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
+BOARDFUL.GameUi.prototype.discard = function (arg) {
 	for (var i in arg.cards) {
 		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).remove();
 	}
@@ -276,22 +274,23 @@ BOARDFUL.BRSR.GameUi.prototype.discard = function (arg) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
+BOARDFUL.Menu = BOARDFUL.Menu || new Object();
+BOARDFUL.Menu.Canvas = "";
 // launch in browser
-BOARDFUL.BRSR.run = function (canvas) {
-	BOARDFUL.BRSR.Canvas = canvas;
-	$("#" + BOARDFUL.BRSR.Canvas).addClass("boardful");
+BOARDFUL.Menu.run = function (canvas) {
+	BOARDFUL.Menu.Canvas = canvas;
+	$("#" + BOARDFUL.Menu.Canvas).addClass("boardful");
 	$('#header #options').click(function () {
 		$("#dialog").toggleClass("active");
 	});
 	$('#header #sound').click(function () {
 		$(this).toggleClass("disable");
 	});
-	BOARDFUL.BRSR.loadOptions();
-	BOARDFUL.BRSR.loadMenu0();
+	BOARDFUL.Menu.loadOptions();
+	BOARDFUL.Menu.loadMenu0();
 };
-BOARDFUL.BRSR.loadOptions = function () {
+BOARDFUL.Menu.loadOptions = function () {
 	$("#dialog").empty();
 	$("#dialog").load("src/browser/options.html", function () {
 		$('#dialog #options_debug').click(function () {
@@ -305,20 +304,20 @@ BOARDFUL.BRSR.loadOptions = function () {
 			var log_list = new Array();
 			switch (id) {
 			case "debug_logger":
-				log_list = BOARDFUL.Logger.list;
+				log_list = BOARDFUL.logger.list;
 				break;
 			case "debug_debugger":
 				log_list = BOARDFUL.Debugger.list;
 				break;
 			case "debug_files":
-				log_list = BOARDFUL.CORE.File.logger.list;
+				log_list = BOARDFUL.File.logger.list;
 				break;
 			case "debug_objects":
 				log_list = BOARDFUL.Mngr.logger.list;
 				break;
 			case "debug_events":
 				log_list = new Array();
-				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				var board = BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected);
 				if (board) {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
@@ -331,7 +330,7 @@ BOARDFUL.BRSR.loadOptions = function () {
 				break;
 			case "debug_event_names":
 				log_list = new Array();
-				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				var board = BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected);
 				if (board) {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
@@ -352,99 +351,99 @@ BOARDFUL.BRSR.loadOptions = function () {
 			}
 		});
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/options.html", "src/browser/options.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/options.html", "src/browser/options.css"], function () {});
 };
 
-BOARDFUL.BRSR.loadMenu0 = function () {
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
+BOARDFUL.Menu.loadMenu0 = function () {
+	$("#" + BOARDFUL.Menu.Canvas).empty();
 	// load menu0
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu0.html", function () {
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/menu0.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_main #local').click(function () {
-			BOARDFUL.BRSR.loadMenu1();
+		$("#" + BOARDFUL.Menu.Canvas + ' #menu0_main #local').click(function () {
+			BOARDFUL.Menu.loadMenu1();
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_secondary #options').click(function () {
+		$("#" + BOARDFUL.Menu.Canvas + ' #menu0_secondary #options').click(function () {
 			$("#dialog").toggleClass("active");
 		});
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
 };
 
-BOARDFUL.BRSR.Selected = undefined;
+BOARDFUL.Menu.Selected = undefined;
 // load menu1
-BOARDFUL.BRSR.loadMenu1 = function () {
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu1.html", function () {
+BOARDFUL.Menu.loadMenu1 = function () {
+	$("#" + BOARDFUL.Menu.Canvas).empty();
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/menu1.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + " #ok").click(function () {
-			if (undefined === BOARDFUL.BRSR.Selected) {
+		$("#" + BOARDFUL.Menu.Canvas + " #ok").click(function () {
+			if (undefined === BOARDFUL.Menu.Selected) {
 				return;
 			}
-			var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
-			board.load(BOARDFUL.BRSR.loadMenu2);
+			var board = BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected);
+			board.load(BOARDFUL.Menu.loadMenu2);
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #exit").click(function () {
-			BOARDFUL.BRSR.run(BOARDFUL.BRSR.Canvas);
+		$("#" + BOARDFUL.Menu.Canvas + " #exit").click(function () {
+			BOARDFUL.Menu.run(BOARDFUL.Menu.Canvas);
 		});
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			$("#" + BOARDFUL.BRSR.Canvas + " #board_list ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
+			$("#" + BOARDFUL.Menu.Canvas + " #board_list ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
 			if (0 == i) {
-				BOARDFUL.BRSR.Selected = $("#" + BOARDFUL.BRSR.Canvas + " #board_list ul li:last").attr("id");
-				$("#" + BOARDFUL.BRSR.Canvas + " #board_list ul li:last").addClass("active");
-				$("#" + BOARDFUL.BRSR.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.description);
+				BOARDFUL.Menu.Selected = $("#" + BOARDFUL.Menu.Canvas + " #board_list ul li:last").attr("id");
+				$("#" + BOARDFUL.Menu.Canvas + " #board_list ul li:last").addClass("active");
+				$("#" + BOARDFUL.Menu.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected).config.description);
 			}
-			$("#" + BOARDFUL.BRSR.Canvas + " #board_list ul li:last").click(function () {
-				BOARDFUL.BRSR.Selected = $(this).attr('id');
-				$("#" + BOARDFUL.BRSR.Canvas + " #board_list li").removeClass("active");
+			$("#" + BOARDFUL.Menu.Canvas + " #board_list ul li:last").click(function () {
+				BOARDFUL.Menu.Selected = $(this).attr('id');
+				$("#" + BOARDFUL.Menu.Canvas + " #board_list li").removeClass("active");
 				$(this).addClass("active");
-				$("#" + BOARDFUL.BRSR.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.description);
+				$("#" + BOARDFUL.Menu.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected).config.description);
 			});
 		}
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
 };
 // load menu2
-BOARDFUL.BRSR.loadMenu2 = function (id) {
+BOARDFUL.Menu.loadMenu2 = function (id) {
 	var room = BOARDFUL.Mngr.get(id);
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu2.html", function () {
+	$("#" + BOARDFUL.Menu.Canvas).empty();
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/menu2.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + " #ok").on("click", function () {
-			var game = new BOARDFUL.CORE.Game(id);
-			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
+		$("#" + BOARDFUL.Menu.Canvas + " #ok").on("click", function () {
+			var game = new BOARDFUL.Game(id);
+			game.ui = new BOARDFUL.GameUi(game.id);
 			game.run();
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #exit").click(function () {
-			BOARDFUL.BRSR.run(BOARDFUL.BRSR.Canvas);
+		$("#" + BOARDFUL.Menu.Canvas + " #exit").click(function () {
+			BOARDFUL.Menu.run(BOARDFUL.Menu.Canvas);
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #room_config li").on("click", function () {
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config li").removeClass("active");
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config div").removeClass("active");
+		$("#" + BOARDFUL.Menu.Canvas + " #room_config li").on("click", function () {
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config li").removeClass("active");
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config div").removeClass("active");
 			$(this).addClass("active");
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config div#" + $(this).attr("id")).addClass("active");
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config div#" + $(this).attr("id")).addClass("active");
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #room_config #name").html(room.config.name);
-		$("#" + BOARDFUL.BRSR.Canvas + " #room_config #description2").html(room.config.description);
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #players").append('<div class="user"><span>me</span></div>');
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #judges").append('<div class="user"><span>empty</span></div>');
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #audience").append('<div class="user"><span>empty</span></div>');
+		$("#" + BOARDFUL.Menu.Canvas + " #room_config #name").html(room.config.name);
+		$("#" + BOARDFUL.Menu.Canvas + " #room_config #description2").html(room.config.description);
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list #players").append('<div class="user"><span>me</span></div>');
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list #judges").append('<div class="user"><span>empty</span></div>');
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list #audience").append('<div class="user"><span>empty</span></div>');
 		for (var i = 1; i < room.config.players[0]; ++ i) {
-			$("#" + BOARDFUL.BRSR.Canvas + " #user_list #players").append('<div class="user"><span>empty</span></div>');
+			$("#" + BOARDFUL.Menu.Canvas + " #user_list #players").append('<div class="user"><span>empty</span></div>');
 		}
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list .user").on("click", function () {
-			$("#" + BOARDFUL.BRSR.Canvas + " #user_list .user").removeClass("active");
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list .user").on("click", function () {
+			$("#" + BOARDFUL.Menu.Canvas + " #user_list .user").removeClass("active");
 			$(this).addClass("active");
 		});
 		for (var i in room.config.options) {
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config").append('<div id="' + i + '"></div>');
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config #" + i).append('<span>' + i + '</span><select></select>');
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config").append('<div id="' + i + '"></div>');
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config #" + i).append('<span>' + i + '</span><select></select>');
 			for (var j in room.config.options[i].value) {
-				$("#" + BOARDFUL.BRSR.Canvas + " #room_config #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
+				$("#" + BOARDFUL.Menu.Canvas + " #room_config #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
 			}
 		}
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };
 
 /**
@@ -455,10 +454,9 @@ BOARDFUL.BRSR.loadMenu2 = function (id) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // gui for player
-BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
+BOARDFUL.PlayerUi = function (instance, owner) {
 	this.type = "PlayerUi";
 	this.instance = instance;
 	this.owner = owner;
@@ -479,17 +477,17 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.addListeners();
 	this.play_card_arg = undefined;
 	$.get(load, function (text, status, xhr) {
-		$("#" + BOARDFUL.BRSR.Canvas).append(text).fadeIn('slow');
+		$("#" + BOARDFUL.Menu.Canvas).append(text).fadeIn('slow');
 	});
-	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
+	var load_files = new BOARDFUL.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
 };
 // 
-BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
+BOARDFUL.PlayerUi.prototype.playerOk = function () {
 	if ("me" != BOARDFUL.Mngr.get(this.instance).name || "userinput" != BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status || undefined === this.play_card_arg) {
 		return;
 	}
 	var card_list = new Array();
-	$("#" + BOARDFUL.BRSR.Canvas + " #table .card").each(function () {
+	$("#" + BOARDFUL.Menu.Canvas + " #table .card").each(function () {
 		var card_ui = parseInt($(this).attr("id"));
 		var card = BOARDFUL.Mngr.get(card_ui).instance;
 		if ("me" == BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(card).owner).owner).name) {
@@ -499,7 +497,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	if (card_list.length != this.play_card_arg.number) {
 		return;
 	}
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "PlaceCardOnTable",
 		source: this.instance,
 		source_event: this.play_card_arg.source_event,
@@ -510,7 +508,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "run";
 };
 
-BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
+BOARDFUL.PlayerUi.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
 		level: "game",
@@ -528,7 +526,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
 	});
 };
 // ui for deal cards
-BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
+BOARDFUL.PlayerUi.prototype.playCardUi = function (arg) {
 	if (arg.player != this.instance) {
 		return;
 	}
@@ -536,7 +534,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
 };
 
-BOARDFUL.BRSR.PlayerUi.prototype.changePlayerValueUi = function (arg) {
+BOARDFUL.PlayerUi.prototype.changePlayerValueUi = function (arg) {
 	if (arg.player != this.instance) {
 		return;
 	}

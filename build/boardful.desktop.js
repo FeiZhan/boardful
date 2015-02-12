@@ -8,15 +8,15 @@
 
 var keypress = require('keypress');
 var BOARDFUL = require("../build/boardful.core.js");
-BOARDFUL.DESKTOP = BOARDFUL.DESKTOP || new Object();
+BOARDFUL = BOARDFUL || new Object();
 
 // command line
-BOARDFUL.DESKTOP.Cmdline = function (owner) {
+BOARDFUL.Cmdline = function (owner) {
 	this.type = "Cmdline";
 	this.owner = owner;
 	if (this.owner) {
 		BOARDFUL.Mngr.add(this);
-		BOARDFUL.CORE.Command.owner = this.owner;
+		BOARDFUL.Command.owner = this.owner;
 	}
 	this.addListeners();
 	this.wait_status = "init";
@@ -32,11 +32,11 @@ BOARDFUL.DESKTOP.Cmdline = function (owner) {
 	}
 };
 // output
-BOARDFUL.DESKTOP.Cmdline.prototype.output = function () {
+BOARDFUL.Cmdline.prototype.output = function () {
 	console.log.apply(console, arguments);
 };
 // input
-BOARDFUL.DESKTOP.Cmdline.prototype.input = function (callback) {
+BOARDFUL.Cmdline.prototype.input = function (callback) {
 	// disable keypress
 	if (this.owner) {
 		process.stdin.removeListener('keypress', function () {
@@ -58,7 +58,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.input = function (callback) {
 	});
 };
 // wait input
-BOARDFUL.DESKTOP.Cmdline.prototype.waitInput = function (check, callback) {
+BOARDFUL.Cmdline.prototype.waitInput = function (check, callback) {
 	var that = this;
 	switch (that.wait_status) {
 	case "init":
@@ -86,7 +86,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.waitInput = function (check, callback) {
 	}, 500);
 };
 // wait keypress
-BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
+BOARDFUL.Cmdline.prototype.keypress = function (chunk, key) {
 	// ctrl + c to exit
 	if (key && key.ctrl && key.name == 'c') {
 		process.exit();
@@ -98,7 +98,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
 		BOARDFUL.Mngr.get(that.owner).pause();
 		// wait input command
 		that.waitInput(function (text) {
-			BOARDFUL.CORE.Command.call(text);
+			BOARDFUL.Command.call(text);
 			// empty string to continue game
 			return "" == text;
 		}, function (text) {
@@ -108,7 +108,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.keypress = function (chunk, key) {
 };
 
 // add listeners
-BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
+BOARDFUL.Cmdline.prototype.addListeners = function () {
 	if (undefined === this.owner) {
 		return;
 	}
@@ -157,23 +157,23 @@ BOARDFUL.DESKTOP.Cmdline.prototype.addListeners = function () {
 	});
 };
 // ui for resume game
-BOARDFUL.DESKTOP.Cmdline.prototype.resumeGame = function (arg) {
+BOARDFUL.Cmdline.prototype.resumeGame = function (arg) {
 	this.output("resume game");
 };
 // ui for start round
-BOARDFUL.DESKTOP.Cmdline.prototype.startRound = function (arg) {
+BOARDFUL.Cmdline.prototype.startRound = function (arg) {
 	this.output("round", arg.number);
 };
 // ui for player start
-BOARDFUL.DESKTOP.Cmdline.prototype.startPlayer = function (arg) {
+BOARDFUL.Cmdline.prototype.startPlayer = function (arg) {
 	this.output("start player", arg.player);
 };
 // ui for deal cards
-BOARDFUL.DESKTOP.Cmdline.prototype.dealCardsUi = function (arg) {
+BOARDFUL.Cmdline.prototype.dealCardsUi = function (arg) {
 	this.output("deal cards", arg.cards);
 };
 // ui for deal cards
-BOARDFUL.DESKTOP.Cmdline.prototype.playCardUi = function (arg) {
+BOARDFUL.Cmdline.prototype.playCardUi = function (arg) {
 	this.output("player", arg.player, "play card:");
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
 	for (var i in hand) {
@@ -187,7 +187,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.playCardUi = function (arg) {
 	}, function (text) {
 		var card = hand[parseInt(text)];
 		that.output("player selected", parseInt(text), BOARDFUL.Mngr.get(card).name);
-		var event = new BOARDFUL.CORE.Event({
+		var event = new BOARDFUL.Event({
 			name: "PlaceCardOnTable",
 			source: arg.player,
 			source_event: arg.source_event,
@@ -199,7 +199,7 @@ BOARDFUL.DESKTOP.Cmdline.prototype.playCardUi = function (arg) {
 	});
 };
 // ui for settle players duel
-BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
+BOARDFUL.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
 	var text = "";
 	for (var i in arg.players) {
 		text += arg.players[i] + ": ";
@@ -220,12 +220,12 @@ BOARDFUL.DESKTOP.Cmdline.prototype.settlePlayersDuelUi = function (arg) {
 };
 
 // config command line
-BOARDFUL.DESKTOP.Cmdline.setCmdline = function () {
+BOARDFUL.Cmdline.setCmdline = function () {
 	process.stdin.setEncoding('utf8');
 	process.stdin.resume();
 };
 // show menu
-BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
+BOARDFUL.Cmdline.loadMenu = function () {
 	var that = this;
 	if (BOARDFUL.BoardList.length > 0) {
 		// board menu
@@ -238,27 +238,27 @@ BOARDFUL.DESKTOP.Cmdline.loadMenu = function () {
 			BOARDFUL.Mngr.get(BOARDFUL.BoardList[parseInt(text)]).load(function (id) {
 				var room = BOARDFUL.Mngr.get(id);
 				// input config for room
-				BOARDFUL.Cmdline.output("config room");
+				BOARDFUL.cmdline.output("config room");
 				var that = this;
 				process.stdin.once('data', function (text) {
-					BOARDFUL.Cmdline.output("config room done");
+					BOARDFUL.cmdline.output("config room done");
 					// create game
-					var game = new BOARDFUL.CORE.Game(id);
+					var game = new BOARDFUL.Game(id);
 					// set a new cmdline as ui
-					game.ui = new BOARDFUL.DESKTOP.Cmdline(game.id);
-					BOARDFUL.Cmdline.output("game start");
+					game.ui = new BOARDFUL.Cmdline(game.id);
+					BOARDFUL.cmdline.output("game start");
 					game.run();
 				});
 			});
 		});
 	}
 	else {
-		setTimeout(BOARDFUL.DESKTOP.Cmdline.loadMenu, 300);
+		setTimeout(BOARDFUL.Cmdline.loadMenu, 300);
 	}
 };
 
 // launch project in desktop
 BOARDFUL.init("desktop");
-BOARDFUL.Cmdline = new BOARDFUL.DESKTOP.Cmdline();
-BOARDFUL.DESKTOP.Cmdline.setCmdline();
-BOARDFUL.DESKTOP.Cmdline.loadMenu();
+BOARDFUL.cmdline = new BOARDFUL.Cmdline();
+BOARDFUL.Cmdline.setCmdline();
+BOARDFUL.Cmdline.loadMenu();

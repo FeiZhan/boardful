@@ -6,15 +6,14 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // game
-BOARDFUL.CORE.Game = function (owner) {
+BOARDFUL.Game = function (owner) {
 	this.type = "Game";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	this.game = this.id;
-	this.event_mngr = new BOARDFUL.CORE.EventMngr(this.id);
+	this.event_mngr = new BOARDFUL.EventMngr(this.id);
 	this.ui = undefined;
 	this.status = "init";
 	// create from room config
@@ -30,26 +29,26 @@ BOARDFUL.CORE.Game = function (owner) {
 			}
 		}
 	}
-	this.table = new BOARDFUL.CORE.Table(this.id).id;
+	this.table = new BOARDFUL.Table(this.id).id;
 	this.deck_list = new Object();
 	// create decks
 	if (room.config.decks) {
 		for (var i in room.config.decks) {
-			this.deck_list[room.config.decks[i]] = new BOARDFUL.CORE.Deck(this.id).id;
+			this.deck_list[room.config.decks[i]] = new BOARDFUL.Deck(this.id).id;
 			this.deck_list[room.config.decks[i]].name = this.name + "_" + room.config.decks[i];
 		}
 	}
 	this.player_list = new Array();
 	// create players
 	for (var i in room.player_list) {
-		var player = new BOARDFUL.CORE.Player(room.player_list[i], this.id);
+		var player = new BOARDFUL.Player(room.player_list[i], this.id);
 		this.player_list.push(player.id);
 	}
 	this.current_player = -1;
 	this.addListeners();
 };
 // add event listeners
-BOARDFUL.CORE.Game.prototype.addListeners = function () {
+BOARDFUL.Game.prototype.addListeners = function () {
 	var that = this;
 	this.event_mngr.on("StartGame", {
 		level: "game",
@@ -87,10 +86,10 @@ BOARDFUL.CORE.Game.prototype.addListeners = function () {
 	}
 };
 // launch game
-BOARDFUL.CORE.Game.prototype.run = function () {
+BOARDFUL.Game.prototype.run = function () {
 	this.status = "run";
 	// create first event
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "StartGame",
 		source: this.id
 	});
@@ -98,7 +97,7 @@ BOARDFUL.CORE.Game.prototype.run = function () {
 	this.event_mngr.run();
 };
 // pause game
-BOARDFUL.CORE.Game.prototype.pause = function () {
+BOARDFUL.Game.prototype.pause = function () {
 	switch (this.status) {
 	case "init":
 	case "exit":
@@ -112,14 +111,14 @@ BOARDFUL.CORE.Game.prototype.pause = function () {
 	}
 };
 // resume game
-BOARDFUL.CORE.Game.prototype.resume = function () {
+BOARDFUL.Game.prototype.resume = function () {
 	switch (this.status) {
 	case "init":
 	case "exit":
 		break;
 	case "pause":
 		this.status = "run";
-		var event = new BOARDFUL.CORE.Event({
+		var event = new BOARDFUL.Event({
 			name: "ResumeGame",
 			source: this.id
 		});
@@ -130,22 +129,22 @@ BOARDFUL.CORE.Game.prototype.resume = function () {
 	}
 };
 // start game
-BOARDFUL.CORE.Game.prototype.start = function (arg) {
+BOARDFUL.Game.prototype.start = function (arg) {
 	this.round = 0;
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ShufflePlayers",
 		source: this.id
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "CreateDeck",
 		source: this.id,
 		deck: this.deck_list.draw,
 		type: "poker"
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "ShuffleDeck",
 		source: this.id,
 		deck: this.deck_list.draw
@@ -157,7 +156,7 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 		init_cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.init);
 	}
 	for (var i in this.player_list) {
-		var event = new BOARDFUL.CORE.Event({
+		var event = new BOARDFUL.Event({
 			name: "DealCards",
 			source: this.id,
 			deck: this.deck_list.draw,
@@ -166,7 +165,7 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 		});
 		event_list.push(event.id);
 	}
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "StartRound",
 		source: this.id,
 		number: this.round + 1
@@ -175,10 +174,10 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 	this.event_mngr.front(event_list);
 };
 // shuffle players
-BOARDFUL.CORE.Game.prototype.shufflePlayers = function (arg) {
-	this.player_list = BOARDFUL.CORE.shuffle(this.player_list);
+BOARDFUL.Game.prototype.shufflePlayers = function (arg) {
+	this.player_list = BOARDFUL.shuffle(this.player_list);
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ShufflePlayersUi",
 		source: this.id,
 		players: this.player_list
@@ -187,7 +186,7 @@ BOARDFUL.CORE.Game.prototype.shufflePlayers = function (arg) {
 	this.event_mngr.front(event_list);
 };
 // start a round
-BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
+BOARDFUL.Game.prototype.startRound = function (arg) {
 	++ this.round;
 	var event_list = new Array();
 	var event;
@@ -197,7 +196,7 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.round) {
 			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
 		}
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "DealCards",
 			source: this.id,
 			deck: this.deck_list.draw,
@@ -207,13 +206,13 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		event_list.push(event.id);
 	}
 	for (var i in this.player_list) {
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "StartPlayer" + this.player_list[i],
 			source: this.id,
 			player: this.player_list[i]
 		});
 		event_list.push(event.id);
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "StartPlayer",
 			source: this.id,
 			player: this.player_list[i]
@@ -224,7 +223,7 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.turn) {
 			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.turn);
 		}
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "DealCards",
 			source: this.id,
 			deck: this.deck_list.draw,
@@ -232,24 +231,24 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 			number: cards
 		});
 		event_list.push(event.id);
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "PlayerAct",
 			source: this.id,
 			player: this.player_list[i]
 		});
 		event_list.push(event.id);
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "PlayerEnd",
 			source: this.id
 		});
 		event_list.push(event.id);
 	}
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "EndRound",
 		source: this.id
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "StartRound",
 		source: this.id,
 		number: this.round + 1
@@ -258,5 +257,5 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 	this.event_mngr.front(event_list);
 };
 // end a round
-BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
+BOARDFUL.Game.prototype.endRound = function (arg) {
 };

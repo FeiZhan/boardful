@@ -6,30 +6,29 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // gui for card
-BOARDFUL.BRSR.CardUi = function (instance, owner) {
+BOARDFUL.CardUi = function (instance, owner) {
 	this.type = "CardUi";
 	this.instance = instance;
 	this.owner = owner;
 	this.visible = false;
 	BOARDFUL.Mngr.add(this);
 	this.addListeners();
-	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
+	var load_files = new BOARDFUL.FileLoader(["src/browser/card.html", "src/browser/card.css"], function () {
 	});
 };
 // display card
-BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
+BOARDFUL.CardUi.prototype.load = function (config, callback) {
 	config = config || new Object();
 	config.parent = config.parent || "";
 	var that = this;
 	// get card html
 	$.get("src/browser/card.html", function (text, status, xhr) {
 		// add html to page
-		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent).append(text).fadeIn('slow');
-		$("#" + BOARDFUL.BRSR.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
-		var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + that.id);
+		$("#" + BOARDFUL.Menu.Canvas + " " + config.parent).append(text).fadeIn('slow');
+		$("#" + BOARDFUL.Menu.Canvas + " " + config.parent + " .card:last").attr("id", that.id);
+		var card_jq = $("#" + BOARDFUL.Menu.Canvas + " #" + that.id);
 		if (that.visible) {
 			card_jq.addClass("visible");
 		}
@@ -76,8 +75,8 @@ BOARDFUL.BRSR.CardUi.prototype.load = function (config, callback) {
 	});
 };
 // move card
-BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
-	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+BOARDFUL.CardUi.prototype.move = function (source, target) {
+	var jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 	source = source || jq;
 	// if not exist, load card
 	if (0 == jq.length) {
@@ -97,8 +96,8 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 			left: source.offset().left + source.width() / 2 - jq.width() / 2
 		};
 		var element = jq.detach();
-		$("#" + BOARDFUL.BRSR.Canvas).append(element);
-		jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+		$("#" + BOARDFUL.Menu.Canvas).append(element);
+		jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 		jq.offset(source_pos);
 		// move to target
 		var target_pos = {
@@ -108,7 +107,7 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		jq.animate(target_pos, "slow", function () {
 			var element = jq.detach();
 			target.append(element);
-			jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+			jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 			jq.css({
 				top: "auto",
 				left: "auto",
@@ -116,8 +115,8 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
-BOARDFUL.BRSR.CardUi.prototype.remove = function () {
-	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+BOARDFUL.CardUi.prototype.remove = function () {
+	var jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 	// don't disturb other cards during removing
 	jq.css({
 		"position": "absolute"
@@ -134,7 +133,7 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	});
 };
 
-BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
+BOARDFUL.CardUi.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).game).event_mngr.on("ShowCard", {
 		level: "game",
@@ -144,11 +143,11 @@ BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
 		id: that.id
 	});
 };
-BOARDFUL.BRSR.CardUi.prototype.show = function (arg) {
+BOARDFUL.CardUi.prototype.show = function (arg) {
 	if (undefined !== arg && arg.card != this.id && arg.card != this.instance) {
 		return;
 	}
 	this.visible = true;
-	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	var card_jq = $("#" + BOARDFUL.Menu.Canvas + " #" + this.id);
 	card_jq.addClass("visible");
 };

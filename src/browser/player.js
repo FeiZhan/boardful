@@ -6,10 +6,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
 // gui for player
-BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
+BOARDFUL.PlayerUi = function (instance, owner) {
 	this.type = "PlayerUi";
 	this.instance = instance;
 	this.owner = owner;
@@ -30,17 +29,17 @@ BOARDFUL.BRSR.PlayerUi = function (instance, owner) {
 	this.addListeners();
 	this.play_card_arg = undefined;
 	$.get(load, function (text, status, xhr) {
-		$("#" + BOARDFUL.BRSR.Canvas).append(text).fadeIn('slow');
+		$("#" + BOARDFUL.Menu.Canvas).append(text).fadeIn('slow');
 	});
-	var load_files = new BOARDFUL.CORE.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
+	var load_files = new BOARDFUL.FileLoader(["src/browser/player_me.html", "src/browser/player_you.html", "src/browser/player.css"], function () {});
 };
 // 
-BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
+BOARDFUL.PlayerUi.prototype.playerOk = function () {
 	if ("me" != BOARDFUL.Mngr.get(this.instance).name || "userinput" != BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status || undefined === this.play_card_arg) {
 		return;
 	}
 	var card_list = new Array();
-	$("#" + BOARDFUL.BRSR.Canvas + " #table .card").each(function () {
+	$("#" + BOARDFUL.Menu.Canvas + " #table .card").each(function () {
 		var card_ui = parseInt($(this).attr("id"));
 		var card = BOARDFUL.Mngr.get(card_ui).instance;
 		if ("me" == BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(card).owner).owner).name) {
@@ -50,7 +49,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	if (card_list.length != this.play_card_arg.number) {
 		return;
 	}
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "PlaceCardOnTable",
 		source: this.instance,
 		source_event: this.play_card_arg.source_event,
@@ -61,7 +60,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playerOk = function () {
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "run";
 };
 
-BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
+BOARDFUL.PlayerUi.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("PlayCardUi", {
 		level: "game",
@@ -79,7 +78,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.addListeners = function () {
 	});
 };
 // ui for deal cards
-BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
+BOARDFUL.PlayerUi.prototype.playCardUi = function (arg) {
 	if (arg.player != this.instance) {
 		return;
 	}
@@ -87,7 +86,7 @@ BOARDFUL.BRSR.PlayerUi.prototype.playCardUi = function (arg) {
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).status = "userinput";
 };
 
-BOARDFUL.BRSR.PlayerUi.prototype.changePlayerValueUi = function (arg) {
+BOARDFUL.PlayerUi.prototype.changePlayerValueUi = function (arg) {
 	if (arg.player != this.instance) {
 		return;
 	}

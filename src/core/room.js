@@ -6,10 +6,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // room
-BOARDFUL.CORE.Room = function (config, owner) {
+BOARDFUL.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
 	this.ui = undefined;

@@ -110,7 +110,7 @@ Poker.playerAct = function (arg) {
 	var event;
 	for (var i in BOARDFUL.Mngr.get(this.owner).player_list) {
 		// each player play one card
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "Player" + BOARDFUL.Mngr.get(this.owner).player_list[i] + "PlayCard",
 			source: this.id,
 			source_event: "PlayersDuel",
@@ -120,7 +120,7 @@ Poker.playerAct = function (arg) {
 		event_list.push(event.id);
 	}
 	// settle players duel
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "Settle",
 		source: this.id,
 		source_event: "PlayersDuel"
@@ -165,7 +165,7 @@ Poker.settle = function (arg) {
 	}
 	// event for ui
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "SettlePlayersDuelUi",
 		source: Poker.id,
 		cards: card_list,
@@ -179,21 +179,21 @@ Poker.settle = function (arg) {
 Poker.settlePlayersDuelUi = function (arg) {
 	var event_list = new Array();
 	for (var i in arg.all_cards) {
-		var event = new BOARDFUL.CORE.Event({
+		var event = new BOARDFUL.Event({
 			name: "ShowCard",
 			source: BOARDFUL.Mngr.get(Poker.owner).table,
 			card: arg.all_cards[i]
 		});
 		event_list.push(event.id);
 	}
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ShowResult",
 		source: BOARDFUL.Mngr.get(Poker.owner).table,
 		cards: arg.all_cards,
 		player: arg.player
 	});
 	event_list.push(event.id);
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(Poker.owner).table,
 		cards: arg.all_cards
@@ -203,7 +203,7 @@ Poker.settlePlayersDuelUi = function (arg) {
 };
 Poker.showResult = function (arg) {
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ChangePlayerValueUi",
 		source: Poker.id,
 		player: arg.player,
@@ -225,7 +225,7 @@ Poker.discard = function (arg) {
 // reorder deck
 Poker.reorderDeck = function (arg) {
 	var discard = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(Poker.owner).deck_list.discard);
-	discard.card_list = BOARDFUL.CORE.shuffle(discard.card_list);
+	discard.card_list = BOARDFUL.shuffle(discard.card_list);
 	BOARDFUL.Mngr.get(arg.deck).getCards(discard.card_list);
 	discard.card_list = new Array();
 };
@@ -236,7 +236,7 @@ Poker.playCardAi = function (arg) {
 		return;
 	}
 	var card_list = Poker.getBestHand(hand, arg.number);
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "PlaceCardOnTable",
 		source: arg.player,
 		source_event: arg.source_event,

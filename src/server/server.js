@@ -10,15 +10,15 @@
 **/
 
 var BOARDFUL = require("../build/boardful.core.js");
-BOARDFUL.SERVER = BOARDFUL.SERVER || new Object();
 
 var http = require("http"),
 	url = require("url"),
 	path = require("path"),
 	fs = require("fs");
 
+BOARDFUL.Server = BOARDFUL.Server || new Object();
 // create a server
-BOARDFUL.SERVER.loadServer = function () {
+BOARDFUL.Server.load = function () {
 	http.createServer(function(request, response) {
 		var uri = url.parse(request.url).pathname, filename = path.join(process.cwd(), uri);
 		var contentTypesByExtension = {
@@ -52,11 +52,11 @@ BOARDFUL.SERVER.loadServer = function () {
 				response.end();
 			});
 		});
-	}).listen(parseInt(BOARDFUL.SERVER.port, 10));
-	console.log("Static file server running at => http://localhost:" + BOARDFUL.SERVER.port + "/ CTRL + C to shutdown");
+	}).listen(parseInt(BOARDFUL.Server.port, 10));
+	console.log("Static file server running at => http://localhost:" + BOARDFUL.Server.port + "/ CTRL + C to shutdown");
 };
 
 // launch project
 BOARDFUL.init("server");
-BOARDFUL.SERVER.port = process.argv[3] || 8080;
-BOARDFUL.SERVER.loadServer();
+BOARDFUL.Server.port = process.argv[3] || 8080;
+BOARDFUL.Server.load();

@@ -6,11 +6,10 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // object manager
-BOARDFUL.CORE.Manager = function () {
-	this.logger = new BOARDFUL.CORE.Logger();
+BOARDFUL.Manager = function () {
+	this.logger = new BOARDFUL.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/mngr.log'
 	})
@@ -20,11 +19,11 @@ BOARDFUL.CORE.Manager = function () {
 	this.list = new Object();
 };
 // get object by id
-BOARDFUL.CORE.Manager.prototype.get = function (id) {
+BOARDFUL.Manager.prototype.get = function (id) {
 	return this.list[id];
 };
 // add object
-BOARDFUL.CORE.Manager.prototype.add = function (object) {
+BOARDFUL.Manager.prototype.add = function (object) {
 	object.id = this.next_id;
 	object.type = object.type || object.constructor.name;
 	if (! ("name" in object)) {

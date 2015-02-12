@@ -6,10 +6,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // board game
-BOARDFUL.CORE.Board = function (config, owner) {
+BOARDFUL.Board = function (config, owner) {
 	this.type = "Board";
 	this.owner = owner;
 	this.name = config.name;
@@ -19,20 +18,20 @@ BOARDFUL.CORE.Board = function (config, owner) {
 	this.room_list = new Array();
 };
 // load board game
-BOARDFUL.CORE.Board.prototype.load = function (callback) {
+BOARDFUL.Board.prototype.load = function (callback) {
 	this.callback = callback;
 	this.loadPackage([this.config.package]);
 };
-BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
+BOARDFUL.Board.prototype.loadPackage = function (packages, callback) {
 	var that = this;
-	var load = new BOARDFUL.CORE.FileLoader(packages, function () {
+	var load = new BOARDFUL.FileLoader(packages, function () {
 		var dependencies = new Array();
 		var files = new Array();
 		for (var i in packages) {
 			if (".json" != packages[i].substr(packages[i].length - 5)) {
 				continue;
 			}
-			var pack = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[packages[i]]].content;
+			var pack = BOARDFUL.File.list[BOARDFUL.File.name_list[packages[i]]].content;
 			if ("files" in pack) {
 				files = files.concat(pack.files);
 			}
@@ -41,15 +40,15 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 			}
 		}
 		var load_files = function () {
-			var load1 = new BOARDFUL.CORE.FileLoader(files, function () {
+			var load1 = new BOARDFUL.FileLoader(files, function () {
 				for (var i in files) {
 					if (".js" == files[i].substr(files[i].length - 3)) {
-						BOARDFUL.CORE.File.setToMods(files[i]);
+						BOARDFUL.File.setToMods(files[i]);
 					}
 				}
 				if (undefined === callback) {
-					BOARDFUL.Logger.log("info", "load board", that.name);
-					that.createRoom(BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[that.config.package]].content);
+					BOARDFUL.logger.log("info", "load board", that.name);
+					that.createRoom(BOARDFUL.File.list[BOARDFUL.File.name_list[that.config.package]].content);
 				}
 				else if ("function" == typeof callback) {
 					callback();
@@ -64,8 +63,8 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 	});
 };
 // create room
-BOARDFUL.CORE.Board.prototype.createRoom = function (package) {
-	var room = new BOARDFUL.CORE.Room(package, this.id);
+BOARDFUL.Board.prototype.createRoom = function (package) {
+	var room = new BOARDFUL.Room(package, this.id);
 	this.room_list.push(room.id);
 	if ("function" == typeof this.callback) {
 		return this.callback(room.id);
@@ -92,32 +91,32 @@ BOARDFUL.MODS = BOARDFUL.MODS || new Object();
 
 // init
 BOARDFUL.init = function (config) {
-	BOARDFUL.CORE.checkEnvi();
+	BOARDFUL.checkEnvi();
 	// create logger
-	BOARDFUL.Logger = new BOARDFUL.CORE.Logger();
-	BOARDFUL.Logger.add(winston.transports.File, {
+	BOARDFUL.logger = new BOARDFUL.Logger();
+	BOARDFUL.logger.add(winston.transports.File, {
 		//filename: 'logs/boardful_' + new Date().toString() + '.log'
 		filename: 'logs/boardful.log'
 	})
 	.remove(winston.transports.Console);
-	BOARDFUL.Logger.log('info', "----------launch----------");
+	BOARDFUL.logger.log('info', "----------launch----------");
 	// create debug logger
-	BOARDFUL.Debugger = new BOARDFUL.CORE.Logger();
+	BOARDFUL.Debugger = new BOARDFUL.Logger();
 	BOARDFUL.Debugger.add(winston.transports.File, {
 		filename: 'logs/debug.log'
 	})
 	.remove(winston.transports.Console);
 	BOARDFUL.Debugger.log('info', "----------launch----------");
 
-	BOARDFUL.Logger.log('info', "launch type", config);
-	BOARDFUL.Logger.log('info', "environment", BOARDFUL.CORE.Envi);
-	BOARDFUL.CORE.File.init();
-	if ("browser" == BOARDFUL.CORE.Envi.type) {
-		BOARDFUL.urlparam = BOARDFUL.CORE.parseUrl();
-		BOARDFUL.Logger.log('info', "url param", BOARDFUL.urlparam);
-		BOARDFUL.CORE.File.getFromHtml();
+	BOARDFUL.logger.log('info', "launch type", config);
+	BOARDFUL.logger.log('info', "environment", BOARDFUL.Envi);
+	BOARDFUL.File.init();
+	if ("browser" == BOARDFUL.Envi.type) {
+		BOARDFUL.urlparam = BOARDFUL.parseUrl();
+		BOARDFUL.logger.log('info', "url param", BOARDFUL.urlparam);
+		BOARDFUL.File.getFromHtml();
 	}
-	BOARDFUL.Mngr = new BOARDFUL.CORE.Manager();
+	BOARDFUL.Mngr = new BOARDFUL.Manager();
 	BOARDFUL.loadBoards();
 };
 // board game list
@@ -125,10 +124,10 @@ BOARDFUL.BoardList = new Array();
 // load board game list
 BOARDFUL.loadBoards = function () {
 	var BOARD_LIST_FILE = "mods/boardlist.json";
-	var load_files = new BOARDFUL.CORE.FileLoader([BOARD_LIST_FILE], function () {
-		var board_list = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[BOARD_LIST_FILE]].content.boards;
+	var load_files = new BOARDFUL.FileLoader([BOARD_LIST_FILE], function () {
+		var board_list = BOARDFUL.File.list[BOARDFUL.File.name_list[BOARD_LIST_FILE]].content.boards;
 		for (var i in board_list) {
-			BOARDFUL.BoardList.push(new BOARDFUL.CORE.Board(board_list[i]).id);
+			BOARDFUL.BoardList.push(new BOARDFUL.Board(board_list[i]).id);
 		}
 	});
 };
@@ -142,10 +141,9 @@ BOARDFUL.loadBoards = function () {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // card
-BOARDFUL.CORE.Card = function (config, owner) {
+BOARDFUL.Card = function (config, owner) {
 	this.type = "Card";
 	this.rank = config.rank;
 	this.suit = config.suit;
@@ -164,26 +162,25 @@ BOARDFUL.CORE.Card = function (config, owner) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // command
-BOARDFUL.CORE.Command = BOARDFUL.CORE.Command || new Object();
-BOARDFUL.CORE.Command.owner = undefined;
+BOARDFUL.Command = BOARDFUL.Command || new Object();
+BOARDFUL.Command.owner = undefined;
 // call command function
-BOARDFUL.CORE.Command.call = function (cmd) {
+BOARDFUL.Command.call = function (cmd) {
 	var arg_list = cmd.replace(/\s/g, " ").split(" ");
 	if (0 == arg_list.length) {
 		return;
 	}
 	cmd = arg_list[0];
 	arg_list.shift();
-	if (cmd in BOARDFUL.CORE.Command.list) {
-		return BOARDFUL.CORE.Command.list[cmd](arg_list);
+	if (cmd in BOARDFUL.Command.list) {
+		return BOARDFUL.Command.list[cmd](arg_list);
 	} else {
 		console.log("unknow cmd", cmd);
 	}
 };
-BOARDFUL.CORE.Command.list = {
+BOARDFUL.Command.list = {
 	"test": function (args) {
 		console.log("Hello Boardful !");
 	},
@@ -199,15 +196,15 @@ BOARDFUL.CORE.Command.list = {
 		console.log(BOARDFUL.Mngr.get(args[0]));
 	},
 	"currentEvent": function (args) {
-		if (BOARDFUL.CORE.Command.owner) {
-			console.log(BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).event_mngr.current.name);
+		if (BOARDFUL.Command.owner) {
+			console.log(BOARDFUL.Mngr.get(BOARDFUL.Command.owner).event_mngr.current.name);
 		} else {
 			console.log(undefined);
 		}
 	},
 	"nextEvent": function (args) {
-		if (BOARDFUL.CORE.Command.owner) {
-			console.log(BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).event_mngr.list[0]);
+		if (BOARDFUL.Command.owner) {
+			console.log(BOARDFUL.Mngr.get(BOARDFUL.Command.owner).event_mngr.list[0]);
 		} else {
 			console.log(undefined);
 		}
@@ -216,13 +213,13 @@ BOARDFUL.CORE.Command.list = {
 		console.log(BOARDFUL.BoardList);
 	},
 	"pause": function (args) {
-		if (BOARDFUL.CORE.Command.owner) {
-			BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).pause();
+		if (BOARDFUL.Command.owner) {
+			BOARDFUL.Mngr.get(BOARDFUL.Command.owner).pause();
 		}
 	},
 	"resume": function (args) {
-		if (BOARDFUL.CORE.Command.owner) {
-			BOARDFUL.Mngr.get(BOARDFUL.CORE.Command.owner).resume();
+		if (BOARDFUL.Command.owner) {
+			BOARDFUL.Mngr.get(BOARDFUL.Command.owner).resume();
 		}
 	},
 	"exit": function (args) {
@@ -239,10 +236,9 @@ BOARDFUL.CORE.Command.list = {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // deck
-BOARDFUL.CORE.Deck = function (owner) {
+BOARDFUL.Deck = function (owner) {
 	this.type = "Deck";
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
@@ -253,7 +249,7 @@ BOARDFUL.CORE.Deck = function (owner) {
 	this.addListeners();
 };
 // get cards
-BOARDFUL.CORE.Deck.prototype.getCards = function (card_list) {
+BOARDFUL.Deck.prototype.getCards = function (card_list) {
 	for (var i in card_list) {
 		BOARDFUL.Mngr.get(card_list[i]).owner = this.id;
 	}
@@ -261,7 +257,7 @@ BOARDFUL.CORE.Deck.prototype.getCards = function (card_list) {
 };
 
 // add listeners
-BOARDFUL.CORE.Deck.prototype.addListeners = function () {
+BOARDFUL.Deck.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.game).event_mngr.on("ShuffleDeck", {
 		level: "game",
@@ -286,15 +282,15 @@ BOARDFUL.CORE.Deck.prototype.addListeners = function () {
 	});
 };
 // shuffle deck
-BOARDFUL.CORE.Deck.prototype.shuffleDeck = function (arg) {
+BOARDFUL.Deck.prototype.shuffleDeck = function (arg) {
 	// not me
 	if (arg.deck != this.id) {
 		return;
 	}
-	this.card_list = BOARDFUL.CORE.shuffle(this.card_list);
+	this.card_list = BOARDFUL.shuffle(this.card_list);
 	// add ui event
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ShuffleDeckUi",
 		source: this.id,
 		cards: this.card_list
@@ -303,7 +299,7 @@ BOARDFUL.CORE.Deck.prototype.shuffleDeck = function (arg) {
 	BOARDFUL.Mngr.get(this.game).event_mngr.front(event_list);
 };
 // deal cards
-BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
+BOARDFUL.Deck.prototype.dealCards = function (arg) {
 	// not me
 	if (arg.deck != this.id) {
 		return;
@@ -311,7 +307,7 @@ BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
 	var event_list = new Array();
 	var event;
 	if (arg.number > this.card_list.length) {
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "ReorderDeck",
 			source: this.id,
 			deck: this.id
@@ -321,13 +317,13 @@ BOARDFUL.CORE.Deck.prototype.dealCards = function (arg) {
 	var arg1 = arg;
 	arg1.name = "DealCard";
 	for (var i = 0; i < arg.number; ++ i) {
-		event = new BOARDFUL.CORE.Event(arg1);
+		event = new BOARDFUL.Event(arg1);
 		event_list.push(event.id);
 	}
 	BOARDFUL.Mngr.get(this.game).event_mngr.front(event_list);
 };
 // deal one card
-BOARDFUL.CORE.Deck.prototype.dealCard = function (arg) {
+BOARDFUL.Deck.prototype.dealCard = function (arg) {
 	// not me
 	if (arg.deck != this.id) {
 		return;
@@ -337,7 +333,7 @@ BOARDFUL.CORE.Deck.prototype.dealCard = function (arg) {
 	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).getCards([card]);
 	// create event for ui
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "DealCardUi",
 		source: this.id,
 		card: card,
@@ -354,10 +350,9 @@ BOARDFUL.CORE.Deck.prototype.dealCard = function (arg) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // event
-BOARDFUL.CORE.Event = function (arg) {
+BOARDFUL.Event = function (arg) {
 	this.type = "Event";
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
@@ -367,9 +362,9 @@ BOARDFUL.CORE.Event = function (arg) {
 };
 
 // event level precedence
-BOARDFUL.CORE.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
+BOARDFUL.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
 // event manager
-BOARDFUL.CORE.EventMngr = function (owner) {
+BOARDFUL.EventMngr = function (owner) {
 	this.type = "EventMngr";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
@@ -377,13 +372,13 @@ BOARDFUL.CORE.EventMngr = function (owner) {
 	this.list = new Array();
 	this.listener_list = new Object();
 	this.timeout = 20;
-	this.logger = new BOARDFUL.CORE.Logger();
+	this.logger = new BOARDFUL.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/event.log'
 	})
 	.remove(winston.transports.Console);
 	this.logger.log('info', "----------launch----------");
-	this.name_logger = new BOARDFUL.CORE.Logger();
+	this.name_logger = new BOARDFUL.Logger();
 	this.name_logger.add(winston.transports.File, {
 		filename: 'logs/event_name.log'
 	})
@@ -391,7 +386,7 @@ BOARDFUL.CORE.EventMngr = function (owner) {
 	this.name_logger.log('info', "----------launch----------");
 };
 // see or push to the front of event list
-BOARDFUL.CORE.EventMngr.prototype.front = function (id) {
+BOARDFUL.EventMngr.prototype.front = function (id) {
 	if (undefined === id) {
 		if (0 == this.list.length) {
 			return undefined;
@@ -410,7 +405,7 @@ BOARDFUL.CORE.EventMngr.prototype.front = function (id) {
 	return BOARDFUL.Mngr.get(this.list[0]);
 };
 // add to the rear of event list
-BOARDFUL.CORE.EventMngr.prototype.add = function (id) {
+BOARDFUL.EventMngr.prototype.add = function (id) {
 	if ("array" == typeof id || "object" == typeof id) {
 		this.list = this.list.concat(id);
 		for (var i in id) {
@@ -423,7 +418,7 @@ BOARDFUL.CORE.EventMngr.prototype.add = function (id) {
 	}
 };
 // add event listener
-BOARDFUL.CORE.EventMngr.prototype.on = function (event, config) {
+BOARDFUL.EventMngr.prototype.on = function (event, config) {
 	if (! (event in this.listener_list)) {
 		this.listener_list[event] = new Object();
 	}
@@ -435,7 +430,7 @@ BOARDFUL.CORE.EventMngr.prototype.on = function (event, config) {
 	this.logger.log("info", "add listener", event);
 };
 // remove event listener
-BOARDFUL.CORE.EventMngr.prototype.off = function (event, config) {
+BOARDFUL.EventMngr.prototype.off = function (event, config) {
 	if (! (event in this.listener_list)) {
 		return;
 	}
@@ -449,7 +444,7 @@ BOARDFUL.CORE.EventMngr.prototype.off = function (event, config) {
 	}
 };
 // launch event manager
-BOARDFUL.CORE.EventMngr.prototype.run = function () {
+BOARDFUL.EventMngr.prototype.run = function () {
 	switch (BOARDFUL.Mngr.get(this.owner).status) {
 	case "pause":
 	case "exit":
@@ -461,14 +456,14 @@ BOARDFUL.CORE.EventMngr.prototype.run = function () {
 		if (this.list.length > 0) {
 			// get the current event
 			this.current = this.front();
-			this.logger.log("info", "event", this.current.name);
-			this.name_logger.log("info", "event", this.current.name);
+			this.logger.log("info", "event", this.current.name, this.current);
+			this.name_logger.log("info", this.current.name);
 			this.list.shift();
 			if (this.current && (this.current.name in this.listener_list)) {
-				for (var i in BOARDFUL.CORE.EVENT_LEVELS) {
-					if (BOARDFUL.CORE.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
-						for (var j in this.listener_list[this.current.name][BOARDFUL.CORE.EVENT_LEVELS[i]]) {
-							var listener = this.listener_list[this.current.name][BOARDFUL.CORE.EVENT_LEVELS[i]][j];
+				for (var i in BOARDFUL.EVENT_LEVELS) {
+					if (BOARDFUL.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
+						for (var j in this.listener_list[this.current.name][BOARDFUL.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[this.current.name][BOARDFUL.EVENT_LEVELS[i]][j];
 							this.logger.log("info", "listener", BOARDFUL.Mngr.get(listener.id).name);
 							// trigger listener callback for event
 							listener.callback(this.current.arg);
@@ -495,40 +490,39 @@ BOARDFUL.CORE.EventMngr.prototype.run = function () {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // file manager
-BOARDFUL.CORE.File = BOARDFUL.CORE.File || new Object();
+BOARDFUL.File = BOARDFUL.File || new Object();
 // init file manager
-BOARDFUL.CORE.File.init = function () {
+BOARDFUL.File.init = function () {
 	// file mngr logger
-	BOARDFUL.CORE.File.logger = new BOARDFUL.CORE.Logger();
-	BOARDFUL.CORE.File.logger.add(winston.transports.File, {
+	BOARDFUL.File.logger = new BOARDFUL.Logger();
+	BOARDFUL.File.logger.add(winston.transports.File, {
 		filename: 'logs/file.log'
 	})
 	.remove(winston.transports.Console);
-	BOARDFUL.CORE.File.logger.log('info', "----------launch----------");
+	BOARDFUL.File.logger.log('info', "----------launch----------");
 };
 // file list
-BOARDFUL.CORE.File.list = new Object();
+BOARDFUL.File.list = new Object();
 // file list by name
-BOARDFUL.CORE.File.name_list = new Object();
-BOARDFUL.CORE.File.next_id = 0;
+BOARDFUL.File.name_list = new Object();
+BOARDFUL.File.next_id = 0;
 // add to file list
-BOARDFUL.CORE.File.add = function (file, content, status) {
+BOARDFUL.File.add = function (file, content, status) {
 	// new file
-	if (! (file in BOARDFUL.CORE.File.name_list)) {
-		BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.next_id] = {
+	if (! (file in BOARDFUL.File.name_list)) {
+		BOARDFUL.File.list[BOARDFUL.File.next_id] = {
 			name: file,
 			type: "",
 			content: content,
 			status: status
 		};
-		BOARDFUL.CORE.File.name_list[file] = BOARDFUL.CORE.File.next_id;
-		++ BOARDFUL.CORE.File.next_id;
+		BOARDFUL.File.name_list[file] = BOARDFUL.File.next_id;
+		++ BOARDFUL.File.next_id;
 	}
 	else {
-		BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[file]] = {
+		BOARDFUL.File.list[BOARDFUL.File.name_list[file]] = {
 			name: file,
 			content: content,
 			status: status
@@ -536,15 +530,15 @@ BOARDFUL.CORE.File.add = function (file, content, status) {
 	}
 };
 // get file list in current html
-BOARDFUL.CORE.File.getFromHtml = function () {
+BOARDFUL.File.getFromHtml = function () {
 	$("script").each(function () {
-		BOARDFUL.CORE.File.add($(this).attr("src"), $(this), "loaded");
+		BOARDFUL.File.add($(this).attr("src"), $(this), "loaded");
 	});
-	BOARDFUL.CORE.File.logger.log('info', "files in html", BOARDFUL.CORE.File.name_list);
+	BOARDFUL.File.logger.log('info', "files in html", BOARDFUL.File.name_list);
 };
 // set file script to MODS scope
-BOARDFUL.CORE.File.setToMods = function (file) {
-	var script = BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[file]].content;
+BOARDFUL.File.setToMods = function (file) {
+	var script = BOARDFUL.File.list[BOARDFUL.File.name_list[file]].content;
 	if (("array" == typeof script || "object" == typeof script || "function" == typeof script) && "name" in script) {
 		BOARDFUL.MODS[script.name] = script;
 	} else {
@@ -555,20 +549,20 @@ BOARDFUL.CORE.File.setToMods = function (file) {
 };
 
 // file loader
-BOARDFUL.CORE.FileLoader = function (list, callback) {
+BOARDFUL.FileLoader = function (list, callback) {
 	this.list = list;
 	this.callback = callback;
 	this.done = false;
 	this.load();
 };
 // load files and wait
-BOARDFUL.CORE.FileLoader.prototype.load = function () {
+BOARDFUL.FileLoader.prototype.load = function () {
 	this.done = true;
 	for (var i in this.list) {
-		if (! (this.list[i] in BOARDFUL.CORE.File.name_list) || "loaded" != BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[this.list[i]]].status) {
+		if (! (this.list[i] in BOARDFUL.File.name_list) || "loaded" != BOARDFUL.File.list[BOARDFUL.File.name_list[this.list[i]]].status) {
 			this.done = false;
 			this.loadFile(this.list[i]);
-			BOARDFUL.CORE.File.logger.log("info", "loading", this.list[i]);
+			BOARDFUL.File.logger.log("info", "loading", this.list[i]);
 		}
 	}
 	var that = this;
@@ -581,8 +575,8 @@ BOARDFUL.CORE.FileLoader.prototype.load = function () {
 	}
 };
 // load a file
-BOARDFUL.CORE.FileLoader.prototype.loadFile = function (file) {
-	switch (BOARDFUL.CORE.Envi.type) {
+BOARDFUL.FileLoader.prototype.loadFile = function (file) {
+	switch (BOARDFUL.Envi.type) {
 	case "browser":
 		this.loadByAjax(file);
 		break;
@@ -593,52 +587,52 @@ BOARDFUL.CORE.FileLoader.prototype.loadFile = function (file) {
 		break;
 	}
 }
-BOARDFUL.CORE.FileLoader.prototype.loadByRequire = function (file) {
+BOARDFUL.FileLoader.prototype.loadByRequire = function (file) {
 	try {
 		var script = require("../" + file);
-		BOARDFUL.CORE.File.add(file, script, "loaded");
-		BOARDFUL.CORE.File.logger.log("info", "file loaded", file);
+		BOARDFUL.File.add(file, script, "loaded");
+		BOARDFUL.File.logger.log("info", "file loaded", file);
 	} catch (err) {
-		BOARDFUL.CORE.File.add(file, "", "failed");
-		BOARDFUL.CORE.File.logger.log("info", "file failed", file, err);
+		BOARDFUL.File.add(file, "", "failed");
+		BOARDFUL.File.logger.log("info", "file failed", file, err);
 	}
 };
 // load a file via ajax by browser
-BOARDFUL.CORE.FileLoader.prototype.loadByAjax = function (file) {
+BOARDFUL.FileLoader.prototype.loadByAjax = function (file) {
 	var true_file = "../" + file;
 	if (".js" == file.substr(file.length - 3)) {
 		// load a js script
 		$.getScript(true_file)
 			.done(function( script, textStatus ) {
-				BOARDFUL.CORE.File.add(file, script, "loaded");
-				BOARDFUL.CORE.File.logger.log("info", "js loaded", file);
+				BOARDFUL.File.add(file, script, "loaded");
+				BOARDFUL.File.logger.log("info", "js loaded", file);
 			})
 			.fail(function( jqxhr, settings, exception ) {
-				BOARDFUL.CORE.File.add(file, "", "failed");
-				BOARDFUL.CORE.File.logger.log("info", "js failed", file);
+				BOARDFUL.File.add(file, "", "failed");
+				BOARDFUL.File.logger.log("info", "js failed", file);
 			});
 	}
 	else if (".css" == file.substr(file.length - 4)) {
 		// load a css
 		$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', true_file) );
-		BOARDFUL.CORE.File.add(file, "", "loaded");
-		BOARDFUL.CORE.File.logger.log("info", "css loaded", file);
+		BOARDFUL.File.add(file, "", "loaded");
+		BOARDFUL.File.logger.log("info", "css loaded", file);
 	}
 	else if (".json" == file.substr(file.length - 5)) {
 		$.getJSON(true_file, function(data, textStatus, jqXHR) {
-			BOARDFUL.CORE.File.add(file, data, "loaded");
-			BOARDFUL.CORE.File.logger.log("info", "json loaded", file);
+			BOARDFUL.File.add(file, data, "loaded");
+			BOARDFUL.File.logger.log("info", "json loaded", file);
 		})
 		.fail(function (jqXHR, textStatus, errorThrown) {
-			BOARDFUL.CORE.File.add(file, "", "failed");
-			BOARDFUL.CORE.File.logger.log("info", "json failed", file);
+			BOARDFUL.File.add(file, "", "failed");
+			BOARDFUL.File.logger.log("info", "json failed", file);
 		})
 		.always(function(data, textStatus, jqXHR) {
 		});
 	}
 	else {
-		BOARDFUL.CORE.File.add(file, "", "loaded");
-		BOARDFUL.CORE.File.logger.log("info", "file unknown", file);
+		BOARDFUL.File.add(file, "", "loaded");
+		BOARDFUL.File.logger.log("info", "file unknown", file);
 	}
 };
 
@@ -650,15 +644,14 @@ BOARDFUL.CORE.FileLoader.prototype.loadByAjax = function (file) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // game
-BOARDFUL.CORE.Game = function (owner) {
+BOARDFUL.Game = function (owner) {
 	this.type = "Game";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
 	this.game = this.id;
-	this.event_mngr = new BOARDFUL.CORE.EventMngr(this.id);
+	this.event_mngr = new BOARDFUL.EventMngr(this.id);
 	this.ui = undefined;
 	this.status = "init";
 	// create from room config
@@ -674,26 +667,26 @@ BOARDFUL.CORE.Game = function (owner) {
 			}
 		}
 	}
-	this.table = new BOARDFUL.CORE.Table(this.id).id;
+	this.table = new BOARDFUL.Table(this.id).id;
 	this.deck_list = new Object();
 	// create decks
 	if (room.config.decks) {
 		for (var i in room.config.decks) {
-			this.deck_list[room.config.decks[i]] = new BOARDFUL.CORE.Deck(this.id).id;
+			this.deck_list[room.config.decks[i]] = new BOARDFUL.Deck(this.id).id;
 			this.deck_list[room.config.decks[i]].name = this.name + "_" + room.config.decks[i];
 		}
 	}
 	this.player_list = new Array();
 	// create players
 	for (var i in room.player_list) {
-		var player = new BOARDFUL.CORE.Player(room.player_list[i], this.id);
+		var player = new BOARDFUL.Player(room.player_list[i], this.id);
 		this.player_list.push(player.id);
 	}
 	this.current_player = -1;
 	this.addListeners();
 };
 // add event listeners
-BOARDFUL.CORE.Game.prototype.addListeners = function () {
+BOARDFUL.Game.prototype.addListeners = function () {
 	var that = this;
 	this.event_mngr.on("StartGame", {
 		level: "game",
@@ -731,10 +724,10 @@ BOARDFUL.CORE.Game.prototype.addListeners = function () {
 	}
 };
 // launch game
-BOARDFUL.CORE.Game.prototype.run = function () {
+BOARDFUL.Game.prototype.run = function () {
 	this.status = "run";
 	// create first event
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "StartGame",
 		source: this.id
 	});
@@ -742,7 +735,7 @@ BOARDFUL.CORE.Game.prototype.run = function () {
 	this.event_mngr.run();
 };
 // pause game
-BOARDFUL.CORE.Game.prototype.pause = function () {
+BOARDFUL.Game.prototype.pause = function () {
 	switch (this.status) {
 	case "init":
 	case "exit":
@@ -756,14 +749,14 @@ BOARDFUL.CORE.Game.prototype.pause = function () {
 	}
 };
 // resume game
-BOARDFUL.CORE.Game.prototype.resume = function () {
+BOARDFUL.Game.prototype.resume = function () {
 	switch (this.status) {
 	case "init":
 	case "exit":
 		break;
 	case "pause":
 		this.status = "run";
-		var event = new BOARDFUL.CORE.Event({
+		var event = new BOARDFUL.Event({
 			name: "ResumeGame",
 			source: this.id
 		});
@@ -774,22 +767,22 @@ BOARDFUL.CORE.Game.prototype.resume = function () {
 	}
 };
 // start game
-BOARDFUL.CORE.Game.prototype.start = function (arg) {
+BOARDFUL.Game.prototype.start = function (arg) {
 	this.round = 0;
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ShufflePlayers",
 		source: this.id
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "CreateDeck",
 		source: this.id,
 		deck: this.deck_list.draw,
 		type: "poker"
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "ShuffleDeck",
 		source: this.id,
 		deck: this.deck_list.draw
@@ -801,7 +794,7 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 		init_cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.init);
 	}
 	for (var i in this.player_list) {
-		var event = new BOARDFUL.CORE.Event({
+		var event = new BOARDFUL.Event({
 			name: "DealCards",
 			source: this.id,
 			deck: this.deck_list.draw,
@@ -810,7 +803,7 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 		});
 		event_list.push(event.id);
 	}
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "StartRound",
 		source: this.id,
 		number: this.round + 1
@@ -819,10 +812,10 @@ BOARDFUL.CORE.Game.prototype.start = function (arg) {
 	this.event_mngr.front(event_list);
 };
 // shuffle players
-BOARDFUL.CORE.Game.prototype.shufflePlayers = function (arg) {
-	this.player_list = BOARDFUL.CORE.shuffle(this.player_list);
+BOARDFUL.Game.prototype.shufflePlayers = function (arg) {
+	this.player_list = BOARDFUL.shuffle(this.player_list);
 	var event_list = new Array();
-	var event = new BOARDFUL.CORE.Event({
+	var event = new BOARDFUL.Event({
 		name: "ShufflePlayersUi",
 		source: this.id,
 		players: this.player_list
@@ -831,7 +824,7 @@ BOARDFUL.CORE.Game.prototype.shufflePlayers = function (arg) {
 	this.event_mngr.front(event_list);
 };
 // start a round
-BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
+BOARDFUL.Game.prototype.startRound = function (arg) {
 	++ this.round;
 	var event_list = new Array();
 	var event;
@@ -841,7 +834,7 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.round) {
 			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.round);
 		}
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "DealCards",
 			source: this.id,
 			deck: this.deck_list.draw,
@@ -851,13 +844,13 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		event_list.push(event.id);
 	}
 	for (var i in this.player_list) {
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "StartPlayer" + this.player_list[i],
 			source: this.id,
 			player: this.player_list[i]
 		});
 		event_list.push(event.id);
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "StartPlayer",
 			source: this.id,
 			player: this.player_list[i]
@@ -868,7 +861,7 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 		if (BOARDFUL.Mngr.get(this.owner).config.cards && BOARDFUL.Mngr.get(this.owner).config.cards.turn) {
 			cards = parseInt(BOARDFUL.Mngr.get(this.owner).config.cards.turn);
 		}
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "DealCards",
 			source: this.id,
 			deck: this.deck_list.draw,
@@ -876,24 +869,24 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 			number: cards
 		});
 		event_list.push(event.id);
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "PlayerAct",
 			source: this.id,
 			player: this.player_list[i]
 		});
 		event_list.push(event.id);
-		event = new BOARDFUL.CORE.Event({
+		event = new BOARDFUL.Event({
 			name: "PlayerEnd",
 			source: this.id
 		});
 		event_list.push(event.id);
 	}
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "EndRound",
 		source: this.id
 	});
 	event_list.push(event.id);
-	event = new BOARDFUL.CORE.Event({
+	event = new BOARDFUL.Event({
 		name: "StartRound",
 		source: this.id,
 		number: this.round + 1
@@ -902,7 +895,7 @@ BOARDFUL.CORE.Game.prototype.startRound = function (arg) {
 	this.event_mngr.front(event_list);
 };
 // end a round
-BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
+BOARDFUL.Game.prototype.endRound = function (arg) {
 };
 /**
  * Logger.
@@ -913,7 +906,6 @@ BOARDFUL.CORE.Game.prototype.endRound = function (arg) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 var winston = {
 	transports: {
 		File: "File",
@@ -922,34 +914,34 @@ var winston = {
 };
 
 // logger
-BOARDFUL.CORE.Logger = function () {
+BOARDFUL.Logger = function () {
 	var logger;
-	switch (BOARDFUL.CORE.Envi.type) {
+	switch (BOARDFUL.Envi.type) {
 	case "nodejs":
 		winston = require('winston');
-		logger = new (BOARDFUL.CORE.WinstonLogger) ({
+		logger = new (BOARDFUL.WinstonLogger) ({
 			transports: [
 				new (winston.transports.Console)()
 			]
 		});
 		break;
 	case "browser":
-		logger = new BOARDFUL.CORE.DefaultLogger();
+		logger = new BOARDFUL.DefaultLogger();
 		break;
 	default:
-		logger = new BOARDFUL.CORE.DefaultLogger();
+		logger = new BOARDFUL.DefaultLogger();
 		break;
 	}
 	return logger;
 };
 
 // default logger
-BOARDFUL.CORE.DefaultLogger = function () {
+BOARDFUL.DefaultLogger = function () {
 	this.enable = true;
 	this.list = new Array();
 	//return console;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.log = function () {
+BOARDFUL.DefaultLogger.prototype.log = function () {
 	var content = "";
 	for (var i in arguments) {
 		if ("array" == typeof arguments[i] || "object" == typeof arguments[i] || "function" == typeof arguments[i]) {
@@ -968,13 +960,13 @@ BOARDFUL.CORE.DefaultLogger.prototype.log = function () {
 	}
 	return this;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.add = function (type) {
+BOARDFUL.DefaultLogger.prototype.add = function (type) {
 	if ("Console" == type) {
 		this.enable = true;
 	}
 	return this;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.remove = function (type) {
+BOARDFUL.DefaultLogger.prototype.remove = function (type) {
 	if ("Console" == type) {
 		this.enable = false;
 	}
@@ -982,16 +974,16 @@ BOARDFUL.CORE.DefaultLogger.prototype.remove = function (type) {
 };
 
 // winston logger for nodejs
-BOARDFUL.CORE.WinstonLogger = function (config) {
+BOARDFUL.WinstonLogger = function (config) {
 	this.winston = new (winston.Logger) (config);
 	this.winston.log_base = this.winston.log;
 	// new log function
 	this.winston.log = function () {
-		if ("nodejs" == BOARDFUL.CORE.Envi.type) {
+		if ("nodejs" == BOARDFUL.Envi.type) {
 			for (var i in arguments) {
 				// convert to string
 				if ("array" == typeof arguments[i] || "object" == typeof arguments[i] || "function" == typeof arguments[i]) {
-					arguments[i] = BOARDFUL.CORE.toString(arguments[i]);
+					arguments[i] = BOARDFUL.toString(arguments[i]);
 				}
 			}
 		}
@@ -1008,11 +1000,10 @@ BOARDFUL.CORE.WinstonLogger = function (config) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // object manager
-BOARDFUL.CORE.Manager = function () {
-	this.logger = new BOARDFUL.CORE.Logger();
+BOARDFUL.Manager = function () {
+	this.logger = new BOARDFUL.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/mngr.log'
 	})
@@ -1022,11 +1013,11 @@ BOARDFUL.CORE.Manager = function () {
 	this.list = new Object();
 };
 // get object by id
-BOARDFUL.CORE.Manager.prototype.get = function (id) {
+BOARDFUL.Manager.prototype.get = function (id) {
 	return this.list[id];
 };
 // add object
-BOARDFUL.CORE.Manager.prototype.add = function (object) {
+BOARDFUL.Manager.prototype.add = function (object) {
 	object.id = this.next_id;
 	object.type = object.type || object.constructor.name;
 	if (! ("name" in object)) {
@@ -1046,10 +1037,9 @@ BOARDFUL.CORE.Manager.prototype.add = function (object) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // player
-BOARDFUL.CORE.Player = function (config, owner) {
+BOARDFUL.Player = function (config, owner) {
 	this.type = "Player";
 	this.owner = owner;
 	this.game = this.owner;
@@ -1068,7 +1058,7 @@ BOARDFUL.CORE.Player = function (config, owner) {
 		break;
 	}
 	BOARDFUL.Mngr.add(this);
-	var hand_deck = new BOARDFUL.CORE.Deck(this.id);
+	var hand_deck = new BOARDFUL.Deck(this.id);
 	hand_deck.name = this.name + "_" + "hand";
 	if ("me" == this.name) {
 		hand_deck.visible = true;
@@ -1077,7 +1067,7 @@ BOARDFUL.CORE.Player = function (config, owner) {
 	this.addListeners();
 };
 // add event listeners
-BOARDFUL.CORE.Player.prototype.addListeners = function () {
+BOARDFUL.Player.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("StartPlayer" + this.id, {
 		level: "game",
@@ -1095,17 +1085,17 @@ BOARDFUL.CORE.Player.prototype.addListeners = function () {
 	});
 };
 // player start
-BOARDFUL.CORE.Player.prototype.start = function (arg) {
+BOARDFUL.Player.prototype.start = function (arg) {
 	BOARDFUL.Mngr.get(this.owner).current_player = this.id;
 };
 // play card
-BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
+BOARDFUL.Player.prototype.playCard = function (arg) {
 	if ("ai" == this.name) {
-		var event = new BOARDFUL.CORE.Event(arg);
+		var event = new BOARDFUL.Event(arg);
 		event.name = "PlayCardAi";
 		BOARDFUL.Mngr.get(this.owner).event_mngr.front(event.id);
 	} else {
-		var event = new BOARDFUL.CORE.Event(arg);
+		var event = new BOARDFUL.Event(arg);
 		event.name = "PlayCardUi";
 		BOARDFUL.Mngr.get(this.owner).event_mngr.front(event.id);
 	}
@@ -1118,10 +1108,9 @@ BOARDFUL.CORE.Player.prototype.playCard = function (arg) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // room
-BOARDFUL.CORE.Room = function (config, owner) {
+BOARDFUL.Room = function (config, owner) {
 	this.type = "Room";
 	this.owner = owner;
 	this.ui = undefined;
@@ -1140,10 +1129,9 @@ BOARDFUL.CORE.Room = function (config, owner) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // table
-BOARDFUL.CORE.Table = function (owner) {
+BOARDFUL.Table = function (owner) {
 	this.type = "Table";
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
@@ -1153,7 +1141,7 @@ BOARDFUL.CORE.Table = function (owner) {
 	this.addListeners();
 };
 // get cards by source event
-BOARDFUL.CORE.Table.prototype.getCardsBySource = function (event) {
+BOARDFUL.Table.prototype.getCardsBySource = function (event) {
 	var select_list = new Array();
 	for (var i in this.arg_list) {
 		if (event == this.arg_list[i].source_event) {
@@ -1170,7 +1158,7 @@ BOARDFUL.CORE.Table.prototype.getCardsBySource = function (event) {
 	return select_list;
 };
 // add listeners
-BOARDFUL.CORE.Table.prototype.addListeners = function () {
+BOARDFUL.Table.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlaceCardOnTable", {
 		level: "game",
@@ -1181,7 +1169,7 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 	});
 };
 // place card on table
-BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
+BOARDFUL.Table.prototype.placeCardOnTable = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
 	for (var i in arg.cards) {
 		var index = hand.indexOf(arg.cards[i]);
@@ -1200,10 +1188,9 @@ BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // get function from string, with or without scopes
-BOARDFUL.CORE.getFunctionFromString = function (string) {
+BOARDFUL.getFunctionFromString = function (string) {
 	var scope = window;
 	var scopeSplit = string.split('.');
 	for (i = 0; i < scopeSplit.length - 1; i++)
@@ -1214,7 +1201,7 @@ BOARDFUL.CORE.getFunctionFromString = function (string) {
 	return scope[scopeSplit[scopeSplit.length - 1]];
 };
 // convert to string
-BOARDFUL.CORE.toString = function (value) {
+BOARDFUL.toString = function (value) {
 	var str = value;
 	try {
 		str = JSON.stringify(value);
@@ -1251,24 +1238,24 @@ BOARDFUL.CORE.toString = function (value) {
 };
 
 // check environment
-BOARDFUL.CORE.Envi = new Object();
-BOARDFUL.CORE.checkEnvi = function () {
+BOARDFUL.Envi = new Object();
+BOARDFUL.checkEnvi = function () {
 	if (typeof module !== 'undefined' && module.exports) {
-		BOARDFUL.CORE.Envi.type = "nodejs";
+		BOARDFUL.Envi.type = "nodejs";
 	} else {
-		BOARDFUL.CORE.Envi.type = "browser";
-		BOARDFUL.CORE.Envi.isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+		BOARDFUL.Envi.type = "browser";
+		BOARDFUL.Envi.isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 		// Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-		BOARDFUL.CORE.Envi.isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-		BOARDFUL.CORE.Envi.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+		BOARDFUL.Envi.isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+		BOARDFUL.Envi.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 		// At least Safari 3+: "[object HTMLElementConstructor]"
-		BOARDFUL.CORE.Envi.isChrome = !!window.chrome && !BOARDFUL.CORE.Envi.isOpera;              // Chrome 1+
-		BOARDFUL.CORE.Envi.isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
+		BOARDFUL.Envi.isChrome = !!window.chrome && !BOARDFUL.Envi.isOpera;              // Chrome 1+
+		BOARDFUL.Envi.isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
 	}
 };
 
 // parse url parameters
-BOARDFUL.CORE.parseUrlParam = function (query) {
+BOARDFUL.parseUrlParam = function (query) {
 	var query_string = {};
 	var query = query || window.location.search.substring(1);
 	var vars = query.split("&");
@@ -1289,10 +1276,10 @@ BOARDFUL.CORE.parseUrlParam = function (query) {
 	return query_string;
 };
 // parse url param and hash
-BOARDFUL.CORE.parseUrl = function () {
-	var param = BOARDFUL.CORE.parseUrlParam(window.location.search.substring(1));
+BOARDFUL.parseUrl = function () {
+	var param = BOARDFUL.parseUrlParam(window.location.search.substring(1));
 	param["#"] = window.location.hash.substring(1);
-	var param1 = BOARDFUL.CORE.parseUrlParam(window.location.hash.substring(1));
+	var param1 = BOARDFUL.parseUrlParam(window.location.hash.substring(1));
 	for (var index in param1) {
 		if (! (index in param)) {
 			param[index] = param1[index];
@@ -1302,7 +1289,7 @@ BOARDFUL.CORE.parseUrl = function () {
 };
 
 // shuffle
-BOARDFUL.CORE.shuffle = function (o) {
+BOARDFUL.shuffle = function (o) {
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };

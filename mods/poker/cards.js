@@ -35,13 +35,13 @@ Poker.createCards = function () {
 	var card;
 	for (var i in Poker.RANKS) {
 		if ("Joker" == i) {
-			card = new BOARDFUL.CORE.Card({
+			card = new BOARDFUL.Card({
 				rank: i,
 				suit: "Spade",
 				name: "♠" + i
 			}, Poker.id);
 			card_list.push(card.id);
-			card = new BOARDFUL.CORE.Card({
+			card = new BOARDFUL.Card({
 				rank: i,
 				suit: "Heart",
 				name: "♥" + i
@@ -50,7 +50,7 @@ Poker.createCards = function () {
 		}
 		else {
 			for (var j in Poker.SUITS) {
-				card = new BOARDFUL.CORE.Card({
+				card = new BOARDFUL.Card({
 					rank: i,
 					suit: j,
 					name: Poker.SUIT_NAMES[j] + i

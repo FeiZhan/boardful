@@ -6,22 +6,23 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.BRSR = BOARDFUL.BRSR || new Object();
 
+BOARDFUL.Menu = BOARDFUL.Menu || new Object();
+BOARDFUL.Menu.Canvas = "";
 // launch in browser
-BOARDFUL.BRSR.run = function (canvas) {
-	BOARDFUL.BRSR.Canvas = canvas;
-	$("#" + BOARDFUL.BRSR.Canvas).addClass("boardful");
+BOARDFUL.Menu.run = function (canvas) {
+	BOARDFUL.Menu.Canvas = canvas;
+	$("#" + BOARDFUL.Menu.Canvas).addClass("boardful");
 	$('#header #options').click(function () {
 		$("#dialog").toggleClass("active");
 	});
 	$('#header #sound').click(function () {
 		$(this).toggleClass("disable");
 	});
-	BOARDFUL.BRSR.loadOptions();
-	BOARDFUL.BRSR.loadMenu0();
+	BOARDFUL.Menu.loadOptions();
+	BOARDFUL.Menu.loadMenu0();
 };
-BOARDFUL.BRSR.loadOptions = function () {
+BOARDFUL.Menu.loadOptions = function () {
 	$("#dialog").empty();
 	$("#dialog").load("src/browser/options.html", function () {
 		$('#dialog #options_debug').click(function () {
@@ -35,20 +36,20 @@ BOARDFUL.BRSR.loadOptions = function () {
 			var log_list = new Array();
 			switch (id) {
 			case "debug_logger":
-				log_list = BOARDFUL.Logger.list;
+				log_list = BOARDFUL.logger.list;
 				break;
 			case "debug_debugger":
 				log_list = BOARDFUL.Debugger.list;
 				break;
 			case "debug_files":
-				log_list = BOARDFUL.CORE.File.logger.list;
+				log_list = BOARDFUL.File.logger.list;
 				break;
 			case "debug_objects":
 				log_list = BOARDFUL.Mngr.logger.list;
 				break;
 			case "debug_events":
 				log_list = new Array();
-				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				var board = BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected);
 				if (board) {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
@@ -61,7 +62,7 @@ BOARDFUL.BRSR.loadOptions = function () {
 				break;
 			case "debug_event_names":
 				log_list = new Array();
-				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				var board = BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected);
 				if (board) {
 					var room = BOARDFUL.Mngr.get(board.room_list[0]);
 					if (room) {
@@ -82,97 +83,97 @@ BOARDFUL.BRSR.loadOptions = function () {
 			}
 		});
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/options.html", "src/browser/options.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/options.html", "src/browser/options.css"], function () {});
 };
 
-BOARDFUL.BRSR.loadMenu0 = function () {
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
+BOARDFUL.Menu.loadMenu0 = function () {
+	$("#" + BOARDFUL.Menu.Canvas).empty();
 	// load menu0
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu0.html", function () {
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/menu0.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_main #local').click(function () {
-			BOARDFUL.BRSR.loadMenu1();
+		$("#" + BOARDFUL.Menu.Canvas + ' #menu0_main #local').click(function () {
+			BOARDFUL.Menu.loadMenu1();
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + ' #menu0_secondary #options').click(function () {
+		$("#" + BOARDFUL.Menu.Canvas + ' #menu0_secondary #options').click(function () {
 			$("#dialog").toggleClass("active");
 		});
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/menu0.html", "src/browser/menu0.css"], function () {});
 };
 
-BOARDFUL.BRSR.Selected = undefined;
+BOARDFUL.Menu.Selected = undefined;
 // load menu1
-BOARDFUL.BRSR.loadMenu1 = function () {
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu1.html", function () {
+BOARDFUL.Menu.loadMenu1 = function () {
+	$("#" + BOARDFUL.Menu.Canvas).empty();
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/menu1.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + " #ok").click(function () {
-			if (undefined === BOARDFUL.BRSR.Selected) {
+		$("#" + BOARDFUL.Menu.Canvas + " #ok").click(function () {
+			if (undefined === BOARDFUL.Menu.Selected) {
 				return;
 			}
-			var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
-			board.load(BOARDFUL.BRSR.loadMenu2);
+			var board = BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected);
+			board.load(BOARDFUL.Menu.loadMenu2);
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #exit").click(function () {
-			BOARDFUL.BRSR.run(BOARDFUL.BRSR.Canvas);
+		$("#" + BOARDFUL.Menu.Canvas + " #exit").click(function () {
+			BOARDFUL.Menu.run(BOARDFUL.Menu.Canvas);
 		});
 		for (var i in BOARDFUL.BoardList) {
 			var board = BOARDFUL.Mngr.get(BOARDFUL.BoardList[i]);
-			$("#" + BOARDFUL.BRSR.Canvas + " #board_list ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
+			$("#" + BOARDFUL.Menu.Canvas + " #board_list ul").append('<li id="' + BOARDFUL.BoardList[i] + '">' + board.config.name + "</li>");
 			if (0 == i) {
-				BOARDFUL.BRSR.Selected = $("#" + BOARDFUL.BRSR.Canvas + " #board_list ul li:last").attr("id");
-				$("#" + BOARDFUL.BRSR.Canvas + " #board_list ul li:last").addClass("active");
-				$("#" + BOARDFUL.BRSR.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.description);
+				BOARDFUL.Menu.Selected = $("#" + BOARDFUL.Menu.Canvas + " #board_list ul li:last").attr("id");
+				$("#" + BOARDFUL.Menu.Canvas + " #board_list ul li:last").addClass("active");
+				$("#" + BOARDFUL.Menu.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected).config.description);
 			}
-			$("#" + BOARDFUL.BRSR.Canvas + " #board_list ul li:last").click(function () {
-				BOARDFUL.BRSR.Selected = $(this).attr('id');
-				$("#" + BOARDFUL.BRSR.Canvas + " #board_list li").removeClass("active");
+			$("#" + BOARDFUL.Menu.Canvas + " #board_list ul li:last").click(function () {
+				BOARDFUL.Menu.Selected = $(this).attr('id');
+				$("#" + BOARDFUL.Menu.Canvas + " #board_list li").removeClass("active");
 				$(this).addClass("active");
-				$("#" + BOARDFUL.BRSR.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected).config.description);
+				$("#" + BOARDFUL.Menu.Canvas + " #description div").html(BOARDFUL.Mngr.get(BOARDFUL.Menu.Selected).config.description);
 			});
 		}
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/menu1.html", "src/browser/menu1.css"], function () {});
 };
 // load menu2
-BOARDFUL.BRSR.loadMenu2 = function (id) {
+BOARDFUL.Menu.loadMenu2 = function (id) {
 	var room = BOARDFUL.Mngr.get(id);
-	$("#" + BOARDFUL.BRSR.Canvas).empty();
-	$("#" + BOARDFUL.BRSR.Canvas).hide().load("src/browser/menu2.html", function () {
+	$("#" + BOARDFUL.Menu.Canvas).empty();
+	$("#" + BOARDFUL.Menu.Canvas).hide().load("src/browser/menu2.html", function () {
 		$(this).fadeIn("slow");
-		$("#" + BOARDFUL.BRSR.Canvas + " #ok").on("click", function () {
-			var game = new BOARDFUL.CORE.Game(id);
-			game.ui = new BOARDFUL.BRSR.GameUi(game.id);
+		$("#" + BOARDFUL.Menu.Canvas + " #ok").on("click", function () {
+			var game = new BOARDFUL.Game(id);
+			game.ui = new BOARDFUL.GameUi(game.id);
 			game.run();
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #exit").click(function () {
-			BOARDFUL.BRSR.run(BOARDFUL.BRSR.Canvas);
+		$("#" + BOARDFUL.Menu.Canvas + " #exit").click(function () {
+			BOARDFUL.Menu.run(BOARDFUL.Menu.Canvas);
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #room_config li").on("click", function () {
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config li").removeClass("active");
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config div").removeClass("active");
+		$("#" + BOARDFUL.Menu.Canvas + " #room_config li").on("click", function () {
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config li").removeClass("active");
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config div").removeClass("active");
 			$(this).addClass("active");
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config div#" + $(this).attr("id")).addClass("active");
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config div#" + $(this).attr("id")).addClass("active");
 		});
-		$("#" + BOARDFUL.BRSR.Canvas + " #room_config #name").html(room.config.name);
-		$("#" + BOARDFUL.BRSR.Canvas + " #room_config #description2").html(room.config.description);
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #players").append('<div class="user"><span>me</span></div>');
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #judges").append('<div class="user"><span>empty</span></div>');
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list #audience").append('<div class="user"><span>empty</span></div>');
+		$("#" + BOARDFUL.Menu.Canvas + " #room_config #name").html(room.config.name);
+		$("#" + BOARDFUL.Menu.Canvas + " #room_config #description2").html(room.config.description);
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list #players").append('<div class="user"><span>me</span></div>');
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list #judges").append('<div class="user"><span>empty</span></div>');
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list #audience").append('<div class="user"><span>empty</span></div>');
 		for (var i = 1; i < room.config.players[0]; ++ i) {
-			$("#" + BOARDFUL.BRSR.Canvas + " #user_list #players").append('<div class="user"><span>empty</span></div>');
+			$("#" + BOARDFUL.Menu.Canvas + " #user_list #players").append('<div class="user"><span>empty</span></div>');
 		}
-		$("#" + BOARDFUL.BRSR.Canvas + " #user_list .user").on("click", function () {
-			$("#" + BOARDFUL.BRSR.Canvas + " #user_list .user").removeClass("active");
+		$("#" + BOARDFUL.Menu.Canvas + " #user_list .user").on("click", function () {
+			$("#" + BOARDFUL.Menu.Canvas + " #user_list .user").removeClass("active");
 			$(this).addClass("active");
 		});
 		for (var i in room.config.options) {
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config").append('<div id="' + i + '"></div>');
-			$("#" + BOARDFUL.BRSR.Canvas + " #room_config #" + i).append('<span>' + i + '</span><select></select>');
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config").append('<div id="' + i + '"></div>');
+			$("#" + BOARDFUL.Menu.Canvas + " #room_config #" + i).append('<span>' + i + '</span><select></select>');
 			for (var j in room.config.options[i].value) {
-				$("#" + BOARDFUL.BRSR.Canvas + " #room_config #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
+				$("#" + BOARDFUL.Menu.Canvas + " #room_config #" + i + " select").append('<option value="' + room.config.options[i].value[j] + '">' + room.config.options[i].value[j] + '</option>');
 			}
 		}
 	});
-	var load = new BOARDFUL.CORE.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
+	var load = new BOARDFUL.FileLoader(["src/browser/menu2.html", "src/browser/menu2.css"], function () {});
 };

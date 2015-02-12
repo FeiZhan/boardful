@@ -6,10 +6,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // event
-BOARDFUL.CORE.Event = function (arg) {
+BOARDFUL.Event = function (arg) {
 	this.type = "Event";
 	this.owner = undefined;
 	BOARDFUL.Mngr.add(this);
@@ -19,9 +18,9 @@ BOARDFUL.CORE.Event = function (arg) {
 };
 
 // event level precedence
-BOARDFUL.CORE.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
+BOARDFUL.EVENT_LEVELS = ["top", "system", "server", "board", "room", "game", "extension", "player", "card", "rear"];
 // event manager
-BOARDFUL.CORE.EventMngr = function (owner) {
+BOARDFUL.EventMngr = function (owner) {
 	this.type = "EventMngr";
 	this.owner = owner;
 	BOARDFUL.Mngr.add(this);
@@ -29,13 +28,13 @@ BOARDFUL.CORE.EventMngr = function (owner) {
 	this.list = new Array();
 	this.listener_list = new Object();
 	this.timeout = 20;
-	this.logger = new BOARDFUL.CORE.Logger();
+	this.logger = new BOARDFUL.Logger();
 	this.logger.add(winston.transports.File, {
 		filename: 'logs/event.log'
 	})
 	.remove(winston.transports.Console);
 	this.logger.log('info', "----------launch----------");
-	this.name_logger = new BOARDFUL.CORE.Logger();
+	this.name_logger = new BOARDFUL.Logger();
 	this.name_logger.add(winston.transports.File, {
 		filename: 'logs/event_name.log'
 	})
@@ -43,7 +42,7 @@ BOARDFUL.CORE.EventMngr = function (owner) {
 	this.name_logger.log('info', "----------launch----------");
 };
 // see or push to the front of event list
-BOARDFUL.CORE.EventMngr.prototype.front = function (id) {
+BOARDFUL.EventMngr.prototype.front = function (id) {
 	if (undefined === id) {
 		if (0 == this.list.length) {
 			return undefined;
@@ -62,7 +61,7 @@ BOARDFUL.CORE.EventMngr.prototype.front = function (id) {
 	return BOARDFUL.Mngr.get(this.list[0]);
 };
 // add to the rear of event list
-BOARDFUL.CORE.EventMngr.prototype.add = function (id) {
+BOARDFUL.EventMngr.prototype.add = function (id) {
 	if ("array" == typeof id || "object" == typeof id) {
 		this.list = this.list.concat(id);
 		for (var i in id) {
@@ -75,7 +74,7 @@ BOARDFUL.CORE.EventMngr.prototype.add = function (id) {
 	}
 };
 // add event listener
-BOARDFUL.CORE.EventMngr.prototype.on = function (event, config) {
+BOARDFUL.EventMngr.prototype.on = function (event, config) {
 	if (! (event in this.listener_list)) {
 		this.listener_list[event] = new Object();
 	}
@@ -87,7 +86,7 @@ BOARDFUL.CORE.EventMngr.prototype.on = function (event, config) {
 	this.logger.log("info", "add listener", event);
 };
 // remove event listener
-BOARDFUL.CORE.EventMngr.prototype.off = function (event, config) {
+BOARDFUL.EventMngr.prototype.off = function (event, config) {
 	if (! (event in this.listener_list)) {
 		return;
 	}
@@ -101,7 +100,7 @@ BOARDFUL.CORE.EventMngr.prototype.off = function (event, config) {
 	}
 };
 // launch event manager
-BOARDFUL.CORE.EventMngr.prototype.run = function () {
+BOARDFUL.EventMngr.prototype.run = function () {
 	switch (BOARDFUL.Mngr.get(this.owner).status) {
 	case "pause":
 	case "exit":
@@ -113,14 +112,14 @@ BOARDFUL.CORE.EventMngr.prototype.run = function () {
 		if (this.list.length > 0) {
 			// get the current event
 			this.current = this.front();
-			this.logger.log("info", "event", this.current.name);
-			this.name_logger.log("info", "event", this.current.name);
+			this.logger.log("info", "event", this.current.name, this.current);
+			this.name_logger.log("info", this.current.name);
 			this.list.shift();
 			if (this.current && (this.current.name in this.listener_list)) {
-				for (var i in BOARDFUL.CORE.EVENT_LEVELS) {
-					if (BOARDFUL.CORE.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
-						for (var j in this.listener_list[this.current.name][BOARDFUL.CORE.EVENT_LEVELS[i]]) {
-							var listener = this.listener_list[this.current.name][BOARDFUL.CORE.EVENT_LEVELS[i]][j];
+				for (var i in BOARDFUL.EVENT_LEVELS) {
+					if (BOARDFUL.EVENT_LEVELS[i] in this.listener_list[this.current.name]) {
+						for (var j in this.listener_list[this.current.name][BOARDFUL.EVENT_LEVELS[i]]) {
+							var listener = this.listener_list[this.current.name][BOARDFUL.EVENT_LEVELS[i]][j];
 							this.logger.log("info", "listener", BOARDFUL.Mngr.get(listener.id).name);
 							// trigger listener callback for event
 							listener.callback(this.current.arg);

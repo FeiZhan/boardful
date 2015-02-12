@@ -6,10 +6,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // get function from string, with or without scopes
-BOARDFUL.CORE.getFunctionFromString = function (string) {
+BOARDFUL.getFunctionFromString = function (string) {
 	var scope = window;
 	var scopeSplit = string.split('.');
 	for (i = 0; i < scopeSplit.length - 1; i++)
@@ -20,7 +19,7 @@ BOARDFUL.CORE.getFunctionFromString = function (string) {
 	return scope[scopeSplit[scopeSplit.length - 1]];
 };
 // convert to string
-BOARDFUL.CORE.toString = function (value) {
+BOARDFUL.toString = function (value) {
 	var str = value;
 	try {
 		str = JSON.stringify(value);
@@ -57,24 +56,24 @@ BOARDFUL.CORE.toString = function (value) {
 };
 
 // check environment
-BOARDFUL.CORE.Envi = new Object();
-BOARDFUL.CORE.checkEnvi = function () {
+BOARDFUL.Envi = new Object();
+BOARDFUL.checkEnvi = function () {
 	if (typeof module !== 'undefined' && module.exports) {
-		BOARDFUL.CORE.Envi.type = "nodejs";
+		BOARDFUL.Envi.type = "nodejs";
 	} else {
-		BOARDFUL.CORE.Envi.type = "browser";
-		BOARDFUL.CORE.Envi.isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+		BOARDFUL.Envi.type = "browser";
+		BOARDFUL.Envi.isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 		// Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
-		BOARDFUL.CORE.Envi.isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-		BOARDFUL.CORE.Envi.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+		BOARDFUL.Envi.isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+		BOARDFUL.Envi.isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 		// At least Safari 3+: "[object HTMLElementConstructor]"
-		BOARDFUL.CORE.Envi.isChrome = !!window.chrome && !BOARDFUL.CORE.Envi.isOpera;              // Chrome 1+
-		BOARDFUL.CORE.Envi.isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
+		BOARDFUL.Envi.isChrome = !!window.chrome && !BOARDFUL.Envi.isOpera;              // Chrome 1+
+		BOARDFUL.Envi.isIE = /*@cc_on!@*/false || !!document.documentMode; // At least IE6
 	}
 };
 
 // parse url parameters
-BOARDFUL.CORE.parseUrlParam = function (query) {
+BOARDFUL.parseUrlParam = function (query) {
 	var query_string = {};
 	var query = query || window.location.search.substring(1);
 	var vars = query.split("&");
@@ -95,10 +94,10 @@ BOARDFUL.CORE.parseUrlParam = function (query) {
 	return query_string;
 };
 // parse url param and hash
-BOARDFUL.CORE.parseUrl = function () {
-	var param = BOARDFUL.CORE.parseUrlParam(window.location.search.substring(1));
+BOARDFUL.parseUrl = function () {
+	var param = BOARDFUL.parseUrlParam(window.location.search.substring(1));
 	param["#"] = window.location.hash.substring(1);
-	var param1 = BOARDFUL.CORE.parseUrlParam(window.location.hash.substring(1));
+	var param1 = BOARDFUL.parseUrlParam(window.location.hash.substring(1));
 	for (var index in param1) {
 		if (! (index in param)) {
 			param[index] = param1[index];
@@ -108,7 +107,7 @@ BOARDFUL.CORE.parseUrl = function () {
 };
 
 // shuffle
-BOARDFUL.CORE.shuffle = function (o) {
+BOARDFUL.shuffle = function (o) {
     for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
 };

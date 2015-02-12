@@ -34,30 +34,30 @@ Uno.createCards = function () {
 	var card_list = new Array();
 	var card;
 	for (var i = 0; i < 4; ++ i) {
-		card = new BOARDFUL.CORE.Card({
+		card = new BOARDFUL.Card({
 			rank: 0,
 			color: Uno.COLOR[i]
 		}, Uno.id);
 		card_list.push(card.id);
 		for (var j = 0; j < 2; ++ j) {
 			for (var k = 1; k <= 9; ++ k) {
-				card = new BOARDFUL.CORE.Card({
+				card = new BOARDFUL.Card({
 					rank: k,
 					color: Uno.COLOR[i]
 				}, Uno.id);
 				card_list.push(card.id);
 			}
-			card = new BOARDFUL.CORE.Card({
+			card = new BOARDFUL.Card({
 				rank: "skip",
 				color: Uno.COLOR[i]
 			}, Uno.id);
 			card_list.push(card.id);
-			card = new BOARDFUL.CORE.Card({
+			card = new BOARDFUL.Card({
 				rank: "draw two",
 				color: Uno.COLOR[i]
 			}, Uno.id);
 			card_list.push(card.id);
-			card = new BOARDFUL.CORE.Card({
+			card = new BOARDFUL.Card({
 				rank: "reverse",
 				color: Uno.COLOR[i]
 			}, Uno.id);
@@ -65,12 +65,12 @@ Uno.createCards = function () {
 		}
 	}
 	for (var i = 0; i < 4; ++ i) {
-		card = new BOARDFUL.CORE.Card({
+		card = new BOARDFUL.Card({
 			rank: "wild",
 			color: "black"
 		}, Uno.id);
 		card_list.push(card.id);
-		card = new BOARDFUL.CORE.Card({
+		card = new BOARDFUL.Card({
 			rank: "wild draw four",
 			color: "black"
 		}, Uno.id);

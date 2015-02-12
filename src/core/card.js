@@ -7,10 +7,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // card
-BOARDFUL.CORE.Card = function (config, owner) {
+BOARDFUL.Card = function (config, owner) {
 	this.type = "Card";
 	this.rank = config.rank;
 	this.suit = config.suit;

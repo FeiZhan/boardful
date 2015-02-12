@@ -6,10 +6,9 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 
 // table
-BOARDFUL.CORE.Table = function (owner) {
+BOARDFUL.Table = function (owner) {
 	this.type = "Table";
 	this.owner = owner;
 	this.game = BOARDFUL.Mngr.get(this.owner).game;
@@ -19,7 +18,7 @@ BOARDFUL.CORE.Table = function (owner) {
 	this.addListeners();
 };
 // get cards by source event
-BOARDFUL.CORE.Table.prototype.getCardsBySource = function (event) {
+BOARDFUL.Table.prototype.getCardsBySource = function (event) {
 	var select_list = new Array();
 	for (var i in this.arg_list) {
 		if (event == this.arg_list[i].source_event) {
@@ -36,7 +35,7 @@ BOARDFUL.CORE.Table.prototype.getCardsBySource = function (event) {
 	return select_list;
 };
 // add listeners
-BOARDFUL.CORE.Table.prototype.addListeners = function () {
+BOARDFUL.Table.prototype.addListeners = function () {
 	var that = this;
 	BOARDFUL.Mngr.get(this.owner).event_mngr.on("PlaceCardOnTable", {
 		level: "game",
@@ -47,7 +46,7 @@ BOARDFUL.CORE.Table.prototype.addListeners = function () {
 	});
 };
 // place card on table
-BOARDFUL.CORE.Table.prototype.placeCardOnTable = function (arg) {
+BOARDFUL.Table.prototype.placeCardOnTable = function (arg) {
 	var hand = BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.player).hand).card_list;
 	for (var i in arg.cards) {
 		var index = hand.indexOf(arg.cards[i]);

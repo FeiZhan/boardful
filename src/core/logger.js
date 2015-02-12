@@ -7,7 +7,6 @@
 **/
 
 var BOARDFUL = BOARDFUL || new Object();
-BOARDFUL.CORE = BOARDFUL.CORE || new Object();
 var winston = {
 	transports: {
 		File: "File",
@@ -16,34 +15,34 @@ var winston = {
 };
 
 // logger
-BOARDFUL.CORE.Logger = function () {
+BOARDFUL.Logger = function () {
 	var logger;
-	switch (BOARDFUL.CORE.Envi.type) {
+	switch (BOARDFUL.Envi.type) {
 	case "nodejs":
 		winston = require('winston');
-		logger = new (BOARDFUL.CORE.WinstonLogger) ({
+		logger = new (BOARDFUL.WinstonLogger) ({
 			transports: [
 				new (winston.transports.Console)()
 			]
 		});
 		break;
 	case "browser":
-		logger = new BOARDFUL.CORE.DefaultLogger();
+		logger = new BOARDFUL.DefaultLogger();
 		break;
 	default:
-		logger = new BOARDFUL.CORE.DefaultLogger();
+		logger = new BOARDFUL.DefaultLogger();
 		break;
 	}
 	return logger;
 };
 
 // default logger
-BOARDFUL.CORE.DefaultLogger = function () {
+BOARDFUL.DefaultLogger = function () {
 	this.enable = true;
 	this.list = new Array();
 	//return console;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.log = function () {
+BOARDFUL.DefaultLogger.prototype.log = function () {
 	var content = "";
 	for (var i in arguments) {
 		if ("array" == typeof arguments[i] || "object" == typeof arguments[i] || "function" == typeof arguments[i]) {
@@ -62,13 +61,13 @@ BOARDFUL.CORE.DefaultLogger.prototype.log = function () {
 	}
 	return this;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.add = function (type) {
+BOARDFUL.DefaultLogger.prototype.add = function (type) {
 	if ("Console" == type) {
 		this.enable = true;
 	}
 	return this;
 };
-BOARDFUL.CORE.DefaultLogger.prototype.remove = function (type) {
+BOARDFUL.DefaultLogger.prototype.remove = function (type) {
 	if ("Console" == type) {
 		this.enable = false;
 	}
@@ -76,16 +75,16 @@ BOARDFUL.CORE.DefaultLogger.prototype.remove = function (type) {
 };
 
 // winston logger for nodejs
-BOARDFUL.CORE.WinstonLogger = function (config) {
+BOARDFUL.WinstonLogger = function (config) {
 	this.winston = new (winston.Logger) (config);
 	this.winston.log_base = this.winston.log;
 	// new log function
 	this.winston.log = function () {
-		if ("nodejs" == BOARDFUL.CORE.Envi.type) {
+		if ("nodejs" == BOARDFUL.Envi.type) {
 			for (var i in arguments) {
 				// convert to string
 				if ("array" == typeof arguments[i] || "object" == typeof arguments[i] || "function" == typeof arguments[i]) {
-					arguments[i] = BOARDFUL.CORE.toString(arguments[i]);
+					arguments[i] = BOARDFUL.toString(arguments[i]);
 				}
 			}
 		}
