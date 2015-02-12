@@ -49,10 +49,10 @@
 	height: 100%;
 	float: left;
 }
-.boardful #myhand .card {
+.boardful #player_me .hand .card {
 	width: 9%;
 }
-.boardful #yourhand .card {
+.boardful #player_you .hand .card {
 	width: 8%;
 }
 .boardful #table .card {

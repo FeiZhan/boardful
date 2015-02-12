@@ -92,12 +92,12 @@ BOARDFUL.BRSR.GameUi.prototype.dealCardUi = function (arg) {
 	var target;
 	switch (BOARDFUL.Mngr.get(arg.player).name) {
 	case "ai":
-		target = $("#yourhand");
+		target = $("#player_you .hand");
 		break;
 	case "me":
 	default:
 		card_ui.visible = true;
-		target = $("#myhand");
+		target = $("#player_me .hand");
 		break;
 	}
 	card_ui.move($("#deck"), target);
