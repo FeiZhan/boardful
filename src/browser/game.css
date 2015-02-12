@@ -73,3 +73,8 @@
 }
 .boardful #detail.active {
 }
+
+.boardful .changed_value {
+	color: Red;
+	font-size: x-large;
+}

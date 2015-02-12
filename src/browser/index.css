@@ -63,4 +63,5 @@ a {
 	left: 0%;
 	height: 95%;
 	width: 100%;
+	overflow:hidden;
 }

@@ -93,4 +93,8 @@ BOARDFUL.PlayerUi.prototype.changePlayerValueUi = function (arg) {
 	var target_jq = $("#" + this.canvas + " .head #" + arg.target + " span");
 	var value = parseInt(target_jq.html());
 	target_jq.html(value + arg.value);
+	var cv = new BOARDFUL.ChangedValue({
+		source_jq: target_jq,
+		value: arg.value,
+	}, this.id);
 };

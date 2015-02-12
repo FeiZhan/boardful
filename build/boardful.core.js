@@ -945,7 +945,7 @@ BOARDFUL.DefaultLogger.prototype.log = function () {
 	var content = "";
 	for (var i in arguments) {
 		if ("array" == typeof arguments[i] || "object" == typeof arguments[i] || "function" == typeof arguments[i]) {
-			content += JSON.stringify(arguments[i]);
+			content += BOARDFUL.toString(arguments[i]);
 		} else {
 			content += arguments[i];
 		}
