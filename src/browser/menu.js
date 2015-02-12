@@ -40,14 +40,33 @@ BOARDFUL.BRSR.loadOptions = function () {
 			case "debug_debugger":
 				log_list = BOARDFUL.Debugger.list;
 				break;
-			case "debug_events":
-				log_list = BOARDFUL.Mngr.logger.list;
-				break;
 			case "debug_files":
 				log_list = BOARDFUL.CORE.File.logger.list;
 				break;
 			case "debug_objects":
+				log_list = BOARDFUL.Mngr.logger.list;
+				break;
+			case "debug_events":
 				log_list = new Array();
+				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				if (board) {
+					var room = BOARDFUL.Mngr.get(board.room_list[0]);
+					if (room) {
+						var game = BOARDFUL.Mngr.get(room.game_list[0]);
+						log_list = game.event_mngr.logger.list;
+					}
+				}
+				break;
+			case "debug_event_names":
+				log_list = new Array();
+				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				if (board) {
+					var room = BOARDFUL.Mngr.get(board.room_list[0]);
+					if (room) {
+						var game = BOARDFUL.Mngr.get(room.game_list[0]);
+						log_list = game.event_mngr.name_logger.list;
+					}
+				}
 				break;
 			default:
 				log_list = new Array();

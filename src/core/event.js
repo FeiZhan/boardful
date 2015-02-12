@@ -113,7 +113,7 @@ BOARDFUL.CORE.EventMngr.prototype.run = function () {
 		if (this.list.length > 0) {
 			// get the current event
 			this.current = this.front();
-			this.logger.log("info", "event", this.current.name);
+			this.logger.log("info", "event", this.current.name, this.current);
 			this.name_logger.log("info", "event", this.current.name);
 			this.list.shift();
 			if (this.current && (this.current.name in this.listener_list)) {

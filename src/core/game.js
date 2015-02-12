@@ -19,6 +19,7 @@ BOARDFUL.CORE.Game = function (owner) {
 	this.status = "init";
 	// create from room config
 	var room = BOARDFUL.Mngr.get(this.owner);
+	room.game_list.push(this.id);
 	this.mod_list = new Array();
 	// load mods
 	if (room.mod_list) {

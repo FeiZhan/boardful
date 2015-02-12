@@ -115,11 +115,6 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
-BOARDFUL.BRSR.CardUi.prototype.show = function () {
-	this.visible = true;
-	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	card_jq.addClass("visible");
-};
 BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 	// don't disturb other cards during removing
@@ -136,6 +131,25 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	}, "slow", function () {
 		$(this).remove();
 	});
+};
+
+BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ShowCard", {
+		level: "game",
+		callback: function (arg) {
+			that.show(arg);
+		},
+		id: that.id
+	});
+};
+BOARDFUL.BRSR.CardUi.prototype.show = function (arg) {
+	if (undefined !== arg && arg.card != this.id && arg.card != this.instance) {
+		return;
+	}
+	this.visible = true;
+	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	card_jq.addClass("visible");
 };
 /**
  * Gui for game.
@@ -295,14 +309,33 @@ BOARDFUL.BRSR.loadOptions = function () {
 			case "debug_debugger":
 				log_list = BOARDFUL.Debugger.list;
 				break;
-			case "debug_events":
-				log_list = BOARDFUL.Mngr.logger.list;
-				break;
 			case "debug_files":
 				log_list = BOARDFUL.CORE.File.logger.list;
 				break;
 			case "debug_objects":
+				log_list = BOARDFUL.Mngr.logger.list;
+				break;
+			case "debug_events":
 				log_list = new Array();
+				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				if (board) {
+					var room = BOARDFUL.Mngr.get(board.room_list[0]);
+					if (room) {
+						var game = BOARDFUL.Mngr.get(room.game_list[0]);
+						log_list = game.event_mngr.logger.list;
+					}
+				}
+				break;
+			case "debug_event_names":
+				log_list = new Array();
+				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				if (board) {
+					var room = BOARDFUL.Mngr.get(board.room_list[0]);
+					if (room) {
+						var game = BOARDFUL.Mngr.get(room.game_list[0]);
+						log_list = game.event_mngr.name_logger.list;
+					}
+				}
 				break;
 			default:
 				log_list = new Array();
@@ -508,7 +541,8 @@ BOARDFUL.CORE.Board = function (config, owner) {
 };
 // load board game
 BOARDFUL.CORE.Board.prototype.load = function (callback) {
-	this.loadPackage([this.config.package], callback);
+	this.callback = callback;
+	this.loadPackage([this.config.package]);
 };
 BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 	var that = this;
@@ -527,30 +561,35 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 				dependencies = dependencies.concat(pack.dependencies);
 			}
 		}
-		var callback1 = function () {
+		var load_files = function () {
 			var load1 = new BOARDFUL.CORE.FileLoader(files, function () {
 				for (var i in files) {
 					if (".js" == files[i].substr(files[i].length - 3)) {
 						BOARDFUL.CORE.File.setToMods(files[i]);
 					}
 				}
-				BOARDFUL.Logger.log("info", "load board", that.name);
-				that.createRoom(BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[that.config.package]].content, callback);
+				if (undefined === callback) {
+					BOARDFUL.Logger.log("info", "load board", that.name);
+					that.createRoom(BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[that.config.package]].content);
+				}
+				else if ("function" == typeof callback) {
+					callback();
+				}
 			});
 		};
 		if (dependencies.length > 0) {
-			that.loadPackage(dependencies, callback1);
+			that.loadPackage(dependencies, load_files);
 		} else {
-			callback1();
+			load_files();
 		}
 	});
 };
 // create room
-BOARDFUL.CORE.Board.prototype.createRoom = function (package, callback) {
+BOARDFUL.CORE.Board.prototype.createRoom = function (package) {
 	var room = new BOARDFUL.CORE.Room(package, this.id);
 	this.room_list.push(room.id);
-	if ("function" == typeof callback) {
-		return callback(room.id);
+	if ("function" == typeof this.callback) {
+		return this.callback(room.id);
 	}
 };
 
@@ -943,7 +982,7 @@ BOARDFUL.CORE.EventMngr.prototype.run = function () {
 		if (this.list.length > 0) {
 			// get the current event
 			this.current = this.front();
-			this.logger.log("info", "event", this.current.name);
+			this.logger.log("info", "event", this.current.name, this.current);
 			this.name_logger.log("info", "event", this.current.name);
 			this.list.shift();
 			if (this.current && (this.current.name in this.listener_list)) {
@@ -1145,6 +1184,7 @@ BOARDFUL.CORE.Game = function (owner) {
 	this.status = "init";
 	// create from room config
 	var room = BOARDFUL.Mngr.get(this.owner);
+	room.game_list.push(this.id);
 	this.mod_list = new Array();
 	// load mods
 	if (room.mod_list) {
@@ -1608,6 +1648,7 @@ BOARDFUL.CORE.Room = function (config, owner) {
 	this.ui = undefined;
 	BOARDFUL.Mngr.add(this);
 	this.config = config;
+	this.game_list = new Array();
 	// set default players
 	this.player_list = config.player_list || ["me", "ai"];
 	this.mod_list = config.mod_list || ["Poker"];
@@ -2614,10 +2655,16 @@ Poker.settle = function (arg) {
 };
 Poker.settlePlayersDuelUi = function (arg) {
 	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
-	for (var i in arg.all_cards) {
-		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).show();
-	}
 	var event_list = new Array();
+	for (var i in arg.all_cards) {
+		//BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).show();
+		var event = new BOARDFUL.CORE.Event({
+			name: "ShowCard",
+			source: BOARDFUL.Mngr.get(Poker.owner).table,
+			card: arg.all_cards[i]
+		});
+		event_list.push(event.id);
+	}
 	var event = new BOARDFUL.CORE.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(Poker.owner).table,

@@ -115,11 +115,6 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
-BOARDFUL.BRSR.CardUi.prototype.show = function () {
-	this.visible = true;
-	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	card_jq.addClass("visible");
-};
 BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 	// don't disturb other cards during removing
@@ -136,4 +131,23 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	}, "slow", function () {
 		$(this).remove();
 	});
+};
+
+BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ShowCard", {
+		level: "game",
+		callback: function (arg) {
+			that.show(arg);
+		},
+		id: that.id
+	});
+};
+BOARDFUL.BRSR.CardUi.prototype.show = function (arg) {
+	if (undefined !== arg && arg.card != this.id && arg.card != this.instance) {
+		return;
+	}
+	this.visible = true;
+	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	card_jq.addClass("visible");
 };

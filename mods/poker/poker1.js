@@ -171,10 +171,16 @@ Poker.settle = function (arg) {
 };
 Poker.settlePlayersDuelUi = function (arg) {
 	console.log("winner", BOARDFUL.Mngr.get(arg.player).name);
-	for (var i in arg.all_cards) {
-		BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).show();
-	}
 	var event_list = new Array();
+	for (var i in arg.all_cards) {
+		//BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(arg.cards[i]).ui).show();
+		var event = new BOARDFUL.CORE.Event({
+			name: "ShowCard",
+			source: BOARDFUL.Mngr.get(Poker.owner).table,
+			card: arg.all_cards[i]
+		});
+		event_list.push(event.id);
+	}
 	var event = new BOARDFUL.CORE.Event({
 		name: "Discard",
 		source: BOARDFUL.Mngr.get(Poker.owner).table,

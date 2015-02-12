@@ -115,11 +115,6 @@ BOARDFUL.BRSR.CardUi.prototype.move = function (source, target) {
 		});
 	}
 };
-BOARDFUL.BRSR.CardUi.prototype.show = function () {
-	this.visible = true;
-	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
-	card_jq.addClass("visible");
-};
 BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	var jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
 	// don't disturb other cards during removing
@@ -136,6 +131,25 @@ BOARDFUL.BRSR.CardUi.prototype.remove = function () {
 	}, "slow", function () {
 		$(this).remove();
 	});
+};
+
+BOARDFUL.BRSR.CardUi.prototype.addListeners = function () {
+	var that = this;
+	BOARDFUL.Mngr.get(BOARDFUL.Mngr.get(this.instance).owner).event_mngr.on("ShowCard", {
+		level: "game",
+		callback: function (arg) {
+			that.show(arg);
+		},
+		id: that.id
+	});
+};
+BOARDFUL.BRSR.CardUi.prototype.show = function (arg) {
+	if (undefined !== arg && arg.card != this.id && arg.card != this.instance) {
+		return;
+	}
+	this.visible = true;
+	var card_jq = $("#" + BOARDFUL.BRSR.Canvas + " #" + this.id);
+	card_jq.addClass("visible");
 };
 /**
  * Gui for game.
@@ -295,14 +309,33 @@ BOARDFUL.BRSR.loadOptions = function () {
 			case "debug_debugger":
 				log_list = BOARDFUL.Debugger.list;
 				break;
-			case "debug_events":
-				log_list = BOARDFUL.Mngr.logger.list;
-				break;
 			case "debug_files":
 				log_list = BOARDFUL.CORE.File.logger.list;
 				break;
 			case "debug_objects":
+				log_list = BOARDFUL.Mngr.logger.list;
+				break;
+			case "debug_events":
 				log_list = new Array();
+				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				if (board) {
+					var room = BOARDFUL.Mngr.get(board.room_list[0]);
+					if (room) {
+						var game = BOARDFUL.Mngr.get(room.game_list[0]);
+						log_list = game.event_mngr.logger.list;
+					}
+				}
+				break;
+			case "debug_event_names":
+				log_list = new Array();
+				var board = BOARDFUL.Mngr.get(BOARDFUL.BRSR.Selected);
+				if (board) {
+					var room = BOARDFUL.Mngr.get(board.room_list[0]);
+					if (room) {
+						var game = BOARDFUL.Mngr.get(room.game_list[0]);
+						log_list = game.event_mngr.name_logger.list;
+					}
+				}
 				break;
 			default:
 				log_list = new Array();

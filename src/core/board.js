@@ -20,7 +20,8 @@ BOARDFUL.CORE.Board = function (config, owner) {
 };
 // load board game
 BOARDFUL.CORE.Board.prototype.load = function (callback) {
-	this.loadPackage([this.config.package], callback);
+	this.callback = callback;
+	this.loadPackage([this.config.package]);
 };
 BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 	var that = this;
@@ -39,29 +40,34 @@ BOARDFUL.CORE.Board.prototype.loadPackage = function (packages, callback) {
 				dependencies = dependencies.concat(pack.dependencies);
 			}
 		}
-		var callback1 = function () {
+		var load_files = function () {
 			var load1 = new BOARDFUL.CORE.FileLoader(files, function () {
 				for (var i in files) {
 					if (".js" == files[i].substr(files[i].length - 3)) {
 						BOARDFUL.CORE.File.setToMods(files[i]);
 					}
 				}
-				BOARDFUL.Logger.log("info", "load board", that.name);
-				that.createRoom(BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[that.config.package]].content, callback);
+				if (undefined === callback) {
+					BOARDFUL.Logger.log("info", "load board", that.name);
+					that.createRoom(BOARDFUL.CORE.File.list[BOARDFUL.CORE.File.name_list[that.config.package]].content);
+				}
+				else if ("function" == typeof callback) {
+					callback();
+				}
 			});
 		};
 		if (dependencies.length > 0) {
-			that.loadPackage(dependencies, callback1);
+			that.loadPackage(dependencies, load_files);
 		} else {
-			callback1();
+			load_files();
 		}
 	});
 };
 // create room
-BOARDFUL.CORE.Board.prototype.createRoom = function (package, callback) {
+BOARDFUL.CORE.Board.prototype.createRoom = function (package) {
 	var room = new BOARDFUL.CORE.Room(package, this.id);
 	this.room_list.push(room.id);
-	if ("function" == typeof callback) {
-		return callback(room.id);
+	if ("function" == typeof this.callback) {
+		return this.callback(room.id);
 	}
 };
